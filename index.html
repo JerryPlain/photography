@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photography — Jerry Plain</title>
+  <meta name="description" content="A photographic monograph — selected photographs by Jerry Plain.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#contents">Skip to contents</a>
+
+  <header class="topbar" id="topbar">
+    <a class="wordmark" href="#top">Selected Photographs</a>
+    <button class="index-toggle" id="indexToggle" aria-expanded="false" aria-controls="indexOverlay">Index</button>
+  </header>
+
+  <nav class="index-overlay" id="indexOverlay" aria-hidden="true">
+    <ol class="index-list" id="indexList"></ol>
+  </nav>
+
+  <main id="top">
+    <section class="hero">
+      <p class="hero-kicker">Selected Photographs</p>
+      <h1 class="hero-title" id="heroAuthor"></h1>
+      <p class="hero-sub" id="heroSub"></p>
+      <p class="hero-statement" id="heroStatement"></p>
+      <p class="hero-stats" id="heroStats"></p>
+    </section>
+
+    <nav class="contents" id="contents" aria-label="Series index">
+      <ol class="contents-list" id="contentsList"></ol>
+      <p class="scroll-hint">Scroll to explore</p>
+    </nav>
+
+    <div id="seriesRoot"></div>
+  </main>
+
+  <footer class="site-footer">
+    <p class="footer-name" id="footerName"></p>
+    <nav class="footer-links" id="footerLinks"></nav>
+    <p class="footer-copy" id="footerCopy"></p>
+  </footer>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="Photograph viewer">
+    <button class="lb-close" id="lbClose" aria-label="Close">×</button>
+    <button class="lb-prev" id="lbPrev" aria-label="Previous">←</button>
+    <button class="lb-next" id="lbNext" aria-label="Next">→</button>
+    <figure class="lb-figure">
+      <div class="lb-media" id="lbMedia"></div>
+      <figcaption class="lb-caption" id="lbCaption"></figcaption>
+    </figure>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
