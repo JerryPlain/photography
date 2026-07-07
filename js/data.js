@@ -3,7 +3,7 @@
 // ============================================================
 
 const SITE = {
-  author: "Jerry Plain",
+  author: "Shijie Zhou",
   subtitle: "Photography",
   // 扉页上的一句话（自己写一句喜欢的）
   statement: "A record of places passed through, and the light that stayed.",

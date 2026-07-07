@@ -3,8 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Photography — Jerry Plain</title>
-  <meta name="description" content="A photographic monograph — selected photographs by Jerry Plain.">
+  <title>Photography — Shijie Zhou</title>
+  <meta name="description" content="A photographic monograph — selected photographs by Shijie Zhou.">
+  <script>
+    // 防止刷新时闪白/闪黑：在 CSS 加载前恢复上次选择的主题
+    (function () {
+      var t = localStorage.getItem("theme");
+      if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
+    })();
+  </script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,7 +19,28 @@
 
   <header class="topbar" id="topbar">
     <a class="wordmark" href="#top">Selected Photographs</a>
-    <button class="index-toggle" id="indexToggle" aria-expanded="false" aria-controls="indexOverlay">Index</button>
+    <div class="topbar-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="tt-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <mask id="ttMoonMask">
+            <rect width="24" height="24" fill="white"/>
+            <circle class="tt-mask-circle" cx="12" cy="12" r="6" fill="black"/>
+          </mask>
+          <circle class="tt-core" cx="12" cy="12" r="5.2" fill="currentColor" mask="url(#ttMoonMask)"/>
+          <g class="tt-rays" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <line x1="12" y1="1.8" x2="12" y2="4.2"/>
+            <line x1="12" y1="19.8" x2="12" y2="22.2"/>
+            <line x1="1.8" y1="12" x2="4.2" y2="12"/>
+            <line x1="19.8" y1="12" x2="22.2" y2="12"/>
+            <line x1="4.6" y1="4.6" x2="6.3" y2="6.3"/>
+            <line x1="17.7" y1="17.7" x2="19.4" y2="19.4"/>
+            <line x1="17.7" y1="6.3" x2="19.4" y2="4.6"/>
+            <line x1="4.6" y1="19.4" x2="6.3" y2="17.7"/>
+          </g>
+        </svg>
+      </button>
+      <button class="index-toggle" id="indexToggle" aria-expanded="false" aria-controls="indexOverlay">Index</button>
+    </div>
   </header>
 
   <nav class="index-overlay" id="indexOverlay" aria-hidden="true">

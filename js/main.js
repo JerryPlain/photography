@@ -107,6 +107,65 @@ document.getElementById("footerLinks").innerHTML = SITE.footerLinks
   .join("");
 document.getElementById("footerCopy").textContent = SITE.copyright;
 
+// ---------- theme toggle (circular reveal) ----------
+const themeToggle = document.getElementById("themeToggle");
+const rootEl = document.documentElement;
+
+function isDark() {
+  if (rootEl.dataset.theme) return rootEl.dataset.theme === "dark";
+  return matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function syncToggleIcon() {
+  document.body.classList.toggle("dark-active", isDark());
+}
+
+function applyTheme(next) {
+  rootEl.dataset.theme = next;
+  localStorage.setItem("theme", next);
+  syncToggleIcon();
+}
+
+themeToggle.addEventListener("click", (e) => {
+  const next = isDark() ? "light" : "dark";
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (!document.startViewTransition || reduced) {
+    applyTheme(next);
+    return;
+  }
+
+  // 以按钮为圆心，向全屏扩散揭开新主题
+  const rect = themeToggle.getBoundingClientRect();
+  const x = rect.left + rect.width / 2;
+  const y = rect.top + rect.height / 2;
+  const radius = Math.hypot(
+    Math.max(x, innerWidth - x),
+    Math.max(y, innerHeight - y)
+  );
+
+  const vt = document.startViewTransition(() => applyTheme(next));
+  vt.ready.then(() => {
+    rootEl.animate(
+      {
+        clipPath: [
+          `circle(0px at ${x}px ${y}px)`,
+          `circle(${radius}px at ${x}px ${y}px)`,
+        ],
+      },
+      {
+        duration: 650,
+        easing: "cubic-bezier(0.4, 0, 0.2, 1)",
+        pseudoElement: "::view-transition-new(root)",
+      }
+    );
+  });
+});
+
+// 跟随系统主题变化（未手动选择时）更新图标
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncToggleIcon);
+syncToggleIcon();
+
 // ---------- index overlay toggle ----------
 const overlay = document.getElementById("indexOverlay");
 const toggle = document.getElementById("indexToggle");

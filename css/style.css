@@ -12,8 +12,17 @@
   --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+/* 深色主题：手动选择（data-theme）优先，否则跟随系统 */
+:root[data-theme="dark"] {
+  --bg: #121110;
+  --ink: #e9e6df;
+  --ink-soft: #97928a;
+  --hairline: rgba(233, 230, 223, 0.16);
+  --paper: #1a1917;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg: #121110;
     --ink: #e9e6df;
     --ink-soft: #97928a;
@@ -72,6 +81,62 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
   text-transform: uppercase;
 }
 .index-toggle:hover { color: var(--ink-soft); }
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+/* ---------- theme toggle (sun ↔ moon) ---------- */
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+}
+.theme-toggle:hover { color: var(--ink-soft); }
+
+.tt-icon { width: 1.15rem; height: 1.15rem; overflow: visible; }
+
+.tt-icon .tt-core {
+  transform-origin: 12px 12px;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tt-icon .tt-mask-circle {
+  /* 遮罩圆停在远处 = 太阳；滑入 = 月牙 */
+  transform: translate(14px, -12px);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tt-icon .tt-rays line {
+  transform-origin: 12px 12px;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+.dark-active .tt-icon .tt-core { transform: rotate(-30deg) scale(1.35); }
+.dark-active .tt-icon .tt-mask-circle { transform: translate(5px, -4px); }
+.dark-active .tt-icon .tt-rays line { transform: scale(0); opacity: 0; }
+
+/* ---------- theme change: circular reveal ---------- */
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 2; }
+
+/* 无 View Transitions 的浏览器退化为柔和渐变 */
+body,
+.photo-frame,
+.index-overlay,
+.lightbox {
+  transition: background-color 0.4s ease, color 0.4s ease, border-color 0.4s ease;
+}
 
 /* ---------- index overlay ---------- */
 
