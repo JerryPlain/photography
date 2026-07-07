@@ -2,33 +2,26 @@
    Selected Photographs — editorial monograph stylesheet
    ============================================================ */
 
+/* 默认深色主题 */
 :root {
-  --bg: #faf9f7;
-  --ink: #17150f;
-  --ink-soft: #6b675e;
-  --hairline: rgba(23, 21, 15, 0.14);
-  --paper: #ffffff;
-  --serif: "Iowan Old Style", "Palatino", "Palatino Linotype", Georgia, "Times New Roman", serif;
-  --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-/* 深色主题：手动选择（data-theme）优先，否则跟随系统 */
-:root[data-theme="dark"] {
   --bg: #121110;
   --ink: #e9e6df;
   --ink-soft: #97928a;
   --hairline: rgba(233, 230, 223, 0.16);
   --paper: #1a1917;
+  --serif: "Iowan Old Style", "Palatino", "Palatino Linotype", Georgia, "Times New Roman", serif;
+  --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #121110;
-    --ink: #e9e6df;
-    --ink-soft: #97928a;
-    --hairline: rgba(233, 230, 223, 0.16);
-    --paper: #1a1917;
-  }
+/* 浅色主题：仅在手动切换时启用 */
+:root[data-theme="light"] {
+  --bg: #faf9f7;
+  --ink: #17150f;
+  --ink-soft: #6b675e;
+  --hairline: rgba(23, 21, 15, 0.14);
+  --paper: #ffffff;
+  color-scheme: light;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }

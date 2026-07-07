@@ -112,8 +112,7 @@ const themeToggle = document.getElementById("themeToggle");
 const rootEl = document.documentElement;
 
 function isDark() {
-  if (rootEl.dataset.theme) return rootEl.dataset.theme === "dark";
-  return matchMedia("(prefers-color-scheme: dark)").matches;
+  return rootEl.dataset.theme !== "light"; // 默认深色
 }
 
 function syncToggleIcon() {
@@ -162,8 +161,6 @@ themeToggle.addEventListener("click", (e) => {
   });
 });
 
-// 跟随系统主题变化（未手动选择时）更新图标
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncToggleIcon);
 syncToggleIcon();
 
 // ---------- index overlay toggle ----------

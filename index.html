@@ -6,10 +6,11 @@
   <title>Photography — Shijie Zhou</title>
   <meta name="description" content="A photographic monograph — selected photographs by Shijie Zhou.">
   <script>
-    // 防止刷新时闪白/闪黑：在 CSS 加载前恢复上次选择的主题
+    // 默认深色；仅当用户手动选过浅色时切换（CSS 加载前执行，避免闪烁）
     (function () {
-      var t = localStorage.getItem("theme");
-      if (t === "dark" || t === "light") document.documentElement.dataset.theme = t;
+      if (localStorage.getItem("theme") === "light") {
+        document.documentElement.dataset.theme = "light";
+      }
     })();
   </script>
   <link rel="stylesheet" href="css/style.css">
