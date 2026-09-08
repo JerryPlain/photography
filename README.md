@@ -4,19 +4,35 @@
 
 在线地址：https://jerryplain.github.io/photography/
 
-## 如何添加照片
+## 更新照片（一条命令）
 
-1. 把图片文件放进 `photos/` 文件夹（建议长边 2000px 左右的 JPG，控制体积）。
-2. 编辑 `js/data.js`，在对应系列的 `photos` 数组里填写：
+照片库在本机 `~/Desktop/photography/`，按系列分文件夹：
 
-   ```js
-   { file: "city-shanghai.jpg", title: "Shanghai", location: "" }
-   ```
+```
+01-City/Berlin, Germany/DSCF1518.jpg     → 系列 City，标题 Berlin，地点 Germany
+04-Car/Porsche 911 GTS/DSCF2940.jpg      → 系列 Car，标题 Porsche 911 GTS
+02-Me/IMG_4342.jpeg                      → 系列 Me，无标题（显示 Plate 编号）
+```
 
-   - `file` 留空 `""` 会显示占位图；
-   - `location` 可留空，有值时显示为小字地点标注。
+- 系列文件夹 `NN-Name`：NN 决定顺序，Name 是标题（连字符变空格，and 变 &）。
+- 只有有照片的系列会出现在网站上。
+- 子文件夹 `地点, 国家` 决定照片标题和地点；直接放在系列文件夹里的照片没有标题。
 
-3. 系列本身（标题、短句、顺序）也都在 `js/data.js` 里改；页面编号、目录、统计数字自动生成。
+放好照片后运行：
+
+```sh
+python3 scripts/ingest.py      # 压缩到 photos/ 并重新生成 js/data.js
+git add -A && git commit -m "Update photos" && git push
+```
+
+脚本只依赖 macOS 自带的 `sips`。每张照片生成 2000px 的全图和 1000px 的缩略图，文件名带内容 hash，重复运行是增量的；源库里删掉的照片会被自动清理。
+
+## 文案
+
+作者名、扉页句子、页脚链接、各系列的一句话副标题都在 [js/site.js](js/site.js)。
+`LEADS` 可以指定某个系列的开篇大图（默认取第一张横构图）。
+
+`js/data.js` 是脚本生成的，不要手改。
 
 ## 本地预览
 
@@ -25,6 +41,4 @@ python3 -m http.server 8000
 # 打开 http://localhost:8000
 ```
 
-## 站点信息
-
-作者名、一句话简介、页脚链接、版权信息都在 `js/data.js` 顶部的 `SITE` 对象里。
+调试参数：`?noreveal` 关闭滚动渐显，`?nohero` 隐藏扉页，`?from=N` 隐藏前 N 个系列（截图用）。

@@ -1,0 +1,213 @@
+#!/usr/bin/env python3
+"""
+Ingest photos from the local Desktop library into the site.
+
+    python3 scripts/ingest.py [SOURCE_DIR]
+
+SOURCE_DIR defaults to ~/Desktop/photography and is expected to look like:
+
+    01-City/Berlin, Germany/DSCF1518.jpg      -> title "Berlin", location "Germany"
+    04-Car/Porsche 911 GTS/DSCF2940.jpg        -> title "Porsche 911 GTS"
+    02-Me/IMG_4342.jpeg                        -> untitled plate in series "Me"
+
+Only series folders that actually contain photos are published. For every
+photo a 2000px "full" JPEG and a 1000px thumbnail are written under
+photos/<series-slug>/ and photos/<series-slug>/thumbs/, named by a content
+hash so re-running is incremental and stable. Files that no longer exist in
+the source are pruned. Finally js/data.js is regenerated.
+Uses only macOS `sips`, no third-party dependencies.
+"""
+import hashlib, json, os, re, struct, subprocess, sys, unicodedata
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+SRC = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else Path("~/Desktop/photography").expanduser()
+OUT = ROOT / "photos"
+DATA = ROOT / "js" / "data.js"
+
+FULL_MAX, FULL_Q = 2000, 72
+THUMB_MAX, THUMB_Q = 1000, 70
+EXTS = {".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp", ".tif", ".tiff"}
+
+# ---------------------------------------------------------------- helpers
+
+def slugify(s: str) -> str:
+    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+    s = re.sub(r"[^A-Za-z0-9]+", "-", s).strip("-").lower()
+    return s or "untitled"
+
+def series_title(folder: str) -> str:
+    name = re.sub(r"^\d+-", "", folder).replace("-", " ")
+    return re.sub(r"\band\b", "&", name)
+
+def file_hash(p: Path) -> str:
+    h = hashlib.md5()
+    with open(p, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()[:8]
+
+def jpeg_info(p: Path):
+    """Return (raw_w, raw_h, orientation, datetime_original) for a JPEG."""
+    w = h = None; orient = 1; dt = None
+    with open(p, "rb") as f:
+        data = f.read()
+    if data[:2] != b"\xff\xd8":
+        return None
+    i = 2
+    while i < len(data) - 4:
+        if data[i] != 0xFF:
+            i += 1; continue
+        marker = data[i + 1]
+        if marker in (0xD8, 0x01) or 0xD0 <= marker <= 0xD7:
+            i += 2; continue
+        seglen = struct.unpack(">H", data[i + 2:i + 4])[0]
+        seg = data[i + 4:i + 2 + seglen]
+        if marker in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+            h, w = struct.unpack(">HH", seg[1:5])
+            break
+        if marker == 0xE1 and seg[:6] == b"Exif\x00\x00":
+            tiff = seg[6:]
+            try:
+                end = "<" if tiff[:2] == b"II" else ">"
+                ifd0 = struct.unpack(end + "I", tiff[4:8])[0]
+                def read_ifd(off):
+                    n = struct.unpack(end + "H", tiff[off:off + 2])[0]
+                    out = {}
+                    for k in range(n):
+                        e = tiff[off + 2 + 12 * k: off + 14 + 12 * k]
+                        tag, typ, cnt = struct.unpack(end + "HHI", e[:8])
+                        out[tag] = (typ, cnt, e[8:12])
+                    return out
+                ifd = read_ifd(ifd0)
+                if 0x0112 in ifd:
+                    orient = struct.unpack(end + "H", ifd[0x0112][2][:2])[0]
+                if 0x8769 in ifd:
+                    exif_off = struct.unpack(end + "I", ifd[0x8769][2])[0]
+                    sub = read_ifd(exif_off)
+                    if 0x9003 in sub:
+                        typ, cnt, val = sub[0x9003]
+                        off = struct.unpack(end + "I", val)[0]
+                        dt = tiff[off:off + cnt - 1].decode("ascii", "ignore")
+            except Exception:
+                pass
+        i += 2 + seglen
+    if w is None:
+        return None
+    return w, h, orient, dt
+
+def displayed_dims(p: Path):
+    info = jpeg_info(p)
+    if not info:
+        return None
+    w, h, o, _ = info
+    return (h, w) if o in (5, 6, 7, 8) else (w, h)
+
+def sips(src: Path, dst: Path, max_px: int, q: int):
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(
+        ["sips", "-s", "format", "jpeg", "-s", "formatOptions", str(q),
+         "--resampleHeightWidthMax", str(max_px), str(src), "--out", str(dst)],
+        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+# ---------------------------------------------------------------- scan
+
+def scan():
+    series = []
+    for folder in sorted(SRC.iterdir()):
+        if not folder.is_dir() or not re.match(r"^\d+-", folder.name):
+            continue
+        slug = slugify(re.sub(r"^\d+-", "", folder.name))
+        groups = {}  # (title, location) -> [paths]
+        for p in sorted(folder.rglob("*")):
+            if not p.is_file() or p.suffix.lower() not in EXTS or p.name.startswith("."):
+                continue
+            rel = p.relative_to(folder)
+            if len(rel.parts) == 1:
+                key = ("", "")
+            else:
+                sub = rel.parts[0]
+                title, _, loc = sub.partition(",")
+                key = (title.strip(), loc.strip())
+            groups.setdefault(key, []).append(p)
+        if not groups:
+            continue
+
+        # order groups by country then place; untitled plates keep source order
+        def gkey(k):
+            title, loc = k
+            return (loc or title).lower(), title.lower()
+        photos = []
+        for key in sorted(groups, key=gkey):
+            files = groups[key]
+            def fkey(p):
+                info = jpeg_info(p) if p.suffix.lower() in (".jpg", ".jpeg") else None
+                return (info[3] if info and info[3] else "9999", p.name.lower())
+            for p in sorted(files, key=fkey):
+                photos.append((key[0], key[1], p))
+        series.append({"slug": slug, "title": series_title(folder.name), "photos": photos})
+    return series
+
+# ---------------------------------------------------------------- build
+
+def main():
+    if not SRC.exists():
+        sys.exit(f"source not found: {SRC}")
+    series = scan()
+    manifest = []
+    keep = set()
+    for s in series:
+        entries = []
+        for title, location, src in s["photos"]:
+            base = f"{slugify(title) if title else s['slug']}-{file_hash(src)}.jpg"
+            full = OUT / s["slug"] / base
+            thumb = OUT / s["slug"] / "thumbs" / base
+            for dst, mx, q in ((full, FULL_MAX, FULL_Q), (thumb, THUMB_MAX, THUMB_Q)):
+                if not dst.exists() or dst.stat().st_mtime < src.stat().st_mtime:
+                    sips(src, dst, mx, q)
+                    print(f"  {dst.relative_to(ROOT)}")
+            keep.add(full); keep.add(thumb)
+            dims = displayed_dims(full)
+            if not dims:
+                dims = (3, 2)
+            # sanity: orientation must survive the resize
+            sd = displayed_dims(src) if src.suffix.lower() in (".jpg", ".jpeg") else None
+            if sd and (sd[0] > sd[1]) != (dims[0] > dims[1]):
+                print(f"  !! orientation mismatch: {src}")
+            entries.append({"file": f"{s['slug']}/{base}", "title": title,
+                            "location": location, "w": dims[0], "h": dims[1]})
+        manifest.append({"slug": s["slug"], "title": s["title"], "photos": entries})
+        print(f"{s['slug']}: {len(entries)} photos")
+
+    # prune
+    if OUT.exists():
+        for p in OUT.rglob("*.jpg"):
+            if p not in keep:
+                p.unlink(); print(f"  pruned {p.relative_to(ROOT)}")
+        for d in sorted(OUT.rglob("*"), reverse=True):
+            if d.is_dir() and not any(d.iterdir()):
+                d.rmdir()
+
+    # write data.js
+    lines = ["// ============================================================",
+             "// GENERATED by scripts/ingest.py — do not edit by hand.",
+             "// Series order & titles come from the folder names on disk;",
+             "// taglines and site text live in js/site.js.",
+             "// ============================================================",
+             "", "const SERIES = ["]
+    for s in manifest:
+        lines.append("  {")
+        lines.append(f"    slug: {json.dumps(s['slug'])},")
+        lines.append(f"    title: {json.dumps(s['title'], ensure_ascii=False)},")
+        lines.append("    photos: [")
+        for e in s["photos"]:
+            lines.append("      " + json.dumps(e, ensure_ascii=False, separators=(", ", ": ")) + ",")
+        lines.append("    ],")
+        lines.append("  },")
+    lines.append("];")
+    DATA.write_text("\n".join(lines) + "\n")
+    total = sum(len(s["photos"]) for s in manifest)
+    print(f"\nwrote {DATA.relative_to(ROOT)}: {len(manifest)} series, {total} photos")
+
+if __name__ == "__main__":
+    main()
