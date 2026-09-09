@@ -174,7 +174,7 @@ def main():
             sd = displayed_dims(src) if src.suffix.lower() in (".jpg", ".jpeg") else None
             if sd and (sd[0] > sd[1]) != (dims[0] > dims[1]):
                 print(f"  !! orientation mismatch: {src}")
-            entries.append({"file": f"{s['slug']}/{base}", "title": title,
+            entries.append({"file": f"{s['slug']}/{base}", "src": src.stem, "title": title,
                             "location": location, "w": dims[0], "h": dims[1]})
         manifest.append({"slug": s["slug"], "title": s["title"], "photos": entries})
         print(f"{s['slug']}: {len(entries)} photos")

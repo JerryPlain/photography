@@ -40,3 +40,16 @@ const TAGLINES = {
   "graduation": "An ending that felt like a beginning.",
   "portrait": "Faces, given a moment.",
 };
+
+// 首页每个系列只"散落"几张代表作，其余点进系列才能看到。
+// 按原始文件名（不带后缀）填写，顺序 = 摆放顺序（第一张最大）。最多 6 张。
+// 没写的系列默认取前 4 张。
+const HIGHLIGHTS = {
+  "city": ["IMG_6694", "50ea2263c183d0c8ebe2234804962ef5", "IMG_4169", "DSCF2147", "DSCF1127", "IMG_1407"],
+  "me": ["IMG_2293", "dji_mimo_20241228_143338_20241228143338_1735393355875_photo", "IMG_4342", "IMG_4591"],
+  "sea-and-lake": ["DSCF2313", "IMG_5243", "IMG_5278"],
+  "car": ["DSCF0864", "DSCF2940", "DSCF0862"],
+  "school": ["IMG_8642", "IMG_9131", "IMG_6677", "IMG_7133"],
+  "mountain": ["DSCF0768", "DSCF0767", "DSCF0775"],
+};
+

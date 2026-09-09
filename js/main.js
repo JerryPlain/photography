@@ -1,5 +1,7 @@
 // ============================================================
-// Render the site from SITE / TAGLINES (site.js) + SERIES (data.js)
+// Render the site from SITE / TAGLINES / HIGHLIGHTS (site.js) + SERIES (data.js)
+// Home: intro + contents + a few scattered prints per series.
+// #/slug: the whole series as a masonry grid.
 // ============================================================
 
 const pad2 = (n) => String(n).padStart(2, "0");
@@ -7,15 +9,28 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 const fullSrc = (p) => `photos/${p.file}`;
 const thumbSrc = (p) => { const i = p.file.lastIndexOf("/"); return `photos/${p.file.slice(0, i)}/thumbs/${p.file.slice(i + 1)}`; };
 const caption = (p) => [p.title, p.location].filter(Boolean).join(", ");
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
 
-// debug flags for screenshots: ?noreveal  ?nohero  ?from=N
+// debug flags for screenshots: ?noreveal ?nohero ?from=N ?theme=dark
 const Q = new URLSearchParams(location.search);
 if (Q.get("theme") === "dark") document.documentElement.dataset.theme = "dark";
+const NO_REVEAL = Q.has("noreveal");
 
-// ---------- flat list for the lightbox ----------
-const FLAT = [];
-SERIES.forEach((s, si) => s.photos.forEach((p, pi) => { p._flat = FLAT.length; FLAT.push({ series: s, si, photo: p, pi }); }));
-const TOTAL = FLAT.length;
+SERIES.forEach((s, si) => { s.num = pad2(si + 1); s.photos.forEach((p, pi) => { p._series = s; p._index = pi; }); });
+const TOTAL = SERIES.reduce((a, s) => a + s.photos.length, 0);
+const bySlug = Object.fromEntries(SERIES.map((s) => [s.slug, s]));
+
+function placesOf(s) {
+  const seen = new Set(), out = [];
+  s.photos.forEach((p) => { if (p.title && !seen.has(p.title)) { seen.add(p.title); out.push(p.title); } });
+  return out;
+}
+function highlightsOf(s) {
+  const want = (typeof HIGHLIGHTS !== "undefined" && HIGHLIGHTS[s.slug]) || [];
+  const picked = want.map((stem) => s.photos.find((p) => p.src === stem)).filter(Boolean);
+  const rest = s.photos.filter((p) => !picked.includes(p));
+  return picked.concat(rest).slice(0, Math.min(6, want.length || 4, s.photos.length));
+}
 
 // ---------- header / intro ----------
 document.getElementById("brandName").textContent = SITE.author;
@@ -25,93 +40,131 @@ document.getElementById("introStatement").textContent = SITE.statement;
 const places = new Set();
 SERIES.forEach((s) => s.photos.forEach((p) => p.location && places.add(p.title)));
 document.getElementById("introStats").innerHTML =
-  `${TOTAL} photographs<span class="dot">·</span>${SERIES.length} series` + (places.size ? `<span class="dot">·</span>${places.size} places` : "");
+  `${plural(TOTAL, "photograph")}<span class="dot">·</span>${plural(SERIES.length, "series").replace("seriess", "series")}` +
+  (places.size ? `<span class="dot">·</span>${plural(places.size, "place")}` : "");
 
 // ---------- contents / index overlay / rail ----------
 const contentsList = document.getElementById("contentsList");
 const indexList = document.getElementById("indexList");
 const rail = document.getElementById("rail");
 SERIES.forEach((s, i) => {
-  const id = `series-${pad2(i + 1)}`, n = s.photos.length;
-  const li = document.createElement("li");
-  li.innerHTML = `<a href="#${id}"><span class="num">${pad2(i + 1)}</span><span class="name">${esc(s.title)}</span><span class="count">${n}</span></a>`;
-  contentsList.appendChild(li);
-  const li2 = document.createElement("li");
-  li2.innerHTML = `<a href="#${id}"><span class="num">${pad2(i + 1)}</span>${esc(s.title)}<span class="count">${n}</span></a>`;
-  indexList.appendChild(li2);
-  const a = document.createElement("a");
-  a.href = `#${id}`; a.dataset.series = i;
-  a.innerHTML = `<span class="rail-title">${esc(s.title)}</span><span class="rail-num">${pad2(i + 1)}</span>`;
-  rail.appendChild(a);
+  const id = `series-${s.num}`, n = s.photos.length;
+  contentsList.insertAdjacentHTML("beforeend",
+    `<li><a href="#${id}"><span class="num">${s.num}</span><span class="name">${esc(s.title)}</span><span class="count">${n}</span></a></li>`);
+  indexList.insertAdjacentHTML("beforeend",
+    `<li><a href="#${id}"><span class="num">${s.num}</span>${esc(s.title)}<span class="count">${n}</span></a></li>`);
+  rail.insertAdjacentHTML("beforeend",
+    `<a href="#${id}" data-series="${i}"><span class="rail-title">${esc(s.title)}</span><span class="rail-num">${s.num}</span></a>`);
 });
 
-// ---------- series sections ----------
-const root = document.getElementById("seriesRoot");
-SERIES.forEach((s, si) => {
-  const num = pad2(si + 1), n = s.photos.length;
-  const seen = new Set(), placeList = [];
-  s.photos.forEach((p) => { if (p.title && !seen.has(p.title)) { seen.add(p.title); placeList.push(p.title); } });
-  const tag = TAGLINES[s.slug];
-  const section = document.createElement("section");
-  section.className = "series"; section.id = `series-${num}`; section.dataset.series = si;
-  section.innerHTML = `
-    <header class="series-head reveal">
+// ---------- scattered print layouts (12 cols × 8 rows) ----------
+const LAYOUTS = {
+  1: [{ c: [3, 11], r: [1, 9], rot: -1 }],
+  2: [{ c: [1, 8], r: [1, 8], rot: -1.5, z: 1 }, { c: [6, 13], r: [2, 9], rot: 2, z: 2 }],
+  3: [{ c: [1, 8], r: [1, 8], rot: -1, z: 1 }, { c: [8, 13], r: [1, 6], rot: 2, z: 2 }, { c: [6, 11], r: [5, 9], rot: -2, z: 3 }],
+  4: [{ c: [1, 8], r: [1, 6], rot: -1, z: 1 }, { c: [8, 13], r: [1, 5], rot: 1.5, z: 2 }, { c: [1, 6], r: [5, 9], rot: 1.5, z: 3 }, { c: [6, 12], r: [5, 9], rot: -1.5, z: 2 }],
+  5: [{ c: [1, 8], r: [1, 6], rot: -1, z: 1 }, { c: [8, 13], r: [1, 5], rot: 2, z: 2 }, { c: [1, 5], r: [5, 9], rot: 1.5, z: 3 }, { c: [5, 10], r: [4, 9], rot: -2, z: 4 }, { c: [9, 13], r: [5, 9], rot: 1, z: 2 }],
+  6: [{ c: [1, 7], r: [1, 5], rot: -1, z: 1 }, { c: [7, 10], r: [1, 6], rot: 1.5, z: 2 }, { c: [10, 13], r: [1, 4], rot: -2, z: 3 }, { c: [1, 5], r: [5, 9], rot: 1.5, z: 2 }, { c: [4, 10], r: [4, 9], rot: -1.5, z: 4 }, { c: [10, 13], r: [4, 9], rot: 1, z: 3 }],
+};
+
+// keep the first pick in the lead slot; fill the rest with the photo whose shape fits each slot best
+function assignSlots(picks, L, containerAspect) {
+  const slotAspect = (l) => ((l.c[1] - l.c[0]) / 12) * containerAspect / ((l.r[1] - l.r[0]) / 8);
+  const out = [picks[0]], pool = picks.slice(1);
+  for (let i = 1; i < L.length && pool.length; i++) {
+    const want = slotAspect(L[i]);
+    pool.sort((a, b) => Math.abs(Math.log(a.w / a.h / want)) - Math.abs(Math.log(b.w / b.h / want)));
+    out.push(pool.shift());
+  }
+  return out;
+}
+
+function seriesHead(s, cls = "") {
+  const n = s.photos.length, pl = placesOf(s), tag = TAGLINES[s.slug];
+  return `
+    <header class="series-head ${cls}">
       <div>
-        <span class="series-num">Series ${num}</span>
+        <span class="series-num">Series ${s.num}</span>
         <h2 class="series-title">${esc(s.title)}</h2>
         ${tag ? `<p class="series-tagline">${esc(tag)}</p>` : ""}
       </div>
-      <p class="series-meta">${n} photograph${n === 1 ? "" : "s"}${placeList.length > 1 ? `<br>${placeList.length} places` : ""}</p>
+      <p class="series-meta">${plural(n, "photograph")}${pl.length > 1 ? `<br>${plural(pl.length, "place")}` : ""}</p>
     </header>
-    ${placeList.length > 1 ? `<p class="series-places reveal">${placeList.map(esc).join('&nbsp;<span class="sep">·</span> ')}</p>` : ""}
-    <div class="photo-grid" data-count="${n}">
-      ${s.photos.map((p, pi) => `
-        <figure class="photo-card" data-flat="${p._flat}" data-ar="${(p.w / p.h).toFixed(4)}" tabindex="0" role="button" aria-label="View ${esc(caption(p) || s.title)}">
-          <img src="${thumbSrc(p)}" alt="${esc(caption(p) || `${s.title} ${pad2(pi + 1)}`)}" loading="lazy" decoding="async" width="${p.w}" height="${p.h}">
-          <figcaption class="photo-cap">
-            <span class="t">${esc(p.title || `${s.title} ${pad2(pi + 1)}`)}</span>
-            ${p.location ? `<span class="l">${esc(p.location)}</span>` : ""}
-          </figcaption>
-        </figure>`).join("")}
-    </div>`;
+    ${pl.length > 1 ? `<p class="series-places ${cls}">${pl.map(esc).join('&nbsp;<span class="sep">·</span> ')}</p>` : ""}`;
+}
+
+// ---------- home: series sections with prints ----------
+const root = document.getElementById("seriesRoot");
+SERIES.forEach((s, si) => {
+  const L = LAYOUTS[highlightsOf(s).length];
+  const picks = assignSlots(highlightsOf(s), L, s.photos.length <= 2 ? 2.4 : s.photos.length === 3 ? 2 : 16 / 9);
+  const section = document.createElement("section");
+  section.className = "series"; section.id = `series-${s.num}`; section.dataset.series = si;
+  section.innerHTML = `
+    ${seriesHead(s, "reveal")}
+    <div class="prints reveal" data-n="${picks.length}">
+      ${picks.map((p, i) => {
+        const l = L[i];
+        return `
+        <figure class="print" data-slug="${s.slug}" data-index="${p._index}" tabindex="0" role="button"
+                aria-label="View ${esc(caption(p) || s.title)}"
+                style="--area:${l.r[0]} / ${l.c[0]} / ${l.r[1]} / ${l.c[1]};--rot:${l.rot}deg;--z:${l.z || 1}">
+          <div class="ph"><img src="${thumbSrc(p)}" alt="${esc(caption(p) || s.title)}" loading="lazy" decoding="async"></div>
+          <figcaption><span class="t">${esc(p.title || s.title)}</span>${p.location ? `<span class="l">${esc(p.location)}</span>` : ""}</figcaption>
+        </figure>`; }).join("")}
+    </div>
+    <a class="view-all reveal" href="#/${s.slug}">${s.photos.length > picks.length ? `View all ${plural(s.photos.length, "photograph")}` : "Open series"} <span aria-hidden="true">→</span></a>`;
   root.appendChild(section);
 });
 
-// ---------- justified rows ----------
-function layoutGrid(grid) {
-  const W = grid.clientWidth;
-  if (!W) return;
-  const gap = parseFloat(getComputedStyle(grid).gap) || 10;
-  const target = W < 640 ? 160 : W < 1000 ? 210 : 250;
-  const maxPer = W < 640 ? 3 : W < 1000 ? 4 : 6;
-  const cards = [...grid.children];
-  let row = [], sum = 0;
-  const apply = (items, h) => items.forEach((c) => {
-    const w = Number(c.dataset.ar) * h;
-    c.style.width = `${w}px`; c.style.height = `${h}px`;
-  });
-  cards.forEach((c) => {
-    row.push(c); sum += Number(c.dataset.ar);
-    const h = (W - gap * (row.length - 1)) / sum;
-    if (h <= target || row.length >= maxPer) { apply(row, h); row = []; sum = 0; }
-  });
-  if (row.length) {
-    // last row: don't stretch; a lone photo may sit a little taller
-    const cap = row.length === 1 ? target * 1.5 : target;
-    apply(row, Math.min(cap, (W - gap * (row.length - 1)) / sum));
+// ---------- series page (#/slug) ----------
+const home = document.getElementById("home");
+const page = document.getElementById("seriesPage");
+let pageSlug = null;
+function renderSeriesPage(s) {
+  page.innerHTML = `
+    <a class="back-link" href="#"><span aria-hidden="true">←</span> All series</a>
+    ${seriesHead(s)}
+    <div class="masonry">
+      ${s.photos.map((p, pi) => `
+        <figure class="photo-card" data-slug="${s.slug}" data-index="${pi}" tabindex="0" role="button" aria-label="View ${esc(caption(p) || s.title)}">
+          <div class="photo-frame" style="--ar:${p.w} / ${p.h}">
+            <img src="${thumbSrc(p)}" alt="${esc(caption(p) || `${s.title} ${pad2(pi + 1)}`)}" loading="lazy" decoding="async" width="${p.w}" height="${p.h}">
+          </div>
+          <figcaption class="photo-caption"><span class="t">${esc(p.title || `${s.title} ${pad2(pi + 1)}`)}</span>${p.location ? `<span class="l">${esc(p.location)}</span>` : ""}</figcaption>
+        </figure>`).join("")}
+    </div>`;
+  wireCards(page);
+  watchImages(page);
+}
+function route() {
+  const m = location.hash.match(/^#\/([a-z0-9-]+)$/);
+  const s = m && bySlug[m[1]];
+  if (s) {
+    if (pageSlug !== s.slug) { renderSeriesPage(s); pageSlug = s.slug; }
+    home.hidden = true; page.hidden = false; rail.hidden = true;
+    document.title = `${s.title} — ${SITE.author}`;
+    scrollTo({ top: 0, behavior: "instant" });
+  } else {
+    home.hidden = false; page.hidden = true; rail.hidden = false;
+    document.title = `Photography — ${SITE.author}`;
+    if (location.hash && location.hash !== "#") {
+      const el = document.querySelector(location.hash);
+      if (el) el.scrollIntoView();
+    }
   }
 }
-const grids = document.querySelectorAll(".photo-grid");
-const relayout = () => grids.forEach(layoutGrid);
-relayout();
-let rt; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(relayout, 80); }, { passive: true });
-if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout);
+addEventListener("hashchange", route);
 
 // ---------- image load state ----------
-document.querySelectorAll(".photo-card img").forEach((img) => {
-  const done = () => img.closest(".photo-card").classList.add("loaded");
-  if (img.complete && img.naturalWidth) done(); else { img.addEventListener("load", done, { once: true }); img.addEventListener("error", done, { once: true }); }
-});
+function watchImages(scope) {
+  scope.querySelectorAll(".print img, .photo-frame img").forEach((img) => {
+    const box = img.closest(".print, .photo-frame");
+    const done = () => box.classList.add("loaded");
+    if (img.complete && img.naturalWidth) done(); else { img.addEventListener("load", done, { once: true }); img.addEventListener("error", done, { once: true }); }
+  });
+}
+watchImages(document);
 
 // ---------- footer ----------
 document.getElementById("footerName").textContent = SITE.author;
@@ -171,7 +224,6 @@ toggle.addEventListener("click", () => setOverlay(!overlay.classList.contains("o
 overlay.addEventListener("click", (e) => { if (e.target.closest("a") || e.target === overlay) setOverlay(false); });
 
 // ---------- scroll reveal ----------
-const NO_REVEAL = Q.has("noreveal");
 if (Q.has("nohero")) document.getElementById("hero").style.display = "none";
 if (Q.has("from")) document.querySelectorAll(".series").forEach((el, i) => { if (i < Number(Q.get("from"))) el.style.display = "none"; });
 const revealObserver = new IntersectionObserver((entries) => {
@@ -179,27 +231,27 @@ const revealObserver = new IntersectionObserver((entries) => {
 }, { rootMargin: "0px 0px -5% 0px" });
 document.querySelectorAll(".reveal").forEach((el) => (NO_REVEAL ? el.classList.add("visible") : revealObserver.observe(el)));
 
-// ---------- lightbox ----------
+// ---------- lightbox (navigates within one series) ----------
 const lightbox = document.getElementById("lightbox");
 const lbMedia = document.getElementById("lbMedia");
 const lbTitle = document.getElementById("lbTitle");
 const lbMeta = document.getElementById("lbMeta");
-let current = -1, lastFocus = null;
-const preload = (i) => { const im = new Image(); im.src = fullSrc(FLAT[(i + TOTAL) % TOTAL].photo); };
+let lbList = [], current = -1, lastFocus = null;
+const preload = (i) => { const im = new Image(); im.src = fullSrc(lbList[(i + lbList.length) % lbList.length]); };
 function showPhoto(i) {
-  current = (i + TOTAL) % TOTAL;
-  const { series, si, photo, pi } = FLAT[current];
+  current = (i + lbList.length) % lbList.length;
+  const photo = lbList[current], s = photo._series;
   const img = new Image();
-  img.alt = caption(photo) || `${series.title} ${pad2(pi + 1)}`;
+  img.alt = caption(photo) || `${s.title} ${pad2(current + 1)}`;
   img.src = fullSrc(photo);
   const swap = () => { lbMedia.innerHTML = ""; lbMedia.appendChild(img); requestAnimationFrame(() => img.classList.add("in")); };
   if (img.complete) swap(); else { img.onload = swap; img.onerror = swap; }
-  lbTitle.textContent = photo.title || series.title;
-  lbMeta.textContent = [photo.location, `${series.title} ${pad2(si + 1)}.${pad2(pi + 1)}`, `${current + 1} / ${TOTAL}`].filter(Boolean).join("  ·  ");
+  lbTitle.textContent = photo.title || s.title;
+  lbMeta.textContent = [photo.location, s.title, `${current + 1} / ${lbList.length}`].filter(Boolean).join("  ·  ");
   preload(current + 1); preload(current - 1);
 }
-function openLightbox(i) {
-  lastFocus = document.activeElement;
+function openLightbox(list, i) {
+  lbList = list; lastFocus = document.activeElement;
   showPhoto(i);
   lightbox.classList.add("open"); lightbox.setAttribute("aria-hidden", "false");
   document.body.classList.add("no-scroll");
@@ -210,11 +262,14 @@ function closeLightbox() {
   document.body.classList.remove("no-scroll");
   if (lastFocus) lastFocus.focus();
 }
-document.querySelectorAll(".photo-card").forEach((card) => {
-  const open = () => openLightbox(Number(card.dataset.flat));
-  card.addEventListener("click", open);
-  card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
-});
+function wireCards(scope) {
+  scope.querySelectorAll("[data-slug][data-index]").forEach((card) => {
+    const open = () => openLightbox(bySlug[card.dataset.slug].photos, Number(card.dataset.index));
+    card.addEventListener("click", open);
+    card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+  });
+}
+wireCards(home);
 document.getElementById("lbClose").addEventListener("click", closeLightbox);
 document.getElementById("lbPrev").addEventListener("click", () => showPhoto(current - 1));
 document.getElementById("lbNext").addEventListener("click", () => showPhoto(current + 1));
@@ -234,3 +289,5 @@ lightbox.addEventListener("touchend", (e) => {
   if (Math.abs(dx) > 50) showPhoto(current + (dx < 0 ? 1 : -1));
   touchX = null;
 }, { passive: true });
+
+route();
