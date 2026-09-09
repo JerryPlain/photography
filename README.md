@@ -41,4 +41,8 @@ python3 -m http.server 8000
 # 打开 http://localhost:8000
 ```
 
-调试参数：`?noreveal` 关闭滚动渐显，`?nohero` 隐藏扉页，`?from=N` 隐藏前 N 个系列（截图用）。
+调试参数：`?noreveal` 关闭滚动渐显，`?nohero` 隐藏扉页，`?from=N` 隐藏前 N 个系列，`?theme=dark` 强制深色（截图用）。
+
+## 样式
+
+默认浅色（暖纸色 `#f9f7f4`、红色点缀 `#c0392b`、Georgia 标题、SZ 字标），与个人主页同一套视觉；右上角可切到深色模式，深色下背景是星空。照片网格按行等高排布（`layoutGrid`），保留原始比例不裁切。

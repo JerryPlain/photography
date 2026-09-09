@@ -21,7 +21,7 @@
   const rand = (a, b) => a + Math.random() * (b - a);
 
   function isDark() {
-    return document.documentElement.dataset.theme !== "light";
+    return document.documentElement.dataset.theme === "dark";
   }
 
   function makeGlow() {
