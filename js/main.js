@@ -25,11 +25,19 @@ function placesOf(s) {
   s.photos.forEach((p) => { if (p.title && !seen.has(p.title)) { seen.add(p.title); out.push(p.title); } });
   return out;
 }
-function highlightsOf(s) {
+const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+function poolOf(s) {
   const want = (typeof HIGHLIGHTS !== "undefined" && HIGHLIGHTS[s.slug]) || [];
   const picked = want.map((stem) => s.photos.find((p) => p.src === stem)).filter(Boolean);
-  const rest = s.photos.filter((p) => !picked.includes(p));
-  return picked.concat(rest).slice(0, Math.min(6, want.length || 4, s.photos.length));
+  return picked.length ? picked : s.photos;
+}
+// random subset of the pool, preferring one photo per place
+function highlightsOf(s) {
+  const n = (typeof HOME_COUNT !== "undefined" && HOME_COUNT[s.slug]) || 4;
+  const pool = shuffle(poolOf(s)), seen = new Set(), out = [];
+  pool.forEach((p) => { if (out.length < n && !seen.has(p.title)) { seen.add(p.title); out.push(p); } });
+  pool.forEach((p) => { if (out.length < n && !out.includes(p)) out.push(p); });
+  return out;
 }
 
 // ---------- header / intro ----------
@@ -258,5 +266,53 @@ lightbox.addEventListener("touchend", (e) => {
   if (Math.abs(dx) > 50) showPhoto(current + (dx < 0 ? 1 : -1));
   touchX = null;
 }, { passive: true });
+
+// ---------- home: one card quietly swaps every few seconds ----------
+(function liveSwap() {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const orient = (p) => (p.w >= p.h ? "l" : "p");
+  function tick() {
+    if (document.hidden || !home || home.hidden || lightbox.classList.contains("open")) return;
+    const cards = [...home.querySelectorAll(".photo-card")].filter((c) => {
+      const r = c.getBoundingClientRect();
+      return r.bottom > 0 && r.top < innerHeight && !c.matches(":hover") && !c.classList.contains("swapping");
+    });
+    if (!cards.length) return;
+    const card = cards[Math.floor(Math.random() * cards.length)];
+    const s = bySlug[card.dataset.slug];
+    const cur = s.photos[Number(card.dataset.index)];
+    const shown = new Set([...home.querySelectorAll(`.photo-card[data-slug="${s.slug}"]`)].map((c) => Number(c.dataset.index)));
+    const shownTitles = new Set([...shown].filter((i) => i !== cur._index).map((i) => s.photos[i].title));
+    let options = poolOf(s).filter((p) => !shown.has(p._index) && orient(p) === orient(cur));
+    if (options.some((p) => !shownTitles.has(p.title))) options = options.filter((p) => !shownTitles.has(p.title));
+    if (!options.length) return;
+    const next = options[Math.floor(Math.random() * options.length)];
+    const frame = card.querySelector(".photo-frame");
+    const old = frame.querySelector("img");
+    const img = new Image();
+    img.alt = caption(next) || `${s.title} ${pad2(next._index + 1)}`;
+    img.decoding = "async";
+    img.className = "swap-in";
+    img.onload = () => {
+      frame.appendChild(img);
+      requestAnimationFrame(() => {
+        img.classList.add("in");
+        card.dataset.index = next._index;
+        card.setAttribute("aria-label", `View ${caption(next) || s.title}`);
+        const cap = card.querySelector(".photo-caption");
+        cap.classList.add("fade");
+        setTimeout(() => {
+          cap.innerHTML = `<span class="t">${esc(next.title || `${s.title} ${pad2(next._index + 1)}`)}</span>${next.location ? `<span class="l">${esc(next.location)}</span>` : ""}`;
+          cap.classList.remove("fade");
+        }, 350);
+        setTimeout(() => { old.remove(); img.className = ""; card.classList.remove("swapping"); }, 1300);
+      });
+    };
+    img.onerror = () => card.classList.remove("swapping");
+    card.classList.add("swapping");
+    img.src = thumbSrc(next);
+  }
+  setInterval(tick, 5000);
+})();
 
 route();

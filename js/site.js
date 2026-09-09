@@ -41,15 +41,18 @@ const TAGLINES = {
   "portrait": "Faces, given a moment.",
 };
 
-// 首页每个系列只"散落"几张代表作，其余点进系列才能看到。
-// 按原始文件名（不带后缀）填写，顺序 = 摆放顺序（第一张最大）。最多 6 张。
-// 没写的系列默认取前 4 张。
+// 首页每个系列只放几张代表作，其余点进系列才能看到。
+// HIGHLIGHTS 是每个系列的"候选池"：按原始文件名（不带后缀）填，每次打开首页
+// 从池子里随机抽 HOME_COUNT 张，并且每隔几秒会有一张悄悄换成池子里的另一张。
+// 没写的系列默认整个系列都是候选。
 const HIGHLIGHTS = {
-  "city": ["IMG_6694", "50ea2263c183d0c8ebe2234804962ef5", "IMG_4169", "DSCF2147", "DSCF1127", "IMG_1407"],
-  "me": ["IMG_2293", "dji_mimo_20241228_143338_20241228143338_1735393355875_photo", "IMG_4342", "IMG_4591"],
-  "sea-and-lake": ["DSCF2313", "IMG_5243", "IMG_5278"],
-  "car": ["DSCF0864", "DSCF2940", "DSCF0862"],
+  "city": [
+    "IMG_6694", "50ea2263c183d0c8ebe2234804962ef5", "IMG_4169", "DSCF2147", "DSCF1127", "IMG_1407",
+    "DSCF2949", "DSCF0624", "IMG_4011", "DSCF1067", "IMG_3593", "DSCF0645", "DSCF2810",
+    "IMG_1912", "IMG_5850", "IMG_0345", "DSCF2645", "DSCF0375",
+  ],
   "school": ["IMG_8642", "IMG_9131", "IMG_6677", "IMG_7133"],
-  "mountain": ["DSCF0768", "DSCF0767", "DSCF0775"],
 };
 
+// 首页每个系列同时展示几张（没写的默认 4）
+const HOME_COUNT = { "city": 6, "me": 3, "sea-and-lake": 3, "car": 3, "school": 4, "mountain": 3 };
