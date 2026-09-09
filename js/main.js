@@ -1,6 +1,6 @@
 // ============================================================
 // Render the site from SITE / TAGLINES / HIGHLIGHTS (site.js) + SERIES (data.js)
-// Home: intro + contents + a few scattered prints per series.
+// Home: intro + contents + a few highlights per series (masonry).
 // #/slug: the whole series as a masonry grid.
 // ============================================================
 
@@ -57,26 +57,14 @@ SERIES.forEach((s, i) => {
     `<a href="#${id}" data-series="${i}"><span class="rail-title">${esc(s.title)}</span><span class="rail-num">${s.num}</span></a>`);
 });
 
-// ---------- scattered print layouts (12 cols × 8 rows) ----------
-const LAYOUTS = {
-  1: [{ c: [3, 11], r: [1, 9], rot: -1 }],
-  2: [{ c: [1, 8], r: [1, 8], rot: -1.5, z: 1 }, { c: [6, 13], r: [2, 9], rot: 2, z: 2 }],
-  3: [{ c: [1, 8], r: [1, 8], rot: -1, z: 1 }, { c: [8, 13], r: [1, 6], rot: 2, z: 2 }, { c: [6, 11], r: [5, 9], rot: -2, z: 3 }],
-  4: [{ c: [1, 8], r: [1, 6], rot: -1, z: 1 }, { c: [8, 13], r: [1, 5], rot: 1.5, z: 2 }, { c: [1, 6], r: [5, 9], rot: 1.5, z: 3 }, { c: [6, 12], r: [5, 9], rot: -1.5, z: 2 }],
-  5: [{ c: [1, 8], r: [1, 6], rot: -1, z: 1 }, { c: [8, 13], r: [1, 5], rot: 2, z: 2 }, { c: [1, 5], r: [5, 9], rot: 1.5, z: 3 }, { c: [5, 10], r: [4, 9], rot: -2, z: 4 }, { c: [9, 13], r: [5, 9], rot: 1, z: 2 }],
-  6: [{ c: [1, 7], r: [1, 5], rot: -1, z: 1 }, { c: [7, 10], r: [1, 6], rot: 1.5, z: 2 }, { c: [10, 13], r: [1, 4], rot: -2, z: 3 }, { c: [1, 5], r: [5, 9], rot: 1.5, z: 2 }, { c: [4, 10], r: [4, 9], rot: -1.5, z: 4 }, { c: [10, 13], r: [4, 9], rot: 1, z: 3 }],
-};
-
-// keep the first pick in the lead slot; fill the rest with the photo whose shape fits each slot best
-function assignSlots(picks, L, containerAspect) {
-  const slotAspect = (l) => ((l.c[1] - l.c[0]) / 12) * containerAspect / ((l.r[1] - l.r[0]) / 8);
-  const out = [picks[0]], pool = picks.slice(1);
-  for (let i = 1; i < L.length && pool.length; i++) {
-    const want = slotAspect(L[i]);
-    pool.sort((a, b) => Math.abs(Math.log(a.w / a.h / want)) - Math.abs(Math.log(b.w / b.h / want)));
-    out.push(pool.shift());
-  }
-  return out;
+function masonryHTML(s, photos) {
+  return `<div class="masonry">${photos.map((p) => `
+    <figure class="photo-card" data-slug="${s.slug}" data-index="${p._index}" tabindex="0" role="button" aria-label="View ${esc(caption(p) || s.title)}">
+      <div class="photo-frame" style="--ar:${p.w} / ${p.h}">
+        <img src="${thumbSrc(p)}" alt="${esc(caption(p) || `${s.title} ${pad2(p._index + 1)}`)}" loading="lazy" decoding="async" width="${p.w}" height="${p.h}">
+      </div>
+      <figcaption class="photo-caption"><span class="t">${esc(p.title || `${s.title} ${pad2(p._index + 1)}`)}</span>${p.location ? `<span class="l">${esc(p.location)}</span>` : ""}</figcaption>
+    </figure>`).join("")}</div>`;
 }
 
 function seriesHead(s, cls = "") {
@@ -93,26 +81,15 @@ function seriesHead(s, cls = "") {
     ${pl.length > 1 ? `<p class="series-places ${cls}">${pl.map(esc).join('&nbsp;<span class="sep">·</span> ')}</p>` : ""}`;
 }
 
-// ---------- home: series sections with prints ----------
+// ---------- home: series sections with highlights ----------
 const root = document.getElementById("seriesRoot");
 SERIES.forEach((s, si) => {
-  const L = LAYOUTS[highlightsOf(s).length];
-  const picks = assignSlots(highlightsOf(s), L, s.photos.length <= 2 ? 2.4 : s.photos.length === 3 ? 2 : 16 / 9);
+  const picks = highlightsOf(s);
   const section = document.createElement("section");
   section.className = "series"; section.id = `series-${s.num}`; section.dataset.series = si;
   section.innerHTML = `
     ${seriesHead(s, "reveal")}
-    <div class="prints reveal" data-n="${picks.length}">
-      ${picks.map((p, i) => {
-        const l = L[i];
-        return `
-        <figure class="print" data-slug="${s.slug}" data-index="${p._index}" tabindex="0" role="button"
-                aria-label="View ${esc(caption(p) || s.title)}"
-                style="--area:${l.r[0]} / ${l.c[0]} / ${l.r[1]} / ${l.c[1]};--rot:${l.rot}deg;--z:${l.z || 1}">
-          <div class="ph"><img src="${thumbSrc(p)}" alt="${esc(caption(p) || s.title)}" loading="lazy" decoding="async"></div>
-          <figcaption><span class="t">${esc(p.title || s.title)}</span>${p.location ? `<span class="l">${esc(p.location)}</span>` : ""}</figcaption>
-        </figure>`; }).join("")}
-    </div>
+    <div class="reveal">${masonryHTML(s, picks)}</div>
     <a class="view-all reveal" href="#/${s.slug}">${s.photos.length > picks.length ? `View all ${plural(s.photos.length, "photograph")}` : "Open series"} <span aria-hidden="true">→</span></a>`;
   root.appendChild(section);
 });
@@ -125,15 +102,7 @@ function renderSeriesPage(s) {
   page.innerHTML = `
     <a class="back-link" href="#"><span aria-hidden="true">←</span> All series</a>
     ${seriesHead(s)}
-    <div class="masonry">
-      ${s.photos.map((p, pi) => `
-        <figure class="photo-card" data-slug="${s.slug}" data-index="${pi}" tabindex="0" role="button" aria-label="View ${esc(caption(p) || s.title)}">
-          <div class="photo-frame" style="--ar:${p.w} / ${p.h}">
-            <img src="${thumbSrc(p)}" alt="${esc(caption(p) || `${s.title} ${pad2(pi + 1)}`)}" loading="lazy" decoding="async" width="${p.w}" height="${p.h}">
-          </div>
-          <figcaption class="photo-caption"><span class="t">${esc(p.title || `${s.title} ${pad2(pi + 1)}`)}</span>${p.location ? `<span class="l">${esc(p.location)}</span>` : ""}</figcaption>
-        </figure>`).join("")}
-    </div>`;
+    ${masonryHTML(s, s.photos)}`;
   wireCards(page);
   watchImages(page);
 }
@@ -158,8 +127,8 @@ addEventListener("hashchange", route);
 
 // ---------- image load state ----------
 function watchImages(scope) {
-  scope.querySelectorAll(".print img, .photo-frame img").forEach((img) => {
-    const box = img.closest(".print, .photo-frame");
+  scope.querySelectorAll(".photo-frame img").forEach((img) => {
+    const box = img.closest(".photo-frame");
     const done = () => box.classList.add("loaded");
     if (img.complete && img.naturalWidth) done(); else { img.addEventListener("load", done, { once: true }); img.addEventListener("error", done, { once: true }); }
   });
