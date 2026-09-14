@@ -32,8 +32,13 @@ function poolOf(s) {
   return picked.length ? picked : s.photos;
 }
 // random subset of the pool, preferring one photo per place
+function homeCount(s) {
+  const base = (typeof HOME_COUNT !== "undefined" && HOME_COUNT[s.slug]) || 4;
+  const w = innerWidth, k = w >= 1400 ? 1.5 : w >= 1000 ? 1.25 : w >= 640 ? 1 : 0.75;
+  return Math.max(2, Math.min(s.photos.length, Math.round(base * k)));
+}
 function highlightsOf(s) {
-  const n = (typeof HOME_COUNT !== "undefined" && HOME_COUNT[s.slug]) || 4;
+  const n = homeCount(s);
   const pool = shuffle(poolOf(s)), seen = new Set(), out = [];
   pool.forEach((p) => { if (out.length < n && !seen.has(p.title)) { seen.add(p.title); out.push(p); } });
   pool.forEach((p) => { if (out.length < n && !out.includes(p)) out.push(p); });
@@ -43,7 +48,8 @@ function highlightsOf(s) {
 // ---------- header / intro ----------
 document.getElementById("brandName").textContent = SITE.author;
 document.getElementById("homeLink").href = SITE.home;
-document.getElementById("introTitle").textContent = SITE.title;
+document.getElementById("introTitle").innerHTML = SITE.title.split(" ")
+  .map((w, i) => `<span class="w"><span style="--d:${i * 90}ms">${esc(w)}</span></span>`).join(" ");
 document.getElementById("introStatement").textContent = SITE.statement;
 const places = new Set();
 SERIES.forEach((s) => s.photos.forEach((p) => p.location && places.add(p.title)));
@@ -58,7 +64,7 @@ const rail = document.getElementById("rail");
 SERIES.forEach((s, i) => {
   const id = `series-${s.num}`, n = s.photos.length;
   contentsList.insertAdjacentHTML("beforeend",
-    `<li><a href="#${id}"><span class="num">${s.num}</span><span class="name">${esc(s.title)}</span><span class="count">${n}</span></a></li>`);
+    `<li class="reveal" style="--d:${300 + i * 55}ms"><a href="#${id}"><span class="num">${s.num}</span><span class="name">${esc(s.title)}</span><span class="count">${n}</span></a></li>`);
   indexList.insertAdjacentHTML("beforeend",
     `<li><a href="#${id}"><span class="num">${s.num}</span>${esc(s.title)}<span class="count">${n}</span></a></li>`);
   rail.insertAdjacentHTML("beforeend",
@@ -66,8 +72,8 @@ SERIES.forEach((s, i) => {
 });
 
 function masonryHTML(s, photos) {
-  return `<div class="masonry">${photos.map((p) => `
-    <figure class="photo-card" data-slug="${s.slug}" data-index="${p._index}" tabindex="0" role="button" aria-label="View ${esc(caption(p) || s.title)}">
+  return `<div class="masonry">${photos.map((p, i) => `
+    <figure class="photo-card reveal" style="--d:${Math.min(i, 8) * 70}ms" data-slug="${s.slug}" data-index="${p._index}" tabindex="0" role="button" aria-label="View ${esc(caption(p) || s.title)}">
       <div class="photo-frame" style="--ar:${p.w} / ${p.h}">
         <img src="${thumbSrc(p)}" alt="${esc(caption(p) || `${s.title} ${pad2(p._index + 1)}`)}" loading="lazy" decoding="async" width="${p.w}" height="${p.h}">
       </div>
@@ -97,7 +103,7 @@ SERIES.forEach((s, si) => {
   section.className = "series"; section.id = `series-${s.num}`; section.dataset.series = si;
   section.innerHTML = `
     ${seriesHead(s, "reveal")}
-    <div class="reveal">${masonryHTML(s, picks)}</div>
+    ${masonryHTML(s, picks)}
     <a class="view-all reveal" href="#/${s.slug}">${s.photos.length > picks.length ? `View all ${plural(s.photos.length, "photograph")}` : "Open series"} <span aria-hidden="true">→</span></a>`;
   root.appendChild(section);
 });
@@ -113,17 +119,23 @@ function renderSeriesPage(s) {
     ${masonryHTML(s, s.photos)}`;
   wireCards(page);
   watchImages(page);
+  page.querySelectorAll(".reveal").forEach((el) => (NO_REVEAL ? el.classList.add("visible") : revealObserver.observe(el)));
+}
+function swapView(show, hide) {
+  hide.hidden = true;
+  show.hidden = false;
+  show.classList.remove("page-in"); void show.offsetWidth; show.classList.add("page-in");
 }
 function route() {
   const m = location.hash.match(/^#\/([a-z0-9-]+)$/);
   const s = m && bySlug[m[1]];
   if (s) {
     if (pageSlug !== s.slug) { renderSeriesPage(s); pageSlug = s.slug; }
-    home.hidden = true; page.hidden = false; rail.hidden = true;
+    swapView(page, home); rail.hidden = true;
     document.title = `${s.title} — ${SITE.author}`;
     scrollTo({ top: 0, behavior: "instant" });
   } else {
-    home.hidden = false; page.hidden = true; rail.hidden = false;
+    if (home.hidden) swapView(home, page); rail.hidden = false;
     document.title = `Photography — ${SITE.author}`;
     if (location.hash && location.hash !== "#") {
       const el = document.querySelector(location.hash);
@@ -149,6 +161,19 @@ document.getElementById("footerStatement").textContent = SITE.statement;
 document.getElementById("footerLinks").innerHTML = SITE.footerLinks
   .map((l) => `<a href="${esc(l.url)}"${l.url.startsWith("http") ? ' target="_blank" rel="noopener"' : ""}>${esc(l.label)}</a>`).join("");
 document.getElementById("footerCopy").textContent = SITE.copyright;
+
+// ---------- intro parallax (desktop) ----------
+const intro = document.getElementById("hero");
+if (intro && matchMedia("(min-width: 900px) and (prefers-reduced-motion: no-preference)").matches) {
+  let ticking = false;
+  const px = () => {
+    const y = scrollY, h = intro.offsetHeight || 1;
+    intro.style.transform = `translateY(${Math.min(y, h) * 0.18}px)`;
+    intro.style.opacity = String(Math.max(0, 1 - y / (h * 1.1)));
+    ticking = false;
+  };
+  addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(px); } }, { passive: true });
+}
 
 // ---------- topbar + rail scrollspy ----------
 const topbar = document.getElementById("topbar");
@@ -215,23 +240,39 @@ const lbTitle = document.getElementById("lbTitle");
 const lbMeta = document.getElementById("lbMeta");
 let lbList = [], current = -1, lastFocus = null;
 const preload = (i) => { const im = new Image(); im.src = fullSrc(lbList[(i + lbList.length) % lbList.length]); };
-function showPhoto(i) {
+function showPhoto(i, fromCard) {
   current = (i + lbList.length) % lbList.length;
   const photo = lbList[current], s = photo._series;
+  // show the (cached) thumbnail at once, then upgrade to the full file
   const img = new Image();
   img.alt = caption(photo) || `${s.title} ${pad2(current + 1)}`;
-  img.src = fullSrc(photo);
-  const swap = () => { lbMedia.innerHTML = ""; lbMedia.appendChild(img); requestAnimationFrame(() => img.classList.add("in")); };
-  if (img.complete) swap(); else { img.onload = swap; img.onerror = swap; }
+  img.src = thumbSrc(photo);
+  img.width = photo.w; img.height = photo.h;
+  lbMedia.innerHTML = ""; lbMedia.appendChild(img);
+  if (fromCard) img.style.viewTransitionName = "lb-photo";
+  requestAnimationFrame(() => img.classList.add("in"));
+  const full = new Image();
+  full.onload = () => { if (lbList[current] === photo) img.src = full.src; };
+  full.src = fullSrc(photo);
   lbTitle.textContent = photo.title || s.title;
   lbMeta.textContent = [photo.location, s.title, `${current + 1} / ${lbList.length}`].filter(Boolean).join("  ·  ");
   preload(current + 1); preload(current - 1);
 }
-function openLightbox(list, i) {
+function openLightbox(list, i, card) {
   lbList = list; lastFocus = document.activeElement;
-  showPhoto(i);
-  lightbox.classList.add("open"); lightbox.setAttribute("aria-hidden", "false");
-  document.body.classList.add("no-scroll");
+  const thumb = card && card.querySelector(".photo-frame img:last-of-type");
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const doOpen = () => {
+    showPhoto(i, !!thumb);
+    lightbox.classList.add("open"); lightbox.setAttribute("aria-hidden", "false");
+    document.body.classList.add("no-scroll");
+  };
+  if (document.startViewTransition && thumb && !reduced) {
+    thumb.style.viewTransitionName = "lb-photo";
+    lightbox.classList.add("vt");
+    const vt = document.startViewTransition(doOpen);
+    vt.finished.finally(() => { thumb.style.viewTransitionName = ""; lightbox.classList.remove("vt"); });
+  } else doOpen();
   document.getElementById("lbClose").focus();
 }
 function closeLightbox() {
@@ -241,7 +282,7 @@ function closeLightbox() {
 }
 function wireCards(scope) {
   scope.querySelectorAll("[data-slug][data-index]").forEach((card) => {
-    const open = () => openLightbox(bySlug[card.dataset.slug].photos, Number(card.dataset.index));
+    const open = () => openLightbox(bySlug[card.dataset.slug].photos, Number(card.dataset.index), card);
     card.addEventListener("click", open);
     card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
   });
@@ -289,30 +330,29 @@ lightbox.addEventListener("touchend", (e) => {
     const next = options[Math.floor(Math.random() * options.length)];
     const frame = card.querySelector(".photo-frame");
     const old = frame.querySelector("img");
+    const cap = card.querySelector(".photo-caption");
+    // claim the slot at once so concurrent swaps never pick the same photo
+    card.classList.add("swapping");
+    card.dataset.index = next._index;
+    card.setAttribute("aria-label", `View ${caption(next) || s.title}`);
     const img = new Image();
     img.alt = caption(next) || `${s.title} ${pad2(next._index + 1)}`;
     img.decoding = "async";
     img.className = "swap-in";
-    img.onload = () => {
-      frame.appendChild(img);
-      requestAnimationFrame(() => {
-        img.classList.add("in");
-        card.dataset.index = next._index;
-        card.setAttribute("aria-label", `View ${caption(next) || s.title}`);
-        const cap = card.querySelector(".photo-caption");
-        cap.classList.add("fade");
-        setTimeout(() => {
-          cap.innerHTML = `<span class="t">${esc(next.title || `${s.title} ${pad2(next._index + 1)}`)}</span>${next.location ? `<span class="l">${esc(next.location)}</span>` : ""}`;
-          cap.classList.remove("fade");
-        }, 350);
-        setTimeout(() => { old.remove(); img.className = ""; card.classList.remove("swapping"); }, 1300);
-      });
-    };
-    img.onerror = () => card.classList.remove("swapping");
-    card.classList.add("swapping");
     img.src = thumbSrc(next);
+    const finish = () => card.classList.remove("swapping");
+    (img.decode ? img.decode() : new Promise((r) => { img.onload = r; })).then(() => {
+      frame.appendChild(img);
+      setTimeout(() => img.classList.add("in"), 40);
+      cap.classList.add("fade");
+      setTimeout(() => {
+        cap.innerHTML = `<span class="t">${esc(next.title || `${s.title} ${pad2(next._index + 1)}`)}</span>${next.location ? `<span class="l">${esc(next.location)}</span>` : ""}`;
+        cap.classList.remove("fade");
+      }, 350);
+      setTimeout(() => { old.remove(); img.className = ""; finish(); }, 2200);
+    }).catch(() => { card.dataset.index = cur._index; finish(); });
   }
-  setInterval(tick, 5000);
+  setTimeout(() => { tick(); setInterval(tick, 4200); }, 6000);
 })();
 
 route();

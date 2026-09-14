@@ -41,18 +41,11 @@ const TAGLINES = {
   "portrait": "Faces, given a moment.",
 };
 
-// 首页每个系列只放几张代表作，其余点进系列才能看到。
-// HIGHLIGHTS 是每个系列的"候选池"：按原始文件名（不带后缀）填，每次打开首页
-// 从池子里随机抽 HOME_COUNT 张，并且每隔几秒会有一张悄悄换成池子里的另一张。
-// 没写的系列默认整个系列都是候选。
-const HIGHLIGHTS = {
-  "city": [
-    "IMG_6694", "50ea2263c183d0c8ebe2234804962ef5", "IMG_4169", "DSCF2147", "DSCF1127", "IMG_1407",
-    "DSCF2949", "DSCF0624", "IMG_4011", "DSCF1067", "IMG_3593", "DSCF0645", "DSCF2810",
-    "IMG_1912", "IMG_5850", "IMG_0345", "DSCF2645", "DSCF0375",
-  ],
-  "school": ["IMG_8642", "IMG_9131", "IMG_6677", "IMG_7133"],
-};
+// 首页每个系列只放几张，其余点进系列才能看到。
+// 每次打开首页从整个系列里随机抽，页面停着时还会一张一张悄悄换。
+// 想限定只从某些照片里抽，就在 HIGHLIGHTS 里按原始文件名（不带后缀）列出来；留空 = 全部随机。
+const HIGHLIGHTS = {};
 
-// 首页每个系列同时展示几张（没写的默认 4）
-const HOME_COUNT = { "city": 6, "me": 3, "sea-and-lake": 3, "car": 3, "school": 4, "mountain": 3 };
+// 首页每个系列同时展示几张的基数（没写的默认 4）。
+// 宽屏自动放大：≥1400px ×1.5，≥1000px ×1.25，手机 ×0.75。
+const HOME_COUNT = { "city": 6, "me": 3, "sea-and-lake": 3, "car": 3, "school": 4, "mountain": 2 };
