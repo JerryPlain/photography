@@ -46,8 +46,6 @@ const SERIES = [
       {"file": "city/manarola-03288153.jpg", "src": "IMG_4169", "title": "Manarola", "location": "Italy", "w": 2000, "h": 1848},
       {"file": "city/pisa-be1efa5d.jpg", "src": "IMG_4011", "title": "Pisa", "location": "Italy", "w": 1662, "h": 2000},
       {"file": "city/osaka-1775fa23.jpg", "src": "IMG_7650", "title": "Osaka", "location": "Japan", "w": 1500, "h": 2000},
-      {"file": "city/tokyo-dab68baf.jpg", "src": "IMG_7841", "title": "Tokyo", "location": "Japan", "w": 1622, "h": 2000},
-      {"file": "city/tokyo-d06d8c48.jpg", "src": "IMG_7888", "title": "Tokyo", "location": "Japan", "w": 1700, "h": 2000},
       {"file": "city/valletta-a028bca4.jpg", "src": "DSCF0928", "title": "Valletta", "location": "Malta", "w": 1333, "h": 2000},
       {"file": "city/valletta-b25599c1.jpg", "src": "DSCF0989", "title": "Valletta", "location": "Malta", "w": 1333, "h": 2000},
       {"file": "city/valletta-987fbff5.jpg", "src": "DSCF1067", "title": "Valletta", "location": "Malta", "w": 2000, "h": 1333},
@@ -72,11 +70,11 @@ const SERIES = [
     slug: "me",
     title: "Me",
     photos: [
-      {"file": "me/europe-a4541608.jpg", "src": "dji_mimo_20241228_143338_20241228143338_1735393355875_photo", "title": "Europe", "location": "", "w": 2000, "h": 1125},
-      {"file": "me/europe-5455fdda.jpg", "src": "IMG_2293", "title": "Europe", "location": "", "w": 2000, "h": 1500},
-      {"file": "me/europe-5f52f1d8.jpg", "src": "IMG_4342", "title": "Europe", "location": "", "w": 2000, "h": 1538},
-      {"file": "me/europe-a60e7036.jpg", "src": "IMG_2277", "title": "Europe", "location": "", "w": 2000, "h": 1333},
-      {"file": "me/europe-95cbb3be.jpg", "src": "DSCF2479", "title": "Europe", "location": "", "w": 2000, "h": 1333},
+      {"file": "me/italy-a4541608.jpg", "src": "Italy", "title": "Italy", "location": "Europe", "w": 2000, "h": 1125},
+      {"file": "me/spain-5455fdda.jpg", "src": "Spain", "title": "Spain", "location": "Europe", "w": 2000, "h": 1500},
+      {"file": "me/italy-5f52f1d8.jpg", "src": "Italy", "title": "Italy", "location": "Europe", "w": 2000, "h": 1538},
+      {"file": "me/germany-a60e7036.jpg", "src": "Germany", "title": "Germany", "location": "Europe", "w": 2000, "h": 1333},
+      {"file": "me/croatia-95cbb3be.jpg", "src": "Croatia", "title": "Croatia", "location": "Europe", "w": 2000, "h": 1333},
     ],
   },
   {
@@ -127,7 +125,9 @@ const SERIES = [
     slug: "concert",
     title: "Concert",
     photos: [
-      {"file": "concert/sza-kendrick-lamar-069844ca.jpg", "src": "FullSizeRender", "title": "SZA & Kendrick Lamar", "location": "", "w": 1499, "h": 2000},
+      {"file": "concert/sza-kendrick-lamar-069844ca.jpg", "src": "FullSizeRender", "title": "SZA & Kendrick Lamar", "location": "Frankfurt 2025", "w": 1499, "h": 2000},
+      {"file": "concert/billie-eilish-dab68baf.jpg", "src": "IMG_7841", "title": "Billie Eilish", "location": "Tokyo 2025", "w": 1622, "h": 2000},
+      {"file": "concert/billie-eilish-d06d8c48.jpg", "src": "IMG_7888", "title": "Billie Eilish", "location": "Tokyo 2025", "w": 1700, "h": 2000},
     ],
   },
   {

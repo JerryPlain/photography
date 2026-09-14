@@ -49,3 +49,14 @@ const HIGHLIGHTS = {};
 // 首页每个系列同时展示几张的基数（没写的默认 4）。
 // 宽屏自动放大：≥1400px ×1.5，≥1000px ×1.25，手机 ×0.75。
 const HOME_COUNT = { "city": 6, "me": 3, "sea-and-lake": 3, "car": 3, "school": 4, "mountain": 2 };
+
+// 每个系列的"条目"叫什么（系列标题下方的计数、以及地点行）。没写的默认 place。
+// 复数形式见 js/main.js 的 PLURALS。
+const SUBJECT = {
+  "me": "country",
+  "car": "model",
+  "robot": "model",
+  "concert": "act",
+  "school": "campus",
+};
+

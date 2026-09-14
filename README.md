@@ -9,14 +9,18 @@
 照片库在本机 `~/Desktop/photography/`，按系列分文件夹：
 
 ```
-01-City/Berlin, Germany/DSCF1518.jpg     → 系列 City，标题 Berlin，地点 Germany
-04-Car/Porsche 911 GTS/DSCF2940.jpg      → 系列 Car，标题 Porsche 911 GTS
-02-Me/IMG_4342.jpeg                      → 系列 Me，无标题（显示 Plate 编号）
+01-City/Berlin, Germany/DSCF1518.jpg      → 标题 Berlin，小字 Germany
+08-Concert/Billie Eilish, Tokyo 2025/*    → 标题 Billie Eilish，小字 Tokyo 2025
+02-Me/Europe/Croatia.jpg                  → 标题 Croatia，小字 Europe（文件名当标题）
+04-Car/Porsche 911 GTS/DSCF2940.jpg       → 标题 Porsche 911 GTS
 ```
 
 - 系列文件夹 `NN-Name`：NN 决定顺序，Name 是标题（连字符变空格，and 变 &）。
 - 只有有照片的系列会出现在网站上。
-- 子文件夹 `地点, 国家` 决定照片标题和地点；直接放在系列文件夹里的照片没有标题。
+- 子文件夹 `标题, 副标题` 决定照片标题和小字标注，例如 `Dubrovnik, Croatia`、`Billie Eilish, Tokyo 2025`。
+- **文件名如果是个正经名字**（`Croatia.jpg`），它就成为这张照片的标题，文件夹名退成小字标注。
+  相机原始文件名（`DSCF1518`、`IMG_6134`、哈希、日期）会被忽略，仍用文件夹名。
+- 每个系列的条目叫什么（places / countries / acts …）在 [js/site.js](js/site.js) 的 `SUBJECT` 里改。
 
 放好照片后运行：
 

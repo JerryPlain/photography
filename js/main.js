@@ -9,7 +9,10 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 const fullSrc = (p) => `photos/${p.file}`;
 const thumbSrc = (p) => { const i = p.file.lastIndexOf("/"); return `photos/${p.file.slice(0, i)}/thumbs/${p.file.slice(i + 1)}`; };
 const caption = (p) => [p.title, p.location].filter(Boolean).join(", ");
-const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+const PLURALS = { series: "series", photograph: "photographs", place: "places",
+                  country: "countries", model: "models", act: "acts", campus: "campuses" };
+const plural = (n, w) => `${n} ${n === 1 ? w : PLURALS[w] || w + "s"}`;
+const subjectOf = (s) => (typeof SUBJECT !== "undefined" && SUBJECT[s.slug]) || "place";
 
 // debug flags for screenshots: ?noreveal ?nohero ?from=N ?theme=dark
 const Q = new URLSearchParams(location.search);
@@ -52,9 +55,10 @@ document.getElementById("introTitle").innerHTML = SITE.title.split(" ")
   .map((w, i) => `<span class="w"><span style="--d:${i * 90}ms">${esc(w)}</span></span>`).join(" ");
 document.getElementById("introStatement").textContent = SITE.statement;
 const places = new Set();
-SERIES.forEach((s) => s.photos.forEach((p) => p.location && places.add(p.title)));
+SERIES.filter((s) => subjectOf(s) === "place")
+  .forEach((s) => s.photos.forEach((p) => p.location && places.add(p.title)));
 document.getElementById("introStats").innerHTML =
-  `${plural(TOTAL, "photograph")}<span class="dot">·</span>${plural(SERIES.length, "series").replace("seriess", "series")}` +
+  `${plural(TOTAL, "photograph")}<span class="dot">·</span>${plural(SERIES.length, "series")}` +
   (places.size ? `<span class="dot">·</span>${plural(places.size, "place")}` : "");
 
 // ---------- contents / index overlay / rail ----------
@@ -90,7 +94,7 @@ function seriesHead(s, cls = "") {
         <h2 class="series-title">${esc(s.title)}</h2>
         ${tag ? `<p class="series-tagline">${esc(tag)}</p>` : ""}
       </div>
-      <p class="series-meta">${plural(n, "photograph")}${pl.length > 1 ? `<br>${plural(pl.length, "place")}` : ""}</p>
+      <p class="series-meta">${plural(n, "photograph")}${pl.length > 1 ? `<br>${plural(pl.length, subjectOf(s))}` : ""}</p>
     </header>
     ${pl.length > 1 ? `<p class="series-places ${cls}">${pl.map(esc).join('&nbsp;<span class="sep">·</span> ')}</p>` : ""}`;
 }

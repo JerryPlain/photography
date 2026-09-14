@@ -40,6 +40,22 @@ def series_title(folder: str) -> str:
     name = re.sub(r"^\d+-", "", folder).replace("-", " ")
     return re.sub(r"\band\b", "&", name)
 
+# Camera/export filenames carry no meaning; anything else is treated as the
+# photo's own label (e.g. 02-Me/Europe/Croatia.jpg -> "Croatia", in Europe).
+NOT_A_NAME = {"fullsizerender", "image", "photo", "untitled", "screenshot"}
+
+def stem_label(p: Path) -> str:
+    stem = p.stem.strip()
+    if not stem or not re.match(r"^[A-Za-z\u00C0-\u024F]", stem):
+        return ""                               # hashes, UUIDs, 0123.jpg
+    if not re.fullmatch(r"[A-Za-z\u00C0-\u024F0-9'\u2019&.\- ]+", stem):
+        return ""                               # underscores etc: IMG_6134
+    if re.search(r"\d{3}", stem):
+        return ""                               # DSCF1518, dates, counters
+    if stem.lower() in NOT_A_NAME:
+        return ""
+    return re.sub(r"[\-.]+", " ", stem).strip()
+
 def file_hash(p: Path) -> str:
     h = hashlib.md5()
     with open(p, "rb") as f:
@@ -130,6 +146,9 @@ def scan():
                 title, _, loc = sub.partition(",")
                 key = (title.strip(), loc.strip())
             groups.setdefault(key, []).append(p)
+        # a meaningful filename becomes the photo's title; the folder then reads
+        # as its context, e.g. Europe/Croatia.jpg -> "Croatia" / "EUROPE"
+        labelled = {k: [(stem_label(p), p) for p in v] for k, v in groups.items()}
         if not groups:
             continue
 
@@ -144,7 +163,11 @@ def scan():
                 info = jpeg_info(p) if p.suffix.lower() in (".jpg", ".jpeg") else None
                 return (info[3] if info and info[3] else "9999", p.name.lower())
             for p in sorted(files, key=fkey):
-                photos.append((key[0], key[1], p))
+                label = dict((q, lbl) for lbl, q in labelled[key]).get(p, "")
+                if label:
+                    photos.append((label, key[1] or key[0], p))
+                else:
+                    photos.append((key[0], key[1], p))
         series.append({"slug": slug, "title": series_title(folder.name), "photos": photos})
     return series
 
