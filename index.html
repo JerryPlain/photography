@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=18e5ea15">
+  <link rel="stylesheet" href="css/style.css?v=fb57de7d">
 </head>
 <body>
   <a class="skip-link" href="#contents">Skip to contents</a>
@@ -109,6 +109,21 @@
     </section>
 
     <div id="seriesRoot"></div>
+
+    <!-- 访客地图：图片即计数器（MapMyVisitors），不懒加载，否则没滚到底的访客不会被计入 -->
+    <section class="visitors" id="visitors" aria-label="Where visitors come from" hidden>
+      <div class="atlas-head">
+        <div>
+          <p class="eyebrow reveal">Visitors</p>
+          <h2 class="atlas-title reveal" style="--d:80ms">Where it was seen from</h2>
+        </div>
+        <p class="atlas-stats reveal" style="--d:160ms">Approximate locations<br>No personal data stored</p>
+      </div>
+      <a class="visitors-plate reveal" id="visitorsLink" style="--d:240ms" target="_blank" rel="noopener nofollow" title="See where visitors come from">
+        <img id="visitorsMap" alt="Map of approximate visitor locations" width="2000" height="980" decoding="async" fetchpriority="low">
+        <span class="visitors-cta">Full statistics <span aria-hidden="true">→</span></span>
+      </a>
+    </section>
     </div>
 
     <!-- 系列页（#/slug）：该系列全部照片 -->
@@ -143,10 +158,10 @@
     <div class="lb-strip" id="lbStrip" aria-label="Photographs in this series"></div>
   </div>
 
-  <script src="js/site.js?v=2c4e531a"></script>
+  <script src="js/site.js?v=223882f5"></script>
   <script src="js/data.js?v=8a222c7f"></script>
   <script src="js/map.js?v=c4f87c16"></script>
   <script src="js/stars.js?v=d5e12b97"></script>
-  <script src="js/main.js?v=dca79323"></script>
+  <script src="js/main.js?v=9e308842"></script>
 </body>
 </html>

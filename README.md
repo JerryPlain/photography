@@ -75,6 +75,12 @@ curl -sLO https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/
 python3 scripts/build_map.py ne_50m_land.geojson
 ```
 
+## 访客地图
+
+页面最后、页脚之前是「Where it was seen from」：和个人主页同一个 [MapMyVisitors](https://mapmyvisitors.com/web/1c6fd) 访客地图，配色改成了本站的纸色和红点，深色模式下自动换成深色地图。点地图打开完整统计页。
+
+这张地图图片本身就是计数器：页面一加载、图片被请求，就记一次访问（所以它故意不懒加载）。账号、`id` 和 `profile` 在 [js/site.js](js/site.js) 的 `VISITORS` 里。**现在和主页共用一个账号**，统计的是主页和摄影站加在一起的访客；想分开，就去 MapMyVisitors 为摄影站新建一个小部件，换上新的 `id` / `profile`。`id` 留空则这一节不显示。
+
 ## 扉页
 
 首屏打开时，一串照片会从标题下方扫过；之后桌面端鼠标在扉页移动时照片会跟着出现、再淡出（目录那一栏除外）。照片从全部系列里随机取，`TRAIL_SKIP` 里的系列不用（默认排除 Robot 的仿真渲染）。

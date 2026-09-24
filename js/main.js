@@ -424,6 +424,28 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   mapEl.addEventListener("keydown", (e) => { const g = e.target.closest(".pin"); if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(g); } });
 })();
 
+// ---------- visitors: the MapMyVisitors image is the counter ----------
+(function visitors() {
+  if (typeof VISITORS === "undefined" || !VISITORS.id) return;
+  // land / ocean colours per theme; dots are the site red in both
+  const COLORS = { light: "cl=e6e2dc&co=fbfaf8", dark: "cl=2b2c31&co=17181c" };
+  const img = document.getElementById("visitorsMap");
+  const plate = img.closest(".visitors-plate");
+  function paint() {
+    const base = `https://mapmyvisitors.com/map.png?d=${encodeURIComponent(VISITORS.id)}&t=n&cmo=e0584a&cmn=e0584a&${COLORS[document.documentElement.dataset.theme === "dark" ? "dark" : "light"]}`;
+    // one request per visitor either way; the browser picks the size it needs
+    img.srcset = `${base}&w=1200 1200w, ${base}&w=2000 2000w`;
+    img.sizes = "(max-width: 760px) 100vw, 67rem";
+    img.src = `${base}&w=1200`;
+  }
+  img.addEventListener("load", () => plate.classList.add("loaded"));
+  paint();
+  // re-draw in the other palette when the theme is switched
+  new MutationObserver(paint).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  document.getElementById("visitorsLink").href = `https://mapmyvisitors.com/web/${encodeURIComponent(VISITORS.profile || "")}`;
+  document.getElementById("visitors").hidden = false;
+})();
+
 // ---------- intro: photographs trail the cursor (and sweep across once on arrival) ----------
 (function trail() {
   const intro = document.getElementById("hero");

@@ -594,3 +594,42 @@ html.noreveal .intro-text > .eyebrow, html.noreveal .intro-statement, html.norev
   animation: none !important; opacity: 1 !important; transform: none !important;
 }
 
+/* ---------- visitors ---------- */
+.visitors {
+  max-width: var(--container); margin: 0 auto;
+  padding: clamp(2rem, 5vh, 3.5rem) var(--gutter) clamp(3rem, 7vh, 5rem);
+  border-top: 1px solid var(--hairline);
+}
+.visitors-plate {
+  position: relative; display: block; overflow: hidden;
+  background: #fbfaf8; border-radius: 6px;
+  box-shadow: 0 1px 2px var(--shadow), 0 20px 50px -30px var(--shadow);
+  transition: box-shadow 0.4s ease, transform 0.5s var(--ease);
+}
+.visitors-plate::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  box-shadow: inset 0 0 70px color-mix(in srgb, var(--bg) 65%, transparent);
+}
+/* the service bakes a zoom control into the image's corner; a slightly narrower frame trims it away */
+.visitors-plate img {
+  display: block; width: 100%; height: auto; aspect-ratio: 1.9; object-fit: cover; object-position: center;
+  opacity: 0; transition: opacity 0.8s ease;
+}
+.visitors-plate.loaded img { opacity: 1; }
+.visitors-plate:hover { transform: translateY(-2px); box-shadow: 0 2px 4px var(--shadow), 0 26px 56px -30px var(--shadow); }
+.visitors-plate:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.visitors-cta {
+  position: absolute; right: 0.9rem; bottom: 0.7rem; z-index: 2;
+  font-family: var(--sans); font-size: 0.64rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0; transform: translateY(4px); transition: opacity 0.3s ease, transform 0.4s var(--ease);
+}
+.visitors-plate:hover .visitors-cta, .visitors-plate:focus-visible .visitors-cta { opacity: 1; transform: none; }
+/* dark mode: the service draws a matching dark map (swapped in by main.js); the plate just darkens */
+:root[data-theme="dark"] .visitors-plate { background: #17181c; }
+@media (max-width: 760px) {
+  .visitors .atlas-head { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+  .visitors .atlas-stats { text-align: left; }
+  .visitors-cta { opacity: 1; transform: none; }
+}
+

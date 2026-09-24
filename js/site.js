@@ -67,3 +67,9 @@ const ATLAS_SERIES = ["city", "concert"];
 // 扉页照片拖尾不从这些系列里取图（例如仿真渲染，不是照片）。
 const TRAIL_SKIP = ["robot"];
 
+// 访客地图（MapMyVisitors）。地图图片本身就是计数器：有人打开页面、图片被加载，就记一次访问。
+// 现在用的是个人主页同一个账号，所以统计的是 jerryplain.github.io 整站（主页 + 摄影）的访客。
+// 想让摄影站单独计数：去 mapmyvisitors.com 新建一个小部件，把嵌入代码里 "d=" 后面那串填进 id，
+// 统计页地址 https://mapmyvisitors.com/web/<profile> 里的那段填进 profile。id 留空则不显示这一节。
+const VISITORS = { id: "hZELT6UZPNZlGfmkobvHKg1hDwHCZ1z1rSwv-G4MW8g", profile: "1c6fd" };
+
