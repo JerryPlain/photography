@@ -46,7 +46,7 @@ function placesHTML(s, cls) {
   if ([...groups.values()].reduce((a, v) => a + v.length, 0) < 2) return "";
   const rows = [...groups.entries()].sort((a, b) => (a[0] === "") - (b[0] === "") || b[1].length - a[1].length);
   return `<div class="series-places ${cls}">${rows.map(([label, names]) => `
-    <div class="pl${names.length > 5 ? " wide" : ""}">${label ? `<span class="pl-label">${esc(label)}</span>` : ""}<span class="pl-names">${names.map(esc).join('&nbsp;<span class="sep">·</span> ')}</span></div>`).join("")}</div>`;
+    <div class="pl${names.join("").length + names.length * 2 > 30 ? " wide" : ""}">${label ? `<span class="pl-label">${esc(label)}</span>` : ""}<span class="pl-names">${names.map(esc).join('&nbsp;<span class="sep">·</span> ')}</span></div>`).join("")}</div>`;
 }
 
 const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -81,7 +81,7 @@ document.getElementById("introStats").innerHTML =
   `<span class="n" data-n="${TOTAL}">${TOTAL}</span> photographs<span class="dot">·</span><span class="n" data-n="${SERIES.length}">${SERIES.length}</span> series` +
   (places.size ? `<span class="dot">·</span><span class="n" data-n="${places.size}">${places.size}</span> places` : "");
 // count the intro numbers up from zero, eased, once fonts are ready
-if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches && !NO_REVEAL) {
   document.querySelectorAll("#introStats .n").forEach((el) => {
     const target = Number(el.dataset.n), t0 = performance.now() + 500, dur = 1400;
     el.textContent = "0";
@@ -177,10 +177,12 @@ function route() {
     document.title = `Photography — ${SITE.author}`;
     if (location.hash && location.hash !== "#") {
       const el = document.querySelector(location.hash);
-      if (el) el.scrollIntoView();
+      // arriving from a link lands straight on the section; in-page jumps keep the smooth scroll
+      if (el) el.scrollIntoView({ behavior: routedOnce ? "smooth" : "instant" });
     }
   }
 }
+let routedOnce = false;
 addEventListener("hashchange", route);
 
 // ---------- image load state ----------
@@ -232,7 +234,24 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   // the journey: cities in the order they were first photographed
   const visits = [...byPlace.values()].sort((a, b) => (a.first || "9999").localeCompare(b.first || "9999") || a.name.localeCompare(b.name));
   const N = visits.length;
-  visits.forEach((v, k) => { v.k = k; v.plate = plateOf[v.name]; v.xy = MAP.plates[v.plate].places[v.name]; });
+  visits.forEach((v, k) => { v.k = k; v.plate = plateOf[v.name]; v.xy = MAP.plates[v.plate].places[v.name].slice(); });
+  // neighbours closer than a pin's width (Rome & Vatican are 4 km apart) get nudged apart so both stay reachable
+  const MIN = 17;
+  for (let pass = 0; pass < 12; pass++) {
+    let moved = false;
+    for (let i = 0; i < N; i++) for (let j = i + 1; j < N; j++) {
+      const a = visits[i], b = visits[j];
+      if (a.plate !== b.plate) continue;
+      let dx = b.xy[0] - a.xy[0], dy = b.xy[1] - a.xy[1], d = Math.hypot(dx, dy);
+      if (d >= MIN) continue;
+      if (d < 0.01) { dx = 1; dy = 0; d = 1; }
+      const push = (MIN - d) / 2, ux = dx / d, uy = dy / d;
+      a.xy[0] -= ux * push; a.xy[1] -= uy * push; b.xy[0] += ux * push; b.xy[1] += uy * push;
+      moved = true;
+    }
+    if (!moved) break;
+  }
+  visits.forEach((v) => { v.xy = v.xy.map((n) => Math.round(n * 10) / 10); });
 
   const countries = new Set(visits.map((v) => v.country).filter(Boolean));
   const years = visits.map((v) => v.first && Number(v.first.slice(0, 4))).filter(Boolean);
@@ -515,6 +534,7 @@ overlay.addEventListener("click", (e) => { if (e.target.closest("a") || e.target
 
 // ---------- scroll reveal ----------
 if (Q.has("nohero")) document.getElementById("hero").style.display = "none";
+if (Q.has("noatlas")) document.getElementById("atlas").style.display = "none";
 if (Q.has("from")) document.querySelectorAll(".series").forEach((el, i) => { if (i < Number(Q.get("from"))) el.style.display = "none"; });
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("visible"); revealObserver.unobserve(e.target); } });
@@ -659,5 +679,6 @@ lightbox.addEventListener("touchend", (e) => {
 })();
 
 route();
+routedOnce = true;
 // debug: ?lb=slug:index opens the lightbox on load (screenshots)
 if (Q.has("lb")) { const [sl, ix] = Q.get("lb").split(":"); if (bySlug[sl]) openLightbox(bySlug[sl].photos, Number(ix || 0)); }

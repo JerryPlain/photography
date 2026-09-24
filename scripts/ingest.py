@@ -48,17 +48,20 @@ NOT_A_NAME = {"fullsizerender", "image", "photo", "untitled", "screenshot"}
 
 def stem_label(p: Path):
     """(title, label) from a meaningful filename, or ("", "") for camera names.
-    'Rainbow, Opening Day.jpeg' -> ("Rainbow", "Opening Day"); 'Croatia.jpg' -> ("Croatia", "")."""
+    'Rainbow, Opening Day.jpeg' -> ("Rainbow", "Opening Day"); 'Rainbow@TUM.jpeg' -> ("Rainbow", "TUM");
+    'Croatia.jpg' -> ("Croatia", "")."""
     stem = unicodedata.normalize("NFC", p.stem.strip())
     if not stem or not re.match(r"^[A-Za-z\u00C0-\u024F]", stem):
         return "", ""                           # hashes, UUIDs, 0123.jpg
-    if not re.fullmatch(r"[A-Za-z\u00C0-\u024F0-9'\u2019&.,\- ]+", stem):
+    if not re.fullmatch(r"[A-Za-z\u00C0-\u024F0-9'\u2019&.,@\- ]+", stem):
         return "", ""                           # underscores etc: IMG_6134
     if re.search(r"\d{3}", stem):
         return "", ""                           # DSCF1518, dates, counters
     if stem.lower() in NOT_A_NAME:
         return "", ""
-    title, _, label = stem.partition(",")
+    # "Title, Label" or "Title@Label" (Rainbow@TUM -> "Rainbow" / "TUM")
+    m = re.match(r"^(.*?)\s*[,@]\s*(.*)$", stem)
+    title, label = (m.group(1), m.group(2)) if m else (stem, "")
     return title.strip(), label.strip()
 
 def file_hash(p: Path) -> str:

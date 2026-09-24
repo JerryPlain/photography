@@ -21,7 +21,7 @@
 - 子文件夹 `标题, 副标题` 决定照片标题和小字标注，例如 `Dubrovnik, Croatia`、`Billie Eilish, Tokyo 2025`。
 - 子文件夹可以嵌套：最里层那层当标题，上一层当小字，例如 `Asia/Japan/` → 标题 Japan，小字 ASIA。
 - **文件名如果是个正经名字**（`Croatia.jpg`），它就成为这张照片的标题，文件夹名退成小字标注。
-  文件名也可以带逗号：`Rainbow, Opening Day.jpeg` → 标题 Rainbow，小字 OPENING DAY。连字符保留（`TUM-Rutsche`）。
+  文件名也可以带逗号或 @：`Rainbow, Opening Day.jpeg` / `Rainbow@TUM.jpeg` → 标题 Rainbow，小字 OPENING DAY / TUM。连字符保留（`TUM-Rutsche`）。
 - 拍摄日期先读 EXIF，没有的话用文件的创建时间（从 Photos 导出的照片会保留拍摄时间）。
   相机原始文件名（`DSCF1518`、`IMG_6134`、哈希、日期）会被忽略，仍用文件夹名。
 - 每个系列的条目叫什么（places / countries / acts …）在 [js/site.js](js/site.js) 的 `SUBJECT` 里改。
@@ -55,7 +55,7 @@ python3 -m http.server 8000
 # 打开 http://localhost:8000
 ```
 
-调试参数：`?journey=0.5` 把旅程停在一半，`?lb=city:3` 直接打开灯箱，`?noreveal` 关闭滚动渐显和所有入场动画，`?nohero` 隐藏扉页，`?from=N` 隐藏前 N 个系列，`?theme=dark` 强制深色（截图用）。
+调试参数：`?noatlas` 隐藏地图，`?journey=0.5` 把旅程停在一半，`?lb=city:3` 直接打开灯箱，`?noreveal` 关闭滚动渐显和所有入场动画，`?nohero` 隐藏扉页，`?from=N` 隐藏前 N 个系列，`?theme=dark` 强制深色（截图用）。
 
 ## 首页只放一部分，随机、会动
 
