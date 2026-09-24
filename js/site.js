@@ -57,7 +57,13 @@ const SUBJECT = {
   "car": "model",
   "robot": "model",
   "concert": "act",
-  "school": "campus",
+  "school": "scene",
   "company": "site",
 };
+
+// 地图上只放这些系列的地方（城市）。Concert 按场次所在城市落点；湖、山等不上图。
+const ATLAS_SERIES = ["city", "concert"];
+
+// 扉页照片拖尾不从这些系列里取图（例如仿真渲染，不是照片）。
+const TRAIL_SKIP = ["robot"];
 

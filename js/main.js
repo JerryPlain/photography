@@ -10,7 +10,8 @@ const fullSrc = (p) => `photos/${p.file}`;
 const thumbSrc = (p) => { const i = p.file.lastIndexOf("/"); return `photos/${p.file.slice(0, i)}/thumbs/${p.file.slice(i + 1)}`; };
 const caption = (p) => [p.title, p.location].filter(Boolean).join(", ");
 const PLURALS = { series: "series", photograph: "photographs", place: "places",
-                  country: "countries", model: "models", act: "acts", campus: "campuses", site: "sites" };
+                  country: "countries", model: "models", act: "acts", campus: "campuses", site: "sites",
+                  scene: "scenes", city: "cities" };
 const plural = (n, w) => `${n} ${n === 1 ? w : PLURALS[w] || w + "s"}`;
 const subjectOf = (s) => (typeof SUBJECT !== "undefined" && SUBJECT[s.slug]) || "place";
 
@@ -30,7 +31,12 @@ function placesOf(s) {
   return out;
 }
 // places grouped under their label: GERMANY  Berlin · Frankfurt · …
+const GROUPED = new Set(["place", "country", "act"]);
 function placesHTML(s, cls) {
+  if (!GROUPED.has(subjectOf(s))) {
+    const names = placesOf(s).map((p) => p.title);
+    return names.length < 2 ? "" : `<div class="series-places ${cls}"><div class="pl wide"><span class="pl-names">${names.map(esc).join('&nbsp;<span class="sep">·</span> ')}</span></div></div>`;
+  }
   const groups = new Map();
   placesOf(s).forEach((p) => {
     const k = p.location || "";
@@ -194,89 +200,198 @@ document.getElementById("footerLinks").innerHTML = SITE.footerLinks
   .map((l) => `<a href="${esc(l.url)}"${l.url.startsWith("http") ? ' target="_blank" rel="noopener"' : ""}>${esc(l.label)}</a>`).join("");
 document.getElementById("footerCopy").textContent = SITE.copyright;
 
-// ---------- atlas: every place with a photograph, on two map plates ----------
+// ---------- atlas: every city photographed, on two map plates, replayed as a journey ----------
 (function atlas() {
   if (typeof MAP === "undefined") return;
   const frame = document.querySelector(".atlas-frame");
   const mapEl = document.getElementById("atlasMap");
   const tip = document.getElementById("atlasTip");
   const stats = document.getElementById("atlasStats");
-  // a photograph's place: its title in place series; for concerts the venue city
+  const onMap = new Set(typeof ATLAS_SERIES !== "undefined" ? ATLAS_SERIES : ["city"]);
+  // a photograph's city: its title in City; for concerts the venue city ("Munich 2025" → Munich)
   const placeOf = (p) => {
-    const kind = subjectOf(p._series);
-    const n = kind === "place" ? p.title : kind === "act" ? (p.location || "").replace(/\s+\d{4}$/, "") : "";
+    if (!onMap.has(p._series.slug)) return "";
+    const n = subjectOf(p._series) === "act" ? (p.location || "").replace(/\s+\d{4}$/, "") : p.title;
     return n ? n.normalize("NFC") : "";
   };
-  const coords = Object.assign({}, ...MAP.plates.map((pl) => pl.places));
-  const byPlace = new Map();
-  const missing = new Set();
+  const plateOf = {};
+  MAP.plates.forEach((pl, k) => Object.keys(pl.places).forEach((n) => { plateOf[n] = k; }));
+  const byPlace = new Map(), missing = new Set();
   SERIES.forEach((s) => s.photos.forEach((p) => {
     const name = placeOf(p);
     if (!name) return;
-    if (!coords[name]) { missing.add(name); return; }
-    if (!byPlace.has(name)) byPlace.set(name, { name, photos: [], country: subjectOf(p._series) === "place" ? p.location : "" });
-    byPlace.get(name).photos.push(p);
+    if (plateOf[name] === undefined) { missing.add(name); return; }
+    if (!byPlace.has(name)) byPlace.set(name, { name, photos: [], country: "", first: "" });
+    const v = byPlace.get(name);
+    v.photos.push(p);
+    if (subjectOf(p._series) === "place" && p.location && !v.country) v.country = p.location;
+    if (p.date && (!v.first || p.date < v.first)) v.first = p.date;
   }));
   if (missing.size) console.warn("atlas: no coordinates for", [...missing].join(", "), "— add them in scripts/build_map.py");
-  const countries = new Set();
-  byPlace.forEach((pl) => pl.photos.forEach((p) => { if (subjectOf(p._series) === "place" && p.location) countries.add(p.location); }));
-  const years = [...byPlace.values()].flatMap((pl) => pl.photos.map((p) => p.date && Number(p.date.slice(0, 4)))).filter(Boolean);
-  const span = years.length ? (Math.min(...years) === Math.max(...years) ? `${years[0]}` : `${Math.min(...years)}–${Math.max(...years)}`) : "";
-  stats.innerHTML = `${plural(byPlace.size, "place")}<br>${plural(countries.size, "country")}${span ? `<br>${span}` : ""}`;
 
-  // permanent labels: most photographed first, skipping any that would sit on top of one already placed;
-  // everything else names itself on hover
+  // the journey: cities in the order they were first photographed
+  const visits = [...byPlace.values()].sort((a, b) => (a.first || "9999").localeCompare(b.first || "9999") || a.name.localeCompare(b.name));
+  const N = visits.length;
+  visits.forEach((v, k) => { v.k = k; v.plate = plateOf[v.name]; v.xy = MAP.plates[v.plate].places[v.name]; });
+
+  const countries = new Set(visits.map((v) => v.country).filter(Boolean));
+  const years = visits.map((v) => v.first && Number(v.first.slice(0, 4))).filter(Boolean);
+  const span = years.length ? (Math.min(...years) === Math.max(...years) ? `${years[0]}` : `${Math.min(...years)}–${Math.max(...years)}`) : "";
+  stats.innerHTML = `${plural(N, "city")}<br>${plural(countries.size, "country")}${span ? `<br>${span}` : ""}`;
+
+  // permanent labels: most photographed first, skipping any that would collide with one already placed
   const named = new Set();
-  MAP.plates.forEach((pl) => {
+  MAP.plates.forEach((pl, k) => {
     const placed = [];
-    [...byPlace.values()].filter((p) => pl.places[p.name])
+    visits.filter((v) => v.plate === k)
       .sort((a, b) => b.photos.length - a.photos.length || a.name.localeCompare(b.name))
-      .forEach((p) => {
-        const [x, y] = pl.places[p.name];
-        const clear = placed.every(([px, py]) => Math.abs(y - py) > 24 || Math.abs(x - px) > 150);
-        if (clear) { named.add(p.name); placed.push([x, y]); }
+      .forEach((v) => {
+        const [x, y] = v.xy;
+        if (placed.every(([px, py]) => Math.abs(y - py) > 24 || Math.abs(x - px) > 150)) { named.add(v.name); placed.push([x, y]); }
       });
   });
 
+  // a gentle upward arc from one city to the next
+  const arcPath = ([x0, y0], [x1, y1]) => {
+    const dx = x1 - x0, dy = y1 - y0, d = Math.hypot(dx, dy) || 1;
+    let nx = -dy / d, ny = dx / d;
+    if (ny > 0) { nx = -nx; ny = -ny; }
+    const off = Math.min(d * 0.28, 140);
+    const cx = (x0 + x1) / 2 + nx * off, cy = (y0 + y1) / 2 + ny * off;
+    return `M${x0},${y0} Q${cx.toFixed(1)},${cy.toFixed(1)} ${x1},${y1}`;
+  };
+
   const merc = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI / 180) / 2));
-  let i = 0;
-  mapEl.innerHTML = MAP.plates.map((pl) => {
+  mapEl.innerHTML = MAP.plates.map((pl, pk) => {
     const [lon0, lat0, lon1, lat1] = pl.bbox;
     const K = pl.w / ((lon1 - lon0) * Math.PI / 180), TOP = merc(lat1);
     const px = (lon) => ((lon - lon0) * Math.PI / 180) * K, py = (lat) => (TOP - merc(lat)) * K;
     let grat = "";
     for (let lon = Math.ceil(lon0 / 5) * 5; lon <= lon1; lon += 5) grat += `M${px(lon).toFixed(1)},0V${pl.h}`;
     for (let lat = Math.ceil(lat0 / 5) * 5; lat <= lat1; lat += 5) grat += `M0,${py(lat).toFixed(1)}H${pl.w}`;
-    const pins = [...byPlace.values()].filter((p) => pl.places[p.name]).sort((a, b) => pl.places[a.name][0] - pl.places[b.name][0]);
+    const here = visits.filter((v) => v.plate === pk);
+    const arcs = visits.filter((v) => v.k > 0 && v.plate === pk && visits[v.k - 1].plate === pk);
     return `
-    <div class="plate" style="--w:${pl.w};--h:${pl.h};flex-grow:${(pl.w / pl.h).toFixed(3)}">
-      <svg viewBox="0 0 ${pl.w} ${pl.h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(pl.name)}: ${plural(pins.length, "place")}">
+    <div class="plate" style="flex-grow:${(pl.w / pl.h).toFixed(3)}">
+      <svg viewBox="0 0 ${pl.w} ${pl.h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(pl.name)}: ${plural(here.length, "city")}">
         <rect class="sea" width="${pl.w}" height="${pl.h}"/>
         <path class="grat" d="${grat}"/>
         <path class="land" d="${pl.land}"/>
-        ${pins.map((p) => {
-          const [x, y] = pl.places[p.name], n = p.photos.length;
+        <g class="routes">${arcs.map((v) => `<path class="arc" data-k="${v.k}" d="${arcPath(visits[v.k - 1].xy, v.xy)}"/>`).join("")}</g>
+        ${here.map((v) => {
+          const [x, y] = v.xy, n = v.photos.length;
           const r = 5.5 + Math.min(n, 12) * 0.45;
-          const right = x < pl.w * 0.82;
-          return `<g transform="translate(${x},${y})"><g class="pin${named.has(p.name) ? " named" : ""}" data-place="${esc(p.name)}" tabindex="0" role="button"
-                   aria-label="${esc(p.name)}, ${plural(n, "photograph")}" style="--i:${i++};--j:${i % 5}">
+          const right = x + r + 12 + v.name.length * 11.5 < pl.w;
+          return `<g transform="translate(${x},${y})"><g class="pin${named.has(v.name) ? " named" : ""}" data-place="${esc(v.name)}" data-k="${v.k}" tabindex="0" role="button"
+                   aria-label="${esc(v.name)}, ${plural(n, "photograph")}" style="--j:${v.k % 5}">
             <circle class="halo" r="6"/>
             <circle class="dot" r="${r.toFixed(1)}"/>
-            <text class="lbl" x="${right ? r + 9 : -(r + 9)}" y="7" text-anchor="${right ? "start" : "end"}">${esc(p.name)}</text>
+            <text class="lbl" x="${right ? r + 9 : -(r + 9)}" y="7" text-anchor="${right ? "start" : "end"}">${esc(v.name)}</text>
           </g></g>`; }).join("")}
+        <circle class="comet" r="7" opacity="0"/>
       </svg>
       <span class="plate-name">${esc(pl.name)}</span>
     </div>`;
   }).join("");
 
-  // tooltip follows the hovered pin; click opens that place's photographs
+  // ---- wire the journey ----
+  visits.forEach((v) => { v.el = mapEl.querySelector(`.pin[data-k="${v.k}"]`); v.on = null; });
+  const arcs = [...mapEl.querySelectorAll(".arc")].map((el) => {
+    const len = el.getTotalLength();
+    el.style.strokeDasharray = `${len}`;
+    el.style.strokeDashoffset = `${len}`;
+    return { el, k: Number(el.dataset.k), len, comet: el.closest("svg").querySelector(".comet") };
+  });
+  const comets = [...mapEl.querySelectorAll(".comet")];
+
+  const jrDate = document.getElementById("jrDate"), jrPlace = document.getElementById("jrPlace");
+  const jrFill = document.getElementById("jrFill"), jrRange = document.getElementById("jrRange");
+  const jrMarks = document.getElementById("jrMarks"), jrPlay = document.getElementById("jrPlay");
+  const month = (d) => d ? new Date(d + "T12:00:00").toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : "";
+  // a tick per city, a year label where each year begins
+  let lastYear = "";
+  jrMarks.innerHTML = visits.map((v, k) => {
+    const at = ((k + 1) / N * 100).toFixed(3), y = (v.first || "").slice(0, 4);
+    const yr = y && y !== lastYear ? `<span class="jr-year" style="left:${at}%">${y}</span>` : "";
+    lastYear = y || lastYear;
+    return `<i style="left:${at}%"></i>${yr}`;
+  }).join("");
+
+  const ease = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  let p = 0, playing = false, raf = 0, last = 0;
+  // visit k arrives at p = k + 1; the arc into it draws over [k, k + 1]
+  function render() {
+    const cur = Math.min(N - 1, Math.floor(p + 1e-6) - 1);
+    visits.forEach((v, k) => {
+      const on = p >= k + 1 - 1e-6;
+      if (on !== v.on) {
+        v.on = on;
+        v.el.classList.toggle("on", on);
+        if (on && playing) { v.el.classList.remove("pop"); v.el.getBoundingClientRect(); v.el.classList.add("pop"); }
+      }
+      v.el.classList.toggle("current", playing && k === cur);
+    });
+    comets.forEach((c) => c.setAttribute("opacity", "0"));
+    const done = p >= N - 1e-6;
+    arcs.forEach((a) => {
+      const f = ease(Math.max(0, Math.min(1, p - a.k)));
+      a.el.style.strokeDashoffset = `${a.len * (1 - f)}`;
+      const live = f > 0 && f < 1;
+      a.el.classList.toggle("live", live);
+      // a short wake: arcs fade over the next three cities, and the finished map is left clean
+      const age = p - (a.k + 1);
+      a.el.style.opacity = done ? "0" : live ? "0.95" : age >= 0 ? String(Math.max(0, 0.55 - age * 0.18).toFixed(3)) : "0";
+      if (live) {
+        const pt = a.el.getPointAtLength(a.len * f);
+        a.comet.setAttribute("cx", pt.x.toFixed(1)); a.comet.setAttribute("cy", pt.y.toFixed(1)); a.comet.setAttribute("opacity", "1");
+      }
+    });
+    const v = visits[Math.max(0, cur)];
+    jrDate.textContent = cur < 0 ? month(visits[0].first) : month(v.first);
+    jrPlace.textContent = cur < 0 ? "" : v.name;
+    jrFill.style.width = `${(p / N * 100).toFixed(2)}%`;
+    if (document.activeElement !== jrRange) jrRange.value = String(Math.round(p / N * 1000));
+    frame.classList.toggle("done", done);
+    jrPlay.dataset.state = playing ? "pause" : p >= N - 1e-6 ? "replay" : "play";
+    jrPlay.setAttribute("aria-label", playing ? "Pause the journey" : p >= N - 1e-6 ? "Replay the journey" : "Play the journey");
+  }
+  const STEP = 380;   // ms per city
+  function tick(now) {
+    p = Math.min(N, p + (now - last) / STEP); last = now;
+    if (p >= N) { playing = false; frame.classList.remove("playing"); }
+    render();
+    if (playing) raf = requestAnimationFrame(tick);
+  }
+  function play(from) {
+    cancelAnimationFrame(raf);
+    if (from !== undefined) p = from;
+    playing = true; frame.classList.add("playing"); tip.hidden = true;
+    last = performance.now(); raf = requestAnimationFrame(tick);
+  }
+  function pause() { playing = false; frame.classList.remove("playing"); cancelAnimationFrame(raf); render(); }
+  jrPlay.addEventListener("click", () => (playing ? pause() : play(p >= N - 1e-6 ? 0 : p)));
+  jrRange.addEventListener("input", () => { pause(); p = Number(jrRange.value) / 1000 * N; render(); });
+
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (Q.has("journey")) { p = Math.max(0, Math.min(1, Number(Q.get("journey")))) * N; render(); }
+  else if (reduced || NO_REVEAL) { p = N; render(); }
+  else {
+    render();
+    const io = new IntersectionObserver((es) => {
+      if (es.some((e) => e.isIntersecting)) { io.disconnect(); setTimeout(() => play(0), 450); }
+    }, { threshold: 0.35 });
+    io.observe(frame);
+  }
+
+  // tooltip follows the hovered city; click opens its photographs
   const tipImg = tip.querySelector("img"), tipB = tip.querySelector("b"), tipS = tip.querySelector("span");
   function showTip(g) {
-    const pl = byPlace.get(g.dataset.place);
+    if (playing || !g.classList.contains("on")) return;
+    const v = byPlace.get(g.dataset.place);
     const r = g.querySelector(".dot").getBoundingClientRect(), fr = frame.getBoundingClientRect();
-    tipImg.src = thumbSrc(pl.photos[0]);
-    tipB.textContent = pl.name;
-    tipS.textContent = [pl.country, plural(pl.photos.length, "photograph")].filter(Boolean).join(" · ");
+    tipImg.src = thumbSrc(v.photos[0]);
+    tipB.textContent = v.name;
+    tipS.textContent = [v.country, month(v.first), plural(v.photos.length, "photograph")].filter(Boolean).join(" · ");
     tip.style.left = `${r.left + r.width / 2 - fr.left}px`;
     tip.style.top = `${r.top - fr.top}px`;
     tip.hidden = false;
@@ -285,9 +400,54 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   mapEl.addEventListener("pointerout", (e) => { if (e.target.closest(".pin") && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".pin"))) tip.hidden = true; });
   mapEl.addEventListener("focusin", (e) => { const g = e.target.closest(".pin"); if (g) showTip(g); });
   mapEl.addEventListener("focusout", () => { tip.hidden = true; });
-  const open = (g) => { const pl = byPlace.get(g.dataset.place); tip.hidden = true; openLightbox(pl.photos, 0, null); };
+  const open = (g) => { if (!g.classList.contains("on")) return; const v = byPlace.get(g.dataset.place); tip.hidden = true; openLightbox(v.photos, 0, null); };
   mapEl.addEventListener("click", (e) => { const g = e.target.closest(".pin"); if (g) open(g); });
   mapEl.addEventListener("keydown", (e) => { const g = e.target.closest(".pin"); if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(g); } });
+})();
+
+// ---------- intro: photographs trail the cursor (and sweep across once on arrival) ----------
+(function trail() {
+  const intro = document.getElementById("hero");
+  if (!intro || matchMedia("(prefers-reduced-motion: reduce)").matches || NO_REVEAL) return;
+  const layer = document.createElement("div");
+  layer.className = "trail"; layer.setAttribute("aria-hidden", "true");
+  intro.prepend(layer);
+  // preload a shuffled pool so frames never appear blank
+  const skip = new Set(typeof TRAIL_SKIP !== "undefined" ? TRAIL_SKIP : []);
+  const pool = shuffle(SERIES.filter((s) => !skip.has(s.slug)).flatMap((s) => s.photos)).slice(0, 16).map((p) => {
+    const im = new Image(); im.decoding = "async"; im.src = thumbSrc(p); return { p, im };
+  });
+  let n = 0, z = 0, live = 0, lx = -1e9, ly = -1e9;
+  function drop(x, y) {
+    const ready = pool.filter((o) => o.im.complete && o.im.naturalWidth);
+    if (!ready.length || live > 10) return;
+    const { p, im } = ready[n++ % ready.length];
+    const small = innerWidth < 640;
+    let H = small ? 150 : 230, W = H * p.w / p.h;
+    const maxW = small ? 190 : 300;
+    if (W > maxW) { W = maxW; H = W * p.h / p.w; }
+    const el = document.createElement("img");
+    el.src = im.src; el.alt = "";
+    el.style.cssText = `left:${x}px;top:${y}px;width:${W.toFixed(0)}px;height:${H.toFixed(0)}px;z-index:${++z}`;
+    layer.appendChild(el); live++;
+    el.addEventListener("animationend", () => { el.remove(); live--; }, { once: true });
+  }
+  intro.addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse" || e.target.closest(".contents")) return;
+    const r = intro.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    if (Math.hypot(x - lx, y - ly) < 90) return;
+    lx = x; ly = y; drop(x, y);
+  });
+  // on arrival: one sweep across the intro, as if someone flipped through the prints
+  setTimeout(() => {
+    const W = intro.clientWidth, H = intro.clientHeight, steps = innerWidth < 640 ? 7 : 11;
+    for (let i = 0; i < steps; i++) {
+      setTimeout(() => {
+        const t = i / (steps - 1);
+        drop(W * (0.1 + 0.8 * t), H * (0.7 + 0.08 * Math.sin(t * Math.PI * 1.6)));
+      }, i * 115);
+    }
+  }, 1150);
 })();
 
 // ---------- intro parallax (desktop) ----------

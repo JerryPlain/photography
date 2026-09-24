@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=b14e8d52">
+  <link rel="stylesheet" href="css/style.css?v=18e5ea15">
 </head>
 <body>
   <a class="skip-link" href="#contents">Skip to contents</a>
@@ -91,6 +91,19 @@
       </div>
       <div class="atlas-frame reveal" style="--d:240ms">
         <div class="atlas-map" id="atlasMap"></div>
+        <div class="journey" aria-label="Journey timeline">
+          <button class="jr-play" id="jrPlay" type="button" data-state="play" aria-label="Play the journey">
+            <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
+            <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 5.5h3v13h-3zM13.5 5.5h3v13h-3z" fill="currentColor"/></svg>
+            <svg class="i-replay" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5a7 7 0 1 1-6.6 4.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M4.2 4.8l1.3 5 4.9-1.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="jr-now" aria-live="polite"><span class="jr-date" id="jrDate"></span><span class="jr-place" id="jrPlace"></span></div>
+          <div class="jr-track">
+            <div class="jr-rail"><div class="jr-fill" id="jrFill"></div></div>
+            <div class="jr-marks" id="jrMarks"></div>
+            <input class="jr-range" id="jrRange" type="range" min="0" max="1000" step="1" value="0" aria-label="Scrub through the journey">
+          </div>
+        </div>
         <div class="atlas-tip" id="atlasTip" hidden><img alt=""><div class="atlas-tip-text"><b></b><span></span></div></div>
       </div>
     </section>
@@ -130,10 +143,10 @@
     <div class="lb-strip" id="lbStrip" aria-label="Photographs in this series"></div>
   </div>
 
-  <script src="js/site.js?v=a16e2566"></script>
-  <script src="js/data.js?v=3fdae1ff"></script>
+  <script src="js/site.js?v=2c4e531a"></script>
+  <script src="js/data.js?v=2b230041"></script>
   <script src="js/map.js?v=c4f87c16"></script>
   <script src="js/stars.js?v=d5e12b97"></script>
-  <script src="js/main.js?v=cb67dc18"></script>
+  <script src="js/main.js?v=4c336836"></script>
 </body>
 </html>

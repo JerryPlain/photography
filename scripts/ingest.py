@@ -46,17 +46,20 @@ def series_title(folder: str) -> str:
 # photo's own label (e.g. 02-Me/Europe/Croatia.jpg -> "Croatia", in Europe).
 NOT_A_NAME = {"fullsizerender", "image", "photo", "untitled", "screenshot"}
 
-def stem_label(p: Path) -> str:
-    stem = p.stem.strip()
+def stem_label(p: Path):
+    """(title, label) from a meaningful filename, or ("", "") for camera names.
+    'Rainbow, Opening Day.jpeg' -> ("Rainbow", "Opening Day"); 'Croatia.jpg' -> ("Croatia", "")."""
+    stem = unicodedata.normalize("NFC", p.stem.strip())
     if not stem or not re.match(r"^[A-Za-z\u00C0-\u024F]", stem):
-        return ""                               # hashes, UUIDs, 0123.jpg
-    if not re.fullmatch(r"[A-Za-z\u00C0-\u024F0-9'\u2019&.\- ]+", stem):
-        return ""                               # underscores etc: IMG_6134
+        return "", ""                           # hashes, UUIDs, 0123.jpg
+    if not re.fullmatch(r"[A-Za-z\u00C0-\u024F0-9'\u2019&.,\- ]+", stem):
+        return "", ""                           # underscores etc: IMG_6134
     if re.search(r"\d{3}", stem):
-        return ""                               # DSCF1518, dates, counters
+        return "", ""                           # DSCF1518, dates, counters
     if stem.lower() in NOT_A_NAME:
-        return ""
-    return unicodedata.normalize("NFC", re.sub(r"[\-.]+", " ", stem).strip())
+        return "", ""
+    title, _, label = stem.partition(",")
+    return title.strip(), label.strip()
 
 def file_hash(p: Path) -> str:
     h = hashlib.md5()
@@ -157,6 +160,16 @@ def camera_line(meta):
     if iso: parts.append(f"ISO {iso}")
     return camera.strip(), " · ".join(parts)
 
+def created_date(p: Path) -> str:
+    """kMDItemContentCreationDate via Spotlight; exports from Photos keep the capture date there."""
+    try:
+        out = subprocess.run(["mdls", "-raw", "-name", "kMDItemContentCreationDate", str(p)],
+                             capture_output=True, text=True, timeout=10).stdout.strip()
+    except Exception:
+        return ""
+    m = re.match(r"(\d{4}-\d{2}-\d{2})", out)
+    return m.group(1) if m else ""
+
 def exif_date(meta):
     dt = (meta or {}).get("dt") or ""
     m = re.match(r"(\d{4}):(\d{2}):(\d{2})", dt)
@@ -219,7 +232,7 @@ def scan():
             groups.setdefault(key, []).append(p)
         # a meaningful filename becomes the photo's title; the folder then reads
         # as its context, e.g. Europe/Croatia.jpg -> "Croatia" / "EUROPE"
-        labelled = {k: [(stem_label(p), p) for p in v] for k, v in groups.items()}
+        labelled = {k: {p: stem_label(p) for p in v} for k, v in groups.items()}
         if not groups:
             continue
 
@@ -232,11 +245,12 @@ def scan():
             files = groups[key]
             def fkey(p):
                 info = jpeg_info(p) if p.suffix.lower() in (".jpg", ".jpeg") else None
-                return (info[3] if info and info[3] else "9999", p.name.lower())
+                when = (info[3] if info and info[3] else "").replace(":", "-")[:10] or created_date(p)
+                return (when or "9999", p.name.lower())
             for p in sorted(files, key=fkey):
-                label = dict((q, lbl) for lbl, q in labelled[key]).get(p, "")
-                if label:
-                    photos.append((label, key[1] or key[0], p))
+                title, label = labelled[key][p]
+                if title:
+                    photos.append((title, label or key[1] or key[0], p))
                 else:
                     photos.append((key[0], key[1], p))
         series.append({"slug": slug, "title": series_title(folder.name), "photos": photos})
@@ -273,7 +287,8 @@ def main():
             camera, settings = camera_line(meta)
             entry = {"file": f"{s['slug']}/{base}", "src": src.stem, "title": title,
                      "location": location, "w": dims[0], "h": dims[1]}
-            if exif_date(meta): entry["date"] = exif_date(meta)
+            when = exif_date(meta) or created_date(src)
+            if when: entry["date"] = when
             if camera: entry["camera"] = camera
             if settings: entry["exif"] = settings
             entries.append(entry)
