@@ -74,7 +74,6 @@ const SERIES = [
     slug: "me",
     title: "Me",
     photos: [
-      {"file": "me/japan-06265d7a.jpg", "src": "IMG_7830", "title": "Japan", "location": "Asia", "w": 2000, "h": 1936},
       {"file": "me/italy-a4541608.jpg", "src": "Italy", "title": "Italy", "location": "Europe", "w": 2000, "h": 1125},
       {"file": "me/spain-5455fdda.jpg", "src": "Spain", "title": "Spain", "location": "Europe", "w": 2000, "h": 1500},
       {"file": "me/italy-5f52f1d8.jpg", "src": "Italy", "title": "Italy", "location": "Europe", "w": 2000, "h": 1538},
@@ -130,7 +129,7 @@ const SERIES = [
     slug: "concert",
     title: "Concert",
     photos: [
-      {"file": "concert/bruno-mars-687c0371.jpg", "src": "berlin_bruno", "title": "Bruno Mars", "location": "Berlin 2026", "w": 1901, "h": 2000},
+      {"file": "concert/bruno-mars-aa4640e6.jpg", "src": "图像", "title": "Bruno Mars", "location": "Berlin 2026", "w": 1901, "h": 2000},
       {"file": "concert/laufey-e688d094.jpg", "src": "IMG_3395", "title": "Laufey", "location": "Berlin 2026", "w": 1654, "h": 2000},
       {"file": "concert/sza-kendrick-lamar-069844ca.jpg", "src": "FullSizeRender", "title": "SZA & Kendrick Lamar", "location": "Frankfurt 2025", "w": 1499, "h": 2000},
       {"file": "concert/dua-lipa-ca6d5ed7.jpg", "src": "IMG_6363", "title": "Dua Lipa", "location": "Munich 2025", "w": 1500, "h": 2000},
