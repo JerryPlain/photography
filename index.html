@@ -80,6 +80,21 @@
       </nav>
     </section>
 
+    <!-- 地图：所有拍过照的地方 -->
+    <section class="atlas" id="atlas" aria-label="Map of places photographed">
+      <div class="atlas-head">
+        <div>
+          <p class="eyebrow reveal">Atlas</p>
+          <h2 class="atlas-title reveal" style="--d:80ms">Where the light was found</h2>
+        </div>
+        <p class="atlas-stats reveal" id="atlasStats" style="--d:160ms"></p>
+      </div>
+      <div class="atlas-frame reveal" style="--d:240ms">
+        <div class="atlas-map" id="atlasMap"></div>
+        <div class="atlas-tip" id="atlasTip" hidden><img alt=""><div class="atlas-tip-text"><b></b><span></span></div></div>
+      </div>
+    </section>
+
     <div id="seriesRoot"></div>
     </div>
 
@@ -117,6 +132,7 @@
 
   <script src="js/site.js"></script>
   <script src="js/data.js"></script>
+  <script src="js/map.js"></script>
   <script src="js/stars.js"></script>
   <script src="js/main.js"></script>
 </body>

@@ -48,12 +48,25 @@ python3 -m http.server 8000
 # 打开 http://localhost:8000
 ```
 
-调试参数：`?noreveal` 关闭滚动渐显，`?nohero` 隐藏扉页，`?from=N` 隐藏前 N 个系列，`?theme=dark` 强制深色（截图用）。
+调试参数：`?noreveal` 关闭滚动渐显和所有入场动画，`?nohero` 隐藏扉页，`?from=N` 隐藏前 N 个系列，`?theme=dark` 强制深色（截图用）。
 
 ## 首页只放一部分，随机、会动
 
 首页每个系列只放几张（`HOME_COUNT` 基数，宽屏自动 ×1.5，手机 ×0.75），每次打开从整个系列里随机抽，尽量每个地点一张；页面停着时每 4 秒左右有一张在原位换成同方向的另一张（放大淡入），标签页不可见、开着灯箱、鼠标悬停时暂停，系统开了"减少动态效果"则完全静止。点 View all 进 `#/slug` 系列页看全部。
 想限定只从某些照片里抽，把原始文件名填进 [js/site.js](js/site.js) 的 `HIGHLIGHTS`；留空就是全部随机。
+
+## 地图
+
+系列之前有一张「Where the light was found」地图：两幅图版（欧洲、东南亚与日本），每个拍过照的地方一个红点，点越大照片越多，滚到那里时红点依次落下并有涟漪；悬停显示该地一张缩略图和张数，点击打开该地全部照片。海岸线来自 [Natural Earth](https://www.naturalearthdata.com/) 50m 陆地数据（公有领域），由 `scripts/build_map.py` 裁剪、简化、投影后写进 `js/map.js`（约 55 KB，不联网）。
+
+**新城市出现时**：浏览器控制台会提示 `atlas: no coordinates for …`，把经纬度加进 `scripts/build_map.py` 的 `PLACES`，再跑：
+
+```sh
+curl -sLO https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_land.geojson
+python3 scripts/build_map.py ne_50m_land.geojson
+```
+
+Concert 的场次（`Munich 2025`）会按城市落到地图上；Me / Car / Robot / School / Company 不上地图。
 
 每个系列标题下面是按小字标注分组的索引（GERMANY Berlin · Frankfurt …；Concert 则按场次分组）。灯箱里除了标题和位置，还会显示相机、焦段、光圈、快门、ISO 和拍摄月份（从原图 EXIF 读出来，导入时写进 `js/data.js`），底部有一条可点击的胶片条在系列内跳转。
 

@@ -451,3 +451,89 @@ body, .topbar, .index-overlay, .lightbox { transition: background-color 0.4s eas
   .series-places { grid-template-columns: 1fr; gap: 0.35rem; }
   .contents-list .peek { display: none; }
 }
+
+/* ---------- atlas ---------- */
+
+.atlas {
+  max-width: var(--container); margin: 0 auto;
+  padding: clamp(2rem, 5vh, 3.5rem) var(--gutter) clamp(3rem, 7vh, 5rem);
+  border-top: 1px solid var(--hairline);
+}
+.atlas-head { display: flex; justify-content: space-between; align-items: end; gap: 2rem; margin-bottom: 1.6rem; }
+.atlas-title { font-family: var(--serif); font-weight: 400; font-size: clamp(1.7rem, 3.2vw, 2.4rem); line-height: 1.1; letter-spacing: -0.01em; }
+.atlas-stats { font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); text-align: right; line-height: 1.9; white-space: nowrap; }
+
+.atlas-frame { position: relative; }
+.atlas-map { display: flex; gap: 1rem; align-items: stretch; }
+.plate {
+  position: relative; flex: 1 1 0; min-width: 0;
+  background: var(--paper); border-radius: 6px; overflow: hidden;
+  box-shadow: 0 1px 2px var(--shadow), 0 20px 50px -30px var(--shadow);
+}
+.plate::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  box-shadow: inset 0 0 70px color-mix(in srgb, var(--bg) 65%, transparent);
+}
+.plate svg { display: block; width: 100%; height: auto; }
+.plate-name {
+  position: absolute; left: 0.9rem; bottom: 0.7rem; z-index: 2;
+  font-family: var(--serif); font-style: italic; font-size: 0.85rem; color: var(--ink-soft);
+}
+
+.atlas-map .sea { fill: var(--paper); }
+.atlas-map .land { fill: color-mix(in srgb, var(--ink) 7%, var(--paper)); stroke: color-mix(in srgb, var(--ink) 28%, transparent); stroke-width: 1.3; stroke-linejoin: round; fill-rule: evenodd; }
+.atlas-map .grat { fill: none; stroke: color-mix(in srgb, var(--ink) 8%, transparent); stroke-width: 1; stroke-dasharray: 3 8; }
+:root[data-theme="dark"] .atlas-map .land { fill: color-mix(in srgb, var(--ink) 10%, var(--paper)); stroke: color-mix(in srgb, var(--ink) 32%, transparent); }
+
+/* one visited place = a dot, a ring that breathes, and a label on hover */
+.atlas-map .pin { cursor: pointer; }
+.atlas-map .pin circle.dot { fill: var(--accent); stroke: var(--paper); stroke-width: 2.4; transition: r 0.3s var(--ease); }
+.atlas-map .pin circle.halo { fill: var(--accent); opacity: 0; }
+.atlas-map .pin:hover circle.dot, .atlas-map .pin:focus-visible circle.dot { r: 12; }
+.atlas-map .pin:focus-visible { outline: none; }
+.atlas-map .pin .lbl {
+  font-family: "Georgia", serif; font-size: 21px; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-width: 5px; stroke-linejoin: round;
+  opacity: 0; transition: opacity 0.25s ease; pointer-events: none;
+}
+.atlas-map .pin:hover .lbl, .atlas-map .pin.named .lbl { opacity: 1; }
+
+/* pins drop in one by one when the atlas scrolls into view (visible by default if animations never run) */
+.atlas-map .pin { transform-box: fill-box; transform-origin: center; }
+.atlas-frame.reveal:not(.visible) .atlas-map .pin { opacity: 0; transform: scale(0.2); }
+.atlas-frame.visible .atlas-map .pin { animation: pinIn 0.7s var(--ease) backwards; animation-delay: calc(400ms + var(--i, 0) * 45ms); }
+@keyframes pinIn { from { opacity: 0; transform: scale(0.2); } 60% { transform: scale(1.35); } to { opacity: 1; transform: scale(1); } }
+.atlas-frame.visible .atlas-map .pin circle.halo { animation: halo 3.2s ease-out infinite; animation-delay: calc(1400ms + var(--i, 0) * 45ms + var(--j, 0) * 900ms); }
+@keyframes halo { 0% { r: 6; opacity: 0.5; } 70% { r: 34; opacity: 0; } 100% { r: 34; opacity: 0; } }
+.atlas-frame.visible .atlas-map .land { animation: landIn 1.4s ease both; }
+@keyframes landIn { from { opacity: 0; } to { opacity: 1; } }
+
+.atlas-tip {
+  position: absolute; z-index: 3; pointer-events: none;
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.4rem 0.7rem 0.4rem 0.4rem;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 4px; box-shadow: 0 8px 24px -8px var(--shadow), 0 0 0 1px var(--hairline);
+  transform: translate(-50%, calc(-100% - 14px));
+  transition: opacity 0.2s ease, transform 0.3s var(--ease);
+  white-space: nowrap;
+}
+.atlas-tip[hidden] { display: flex; opacity: 0; transform: translate(-50%, calc(-100% - 6px)); }
+.atlas-tip img { width: 3.4rem; height: 2.5rem; object-fit: cover; border-radius: 2px; }
+.atlas-tip b { display: block; font-family: var(--serif); font-weight: 400; font-size: 0.95rem; line-height: 1.2; }
+.atlas-tip span { font-family: var(--sans); font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
+
+@media (max-width: 760px) {
+  .atlas-head { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+  .atlas-stats { text-align: left; }
+  .atlas-map { flex-direction: column; }
+  .plate { flex: 0 0 auto !important; }
+  .atlas-map .pin .lbl { font-size: 24px; }
+}
+
+/* screenshot mode: every entrance already finished */
+html.noreveal .atlas-map .pin, html.noreveal .atlas-map .land, html.noreveal .intro-title .w > span,
+html.noreveal .intro-text > .eyebrow, html.noreveal .intro-statement, html.noreveal .intro-stats, html.noreveal .contents > .eyebrow {
+  animation: none !important; opacity: 1 !important; transform: none !important;
+}
+

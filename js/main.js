@@ -10,7 +10,7 @@ const fullSrc = (p) => `photos/${p.file}`;
 const thumbSrc = (p) => { const i = p.file.lastIndexOf("/"); return `photos/${p.file.slice(0, i)}/thumbs/${p.file.slice(i + 1)}`; };
 const caption = (p) => [p.title, p.location].filter(Boolean).join(", ");
 const PLURALS = { series: "series", photograph: "photographs", place: "places",
-                  country: "countries", model: "models", act: "acts", campus: "campuses" };
+                  country: "countries", model: "models", act: "acts", campus: "campuses", site: "sites" };
 const plural = (n, w) => `${n} ${n === 1 ? w : PLURALS[w] || w + "s"}`;
 const subjectOf = (s) => (typeof SUBJECT !== "undefined" && SUBJECT[s.slug]) || "place";
 
@@ -18,6 +18,7 @@ const subjectOf = (s) => (typeof SUBJECT !== "undefined" && SUBJECT[s.slug]) || 
 const Q = new URLSearchParams(location.search);
 if (Q.get("theme") === "dark") document.documentElement.dataset.theme = "dark";
 const NO_REVEAL = Q.has("noreveal");
+if (NO_REVEAL) document.documentElement.classList.add("noreveal");   // also freezes keyframe entrances
 
 SERIES.forEach((s, si) => { s.num = pad2(si + 1); s.photos.forEach((p, pi) => { p._series = s; p._index = pi; }); });
 const TOTAL = SERIES.reduce((a, s) => a + s.photos.length, 0);
@@ -192,6 +193,90 @@ document.getElementById("footerStatement").textContent = SITE.statement;
 document.getElementById("footerLinks").innerHTML = SITE.footerLinks
   .map((l) => `<a href="${esc(l.url)}"${l.url.startsWith("http") ? ' target="_blank" rel="noopener"' : ""}>${esc(l.label)}</a>`).join("");
 document.getElementById("footerCopy").textContent = SITE.copyright;
+
+// ---------- atlas: every place with a photograph, on two map plates ----------
+(function atlas() {
+  if (typeof MAP === "undefined") return;
+  const frame = document.querySelector(".atlas-frame");
+  const mapEl = document.getElementById("atlasMap");
+  const tip = document.getElementById("atlasTip");
+  const stats = document.getElementById("atlasStats");
+  // a photograph's place: its title in place series; for concerts the venue city
+  const placeOf = (p) => {
+    const kind = subjectOf(p._series);
+    const n = kind === "place" ? p.title : kind === "act" ? (p.location || "").replace(/\s+\d{4}$/, "") : "";
+    return n ? n.normalize("NFC") : "";
+  };
+  const coords = Object.assign({}, ...MAP.plates.map((pl) => pl.places));
+  const byPlace = new Map();
+  const missing = new Set();
+  SERIES.forEach((s) => s.photos.forEach((p) => {
+    const name = placeOf(p);
+    if (!name) return;
+    if (!coords[name]) { missing.add(name); return; }
+    if (!byPlace.has(name)) byPlace.set(name, { name, photos: [], country: subjectOf(p._series) === "place" ? p.location : "" });
+    byPlace.get(name).photos.push(p);
+  }));
+  if (missing.size) console.warn("atlas: no coordinates for", [...missing].join(", "), "— add them in scripts/build_map.py");
+  const countries = new Set();
+  byPlace.forEach((pl) => pl.photos.forEach((p) => { if (subjectOf(p._series) === "place" && p.location) countries.add(p.location); }));
+  stats.innerHTML = `${plural(byPlace.size, "place")}<br>${plural(countries.size, "country")}`;
+
+  // the most photographed places carry a permanent label; the rest name themselves on hover
+  const named = new Set([...byPlace.values()].sort((a, b) => b.photos.length - a.photos.length).slice(0, 8).map((p) => p.name));
+  ["Lisbon", "Paris", "Berlin", "Santorini", "Bangkok", "Singapore", "Osaka", "Tokyo", "Barcelona", "Dubrovnik"].forEach((n) => byPlace.has(n) && named.add(n));
+
+  const merc = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI / 180) / 2));
+  let i = 0;
+  mapEl.innerHTML = MAP.plates.map((pl) => {
+    const [lon0, lat0, lon1, lat1] = pl.bbox;
+    const K = pl.w / ((lon1 - lon0) * Math.PI / 180), TOP = merc(lat1);
+    const px = (lon) => ((lon - lon0) * Math.PI / 180) * K, py = (lat) => (TOP - merc(lat)) * K;
+    let grat = "";
+    for (let lon = Math.ceil(lon0 / 5) * 5; lon <= lon1; lon += 5) grat += `M${px(lon).toFixed(1)},0V${pl.h}`;
+    for (let lat = Math.ceil(lat0 / 5) * 5; lat <= lat1; lat += 5) grat += `M0,${py(lat).toFixed(1)}H${pl.w}`;
+    const pins = [...byPlace.values()].filter((p) => pl.places[p.name]).sort((a, b) => pl.places[a.name][0] - pl.places[b.name][0]);
+    return `
+    <div class="plate" style="--w:${pl.w};--h:${pl.h};flex-grow:${(pl.w / pl.h).toFixed(3)}">
+      <svg viewBox="0 0 ${pl.w} ${pl.h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(pl.name)}: ${plural(pins.length, "place")}">
+        <rect class="sea" width="${pl.w}" height="${pl.h}"/>
+        <path class="grat" d="${grat}"/>
+        <path class="land" d="${pl.land}"/>
+        ${pins.map((p) => {
+          const [x, y] = pl.places[p.name], n = p.photos.length;
+          const r = 5.5 + Math.min(n, 12) * 0.45;
+          const right = x < pl.w * 0.82;
+          return `<g transform="translate(${x},${y})"><g class="pin${named.has(p.name) ? " named" : ""}" data-place="${esc(p.name)}" tabindex="0" role="button"
+                   aria-label="${esc(p.name)}, ${plural(n, "photograph")}" style="--i:${i++};--j:${i % 5}">
+            <circle class="halo" r="6"/>
+            <circle class="dot" r="${r.toFixed(1)}"/>
+            <text class="lbl" x="${right ? r + 9 : -(r + 9)}" y="7" text-anchor="${right ? "start" : "end"}">${esc(p.name)}</text>
+          </g></g>`; }).join("")}
+      </svg>
+      <span class="plate-name">${esc(pl.name)}</span>
+    </div>`;
+  }).join("");
+
+  // tooltip follows the hovered pin; click opens that place's photographs
+  const tipImg = tip.querySelector("img"), tipB = tip.querySelector("b"), tipS = tip.querySelector("span");
+  function showTip(g) {
+    const pl = byPlace.get(g.dataset.place);
+    const r = g.querySelector(".dot").getBoundingClientRect(), fr = frame.getBoundingClientRect();
+    tipImg.src = thumbSrc(pl.photos[0]);
+    tipB.textContent = pl.name;
+    tipS.textContent = [pl.country, plural(pl.photos.length, "photograph")].filter(Boolean).join(" · ");
+    tip.style.left = `${r.left + r.width / 2 - fr.left}px`;
+    tip.style.top = `${r.top - fr.top}px`;
+    tip.hidden = false;
+  }
+  mapEl.addEventListener("pointerover", (e) => { const g = e.target.closest(".pin"); if (g) showTip(g); });
+  mapEl.addEventListener("pointerout", (e) => { if (e.target.closest(".pin") && !(e.relatedTarget && e.relatedTarget.closest && e.relatedTarget.closest(".pin"))) tip.hidden = true; });
+  mapEl.addEventListener("focusin", (e) => { const g = e.target.closest(".pin"); if (g) showTip(g); });
+  mapEl.addEventListener("focusout", () => { tip.hidden = true; });
+  const open = (g) => { const pl = byPlace.get(g.dataset.place); tip.hidden = true; openLightbox(pl.photos, 0, null); };
+  mapEl.addEventListener("click", (e) => { const g = e.target.closest(".pin"); if (g) open(g); });
+  mapEl.addEventListener("keydown", (e) => { const g = e.target.closest(".pin"); if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(g); } });
+})();
 
 // ---------- intro parallax (desktop) ----------
 const intro = document.getElementById("hero");

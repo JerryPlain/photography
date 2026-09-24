@@ -56,7 +56,7 @@ def stem_label(p: Path) -> str:
         return ""                               # DSCF1518, dates, counters
     if stem.lower() in NOT_A_NAME:
         return ""
-    return re.sub(r"[\-.]+", " ", stem).strip()
+    return unicodedata.normalize("NFC", re.sub(r"[\-.]+", " ", stem).strip())
 
 def file_hash(p: Path) -> str:
     h = hashlib.md5()
@@ -208,7 +208,7 @@ def scan():
             # folders between the series and the file: the deepest one titles the
             # photo, the one above it becomes the small label, and an explicit
             # "Title, Label" folder beats both (Asia/Japan -> Japan / ASIA).
-            dirs = p.relative_to(folder).parts[:-1]
+            dirs = [unicodedata.normalize("NFC", d) for d in p.relative_to(folder).parts[:-1]]
             if not dirs:
                 key = ("", "")
             elif "," in dirs[-1]:

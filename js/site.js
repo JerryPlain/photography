@@ -58,5 +58,6 @@ const SUBJECT = {
   "robot": "model",
   "concert": "act",
   "school": "campus",
+  "company": "site",
 };
 
