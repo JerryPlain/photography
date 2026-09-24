@@ -222,9 +222,19 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   byPlace.forEach((pl) => pl.photos.forEach((p) => { if (subjectOf(p._series) === "place" && p.location) countries.add(p.location); }));
   stats.innerHTML = `${plural(byPlace.size, "place")}<br>${plural(countries.size, "country")}`;
 
-  // the most photographed places carry a permanent label; the rest name themselves on hover
-  const named = new Set([...byPlace.values()].sort((a, b) => b.photos.length - a.photos.length).slice(0, 8).map((p) => p.name));
-  ["Lisbon", "Paris", "Berlin", "Santorini", "Bangkok", "Singapore", "Osaka", "Tokyo", "Barcelona", "Dubrovnik"].forEach((n) => byPlace.has(n) && named.add(n));
+  // permanent labels: most photographed first, skipping any that would sit on top of one already placed;
+  // everything else names itself on hover
+  const named = new Set();
+  MAP.plates.forEach((pl) => {
+    const placed = [];
+    [...byPlace.values()].filter((p) => pl.places[p.name])
+      .sort((a, b) => b.photos.length - a.photos.length || a.name.localeCompare(b.name))
+      .forEach((p) => {
+        const [x, y] = pl.places[p.name];
+        const clear = placed.every(([px, py]) => Math.abs(y - py) > 24 || Math.abs(x - px) > 150);
+        if (clear) { named.add(p.name); placed.push([x, y]); }
+      });
+  });
 
   const merc = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI / 180) / 2));
   let i = 0;
