@@ -138,13 +138,17 @@ def scan():
         for p in sorted(folder.rglob("*")):
             if not p.is_file() or p.suffix.lower() not in EXTS or p.name.startswith("."):
                 continue
-            rel = p.relative_to(folder)
-            if len(rel.parts) == 1:
+            # folders between the series and the file: the deepest one titles the
+            # photo, the one above it becomes the small label, and an explicit
+            # "Title, Label" folder beats both (Asia/Japan -> Japan / ASIA).
+            dirs = p.relative_to(folder).parts[:-1]
+            if not dirs:
                 key = ("", "")
-            else:
-                sub = rel.parts[0]
-                title, _, loc = sub.partition(",")
+            elif "," in dirs[-1]:
+                title, _, loc = dirs[-1].partition(",")
                 key = (title.strip(), loc.strip())
+            else:
+                key = (dirs[-1].strip(), dirs[-2].strip() if len(dirs) > 1 else "")
             groups.setdefault(key, []).append(p)
         # a meaningful filename becomes the photo's title; the folder then reads
         # as its context, e.g. Europe/Croatia.jpg -> "Croatia" / "EUROPE"
