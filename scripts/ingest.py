@@ -2,7 +2,7 @@
 """
 Ingest photos from the local Desktop library into the site.
 
-    python3 scripts/ingest.py [SOURCE_DIR]
+    python3 scripts/ingest.py [SOURCE_DIR] [--force]
 
 SOURCE_DIR defaults to ~/Desktop/photography and is expected to look like:
 
@@ -21,7 +21,9 @@ import hashlib, json, os, re, struct, subprocess, sys, unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = Path(sys.argv[1]).expanduser() if len(sys.argv) > 1 else Path("~/Desktop/photography").expanduser()
+ARGS = [a for a in sys.argv[1:] if not a.startswith("-")]
+FORCE = "--force" in sys.argv          # re-encode even if the output is current
+SRC = Path(ARGS[0]).expanduser() if ARGS else Path("~/Desktop/photography").expanduser()
 OUT = ROOT / "photos"
 DATA = ROOT / "js" / "data.js"
 
@@ -119,12 +121,29 @@ def displayed_dims(p: Path):
     w, h, o, _ = info
     return (h, w) if o in (5, 6, 7, 8) else (w, h)
 
+def pixel_dims(p: Path):
+    """(width, height) for any format sips can read; (0, 0) if it cannot."""
+    out = subprocess.run(["sips", "-g", "pixelWidth", "-g", "pixelHeight", str(p)],
+                         capture_output=True, text=True).stdout
+    w = h = 0
+    for line in out.splitlines():
+        if "pixelWidth:" in line:
+            w = int(line.split(":")[1])
+        elif "pixelHeight:" in line:
+            h = int(line.split(":")[1])
+    return w, h
+
 def sips(src: Path, dst: Path, max_px: int, q: int):
+    """Convert to JPEG, shrinking only when the source is bigger than max_px.
+    sips --resampleHeightWidthMax happily UPSCALES a small photo, which just
+    wastes bytes and softens it, so the flag is passed only when it shrinks."""
     dst.parent.mkdir(parents=True, exist_ok=True)
-    subprocess.run(
-        ["sips", "-s", "format", "jpeg", "-s", "formatOptions", str(q),
-         "--resampleHeightWidthMax", str(max_px), str(src), "--out", str(dst)],
-        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    args = ["sips", "-s", "format", "jpeg", "-s", "formatOptions", str(q)]
+    w, h = pixel_dims(src)
+    if max(w, h) > max_px:
+        args += ["--resampleHeightWidthMax", str(max_px)]
+    args += [str(src), "--out", str(dst)]
+    subprocess.run(args, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 # ---------------------------------------------------------------- scan
 
@@ -190,7 +209,7 @@ def main():
             full = OUT / s["slug"] / base
             thumb = OUT / s["slug"] / "thumbs" / base
             for dst, mx, q in ((full, FULL_MAX, FULL_Q), (thumb, THUMB_MAX, THUMB_Q)):
-                if not dst.exists() or dst.stat().st_mtime < src.stat().st_mtime:
+                if FORCE or not dst.exists() or dst.stat().st_mtime < src.stat().st_mtime:
                     sips(src, dst, mx, q)
                     print(f"  {dst.relative_to(ROOT)}")
             keep.add(full); keep.add(thumb)

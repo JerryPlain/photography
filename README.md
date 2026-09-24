@@ -27,11 +27,12 @@
 放好照片后运行：
 
 ```sh
-python3 scripts/ingest.py      # 压缩到 photos/ 并重新生成 js/data.js
+python3 scripts/ingest.py           # 压缩到 photos/ 并重新生成 js/data.js
+# python3 scripts/ingest.py --force # 改了压缩参数后，强制重新生成全部
 git add -A && git commit -m "Update photos" && git push
 ```
 
-脚本只依赖 macOS 自带的 `sips`。每张照片生成 2000px 的全图和 1000px 的缩略图，文件名带内容 hash，重复运行是增量的；源库里删掉的照片会被自动清理。
+脚本只依赖 macOS 自带的 `sips`。每张照片生成最大 2000px 的全图和最大 1000px 的缩略图（**原图更小就保持原尺寸，不放大**），文件名带内容 hash，重复运行是增量的；源库里删掉的照片会被自动清理。
 
 ## 文案
 
