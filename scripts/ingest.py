@@ -66,8 +66,9 @@ def file_hash(p: Path) -> str:
     return h.hexdigest()[:8]
 
 def jpeg_info(p: Path):
-    """Return (raw_w, raw_h, orientation, datetime_original) for a JPEG."""
-    w = h = None; orient = 1; dt = None
+    """Return (raw_w, raw_h, orientation, datetime_original, meta) for a JPEG.
+    meta holds camera/lens/exposure fields when the file carries EXIF."""
+    w = h = None; orient = 1; dt = None; meta = {}
     with open(p, "rb") as f:
         data = f.read()
     if data[:2] != b"\xff\xd8":
@@ -88,7 +89,7 @@ def jpeg_info(p: Path):
             tiff = seg[6:]
             try:
                 end = "<" if tiff[:2] == b"II" else ">"
-                ifd0 = struct.unpack(end + "I", tiff[4:8])[0]
+                SIZES = {1: 1, 2: 1, 3: 2, 4: 4, 5: 8, 7: 1, 9: 4, 10: 8}
                 def read_ifd(off):
                     n = struct.unpack(end + "H", tiff[off:off + 2])[0]
                     out = {}
@@ -97,28 +98,75 @@ def jpeg_info(p: Path):
                         tag, typ, cnt = struct.unpack(end + "HHI", e[:8])
                         out[tag] = (typ, cnt, e[8:12])
                     return out
+                def value(entry):
+                    typ, cnt, raw = entry
+                    size = SIZES.get(typ, 1) * cnt
+                    buf = raw[:size] if size <= 4 else tiff[struct.unpack(end + "I", raw)[0]:][:size]
+                    if typ == 2:
+                        return buf.split(b"\x00", 1)[0].decode("ascii", "ignore").strip()
+                    if typ == 3:
+                        return struct.unpack(end + "H", buf[:2])[0]
+                    if typ == 4:
+                        return struct.unpack(end + "I", buf[:4])[0]
+                    if typ in (5, 10):
+                        n_, d_ = struct.unpack(end + ("II" if typ == 5 else "ii"), buf[:8])
+                        return n_ / d_ if d_ else 0
+                    return None
+                ifd0 = struct.unpack(end + "I", tiff[4:8])[0]
                 ifd = read_ifd(ifd0)
                 if 0x0112 in ifd:
-                    orient = struct.unpack(end + "H", ifd[0x0112][2][:2])[0]
+                    orient = value(ifd[0x0112]) or 1
+                for tag, key in ((0x010F, "make"), (0x0110, "model")):
+                    if tag in ifd:
+                        meta[key] = value(ifd[tag])
                 if 0x8769 in ifd:
-                    exif_off = struct.unpack(end + "I", ifd[0x8769][2])[0]
-                    sub = read_ifd(exif_off)
-                    if 0x9003 in sub:
-                        typ, cnt, val = sub[0x9003]
-                        off = struct.unpack(end + "I", val)[0]
-                        dt = tiff[off:off + cnt - 1].decode("ascii", "ignore")
+                    sub = read_ifd(value(ifd[0x8769]))
+                    for tag, key in ((0x9003, "dt"), (0x829A, "exposure"), (0x829D, "fnumber"),
+                                     (0x8827, "iso"), (0x920A, "focal"), (0xA405, "focal35"),
+                                     (0xA434, "lens")):
+                        if tag in sub:
+                            meta[key] = value(sub[tag])
+                    dt = meta.get("dt")
             except Exception:
                 pass
         i += 2 + seglen
     if w is None:
         return None
-    return w, h, orient, dt
+    return w, h, orient, dt, meta
+
+def camera_line(meta):
+    """'Fujifilm X-T30 II · 23 mm · ƒ/2 · 1/500 s · ISO 160' from EXIF, or ''."""
+    if not meta:
+        return "", ""
+    make = (meta.get("make") or "").strip()
+    model = (meta.get("model") or "").strip()
+    if make.upper() == "FUJIFILM": make = "Fujifilm"
+    if make.upper() == "APPLE": make = ""            # "iPhone 15 Pro" says it already
+    camera = model if not make or model.lower().startswith(make.lower()) else f"{make} {model}"
+    parts = []
+    # phones quote the 35 mm-equivalent focal length; real cameras their lens
+    phone = not make or "iphone" in model.lower()
+    f = (meta.get("focal35") if phone else None) or meta.get("focal")
+    if f: parts.append(f"{f:g} mm")
+    n = meta.get("fnumber")
+    if n: parts.append(f"ƒ/{n:g}")
+    t = meta.get("exposure")
+    if t:
+        parts.append(f"1/{round(1 / t)} s" if 0 < t < 1 else f"{t:g} s")
+    iso = meta.get("iso")
+    if iso: parts.append(f"ISO {iso}")
+    return camera.strip(), " · ".join(parts)
+
+def exif_date(meta):
+    dt = (meta or {}).get("dt") or ""
+    m = re.match(r"(\d{4}):(\d{2}):(\d{2})", dt)
+    return f"{m.group(1)}-{m.group(2)}-{m.group(3)}" if m else ""
 
 def displayed_dims(p: Path):
     info = jpeg_info(p)
     if not info:
         return None
-    w, h, o, _ = info
+    w, h, o = info[0], info[1], info[2]
     return (h, w) if o in (5, 6, 7, 8) else (w, h)
 
 def pixel_dims(p: Path):
@@ -220,8 +268,15 @@ def main():
             sd = displayed_dims(src) if src.suffix.lower() in (".jpg", ".jpeg") else None
             if sd and (sd[0] > sd[1]) != (dims[0] > dims[1]):
                 print(f"  !! orientation mismatch: {src}")
-            entries.append({"file": f"{s['slug']}/{base}", "src": src.stem, "title": title,
-                            "location": location, "w": dims[0], "h": dims[1]})
+            info = jpeg_info(src) if src.suffix.lower() in (".jpg", ".jpeg") else None
+            meta = info[4] if info else {}
+            camera, settings = camera_line(meta)
+            entry = {"file": f"{s['slug']}/{base}", "src": src.stem, "title": title,
+                     "location": location, "w": dims[0], "h": dims[1]}
+            if exif_date(meta): entry["date"] = exif_date(meta)
+            if camera: entry["camera"] = camera
+            if settings: entry["exif"] = settings
+            entries.append(entry)
         manifest.append({"slug": s["slug"], "title": s["title"], "photos": entries})
         print(f"{s['slug']}: {len(entries)} photos")
 

@@ -25,16 +25,29 @@ const bySlug = Object.fromEntries(SERIES.map((s) => [s.slug, s]));
 
 function placesOf(s) {
   const seen = new Set(), out = [];
-  s.photos.forEach((p) => { if (p.title && !seen.has(p.title)) { seen.add(p.title); out.push(p.title); } });
+  s.photos.forEach((p) => { if (p.title && !seen.has(p.title)) { seen.add(p.title); out.push(p); } });
   return out;
 }
+// places grouped under their label: GERMANY  Berlin · Frankfurt · …
+function placesHTML(s, cls) {
+  const groups = new Map();
+  placesOf(s).forEach((p) => {
+    const k = p.location || "";
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(p.title);
+  });
+  if ([...groups.values()].reduce((a, v) => a + v.length, 0) < 2) return "";
+  const rows = [...groups.entries()].sort((a, b) => (a[0] === "") - (b[0] === "") || b[1].length - a[1].length);
+  return `<div class="series-places ${cls}">${rows.map(([label, names]) => `
+    <div class="pl${names.length > 5 ? " wide" : ""}">${label ? `<span class="pl-label">${esc(label)}</span>` : ""}<span class="pl-names">${names.map(esc).join('&nbsp;<span class="sep">·</span> ')}</span></div>`).join("")}</div>`;
+}
+
 const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 function poolOf(s) {
   const want = (typeof HIGHLIGHTS !== "undefined" && HIGHLIGHTS[s.slug]) || [];
   const picked = want.map((stem) => s.photos.find((p) => p.src === stem)).filter(Boolean);
   return picked.length ? picked : s.photos;
 }
-// random subset of the pool, preferring one photo per place
 function homeCount(s) {
   const base = (typeof HOME_COUNT !== "undefined" && HOME_COUNT[s.slug]) || 4;
   const w = innerWidth, k = w >= 1400 ? 1.5 : w >= 1000 ? 1.25 : w >= 640 ? 1 : 0.75;
@@ -58,8 +71,21 @@ const places = new Set();
 SERIES.filter((s) => subjectOf(s) === "place")
   .forEach((s) => s.photos.forEach((p) => p.location && places.add(p.title)));
 document.getElementById("introStats").innerHTML =
-  `${plural(TOTAL, "photograph")}<span class="dot">·</span>${plural(SERIES.length, "series")}` +
-  (places.size ? `<span class="dot">·</span>${plural(places.size, "place")}` : "");
+  `<span class="n" data-n="${TOTAL}">${TOTAL}</span> photographs<span class="dot">·</span><span class="n" data-n="${SERIES.length}">${SERIES.length}</span> series` +
+  (places.size ? `<span class="dot">·</span><span class="n" data-n="${places.size}">${places.size}</span> places` : "");
+// count the intro numbers up from zero, eased, once fonts are ready
+if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  document.querySelectorAll("#introStats .n").forEach((el) => {
+    const target = Number(el.dataset.n), t0 = performance.now() + 500, dur = 1400;
+    el.textContent = "0";
+    const step = (now) => {
+      const k = Math.min(1, Math.max(0, (now - t0) / dur)), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = String(Math.round(target * e));
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
 
 // ---------- contents / index overlay / rail ----------
 const contentsList = document.getElementById("contentsList");
@@ -67,8 +93,9 @@ const indexList = document.getElementById("indexList");
 const rail = document.getElementById("rail");
 SERIES.forEach((s, i) => {
   const id = `series-${s.num}`, n = s.photos.length;
+  const peek = s.photos[Math.floor(Math.random() * s.photos.length)];
   contentsList.insertAdjacentHTML("beforeend",
-    `<li class="reveal" style="--d:${300 + i * 55}ms"><a href="#${id}"><span class="num">${s.num}</span><span class="name">${esc(s.title)}</span><span class="count">${n}</span></a></li>`);
+    `<li class="reveal" style="--d:${300 + i * 55}ms"><a href="#${id}"><span class="num">${s.num}</span><span class="name">${esc(s.title)}</span><span class="count">${n}</span><img class="peek" src="${thumbSrc(peek)}" alt="" loading="lazy" style="--ar:${peek.w} / ${peek.h}"></a></li>`);
   indexList.insertAdjacentHTML("beforeend",
     `<li><a href="#${id}"><span class="num">${s.num}</span>${esc(s.title)}<span class="count">${n}</span></a></li>`);
   rail.insertAdjacentHTML("beforeend",
@@ -96,7 +123,7 @@ function seriesHead(s, cls = "") {
       </div>
       <p class="series-meta">${plural(n, "photograph")}${pl.length > 1 ? `<br>${plural(pl.length, subjectOf(s))}` : ""}</p>
     </header>
-    ${pl.length > 1 ? `<p class="series-places ${cls}">${pl.map(esc).join('&nbsp;<span class="sep">·</span> ')}</p>` : ""}`;
+    ${placesHTML(s, cls)}`;
 }
 
 // ---------- home: series sections with highlights ----------
@@ -242,6 +269,13 @@ const lightbox = document.getElementById("lightbox");
 const lbMedia = document.getElementById("lbMedia");
 const lbTitle = document.getElementById("lbTitle");
 const lbMeta = document.getElementById("lbMeta");
+const lbExif = document.getElementById("lbExif");
+const lbStrip = document.getElementById("lbStrip");
+function buildStrip(list) {
+  lbStrip.innerHTML = list.map((p, i) =>
+    `<button type="button" data-i="${i}" aria-label="Photograph ${i + 1}" style="--ar:${p.w} / ${p.h}"><img src="${thumbSrc(p)}" alt="" loading="lazy" decoding="async"></button>`).join("");
+}
+lbStrip.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) showPhoto(Number(b.dataset.i)); });
 let lbList = [], current = -1, lastFocus = null;
 const preload = (i) => { const im = new Image(); im.src = fullSrc(lbList[(i + lbList.length) % lbList.length]); };
 function showPhoto(i, fromCard) {
@@ -260,9 +294,17 @@ function showPhoto(i, fromCard) {
   full.src = fullSrc(photo);
   lbTitle.textContent = photo.title || s.title;
   lbMeta.textContent = [photo.location, s.title, `${current + 1} / ${lbList.length}`].filter(Boolean).join("  ·  ");
+  const when = photo.date ? new Date(photo.date + "T12:00:00").toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : "";
+  lbExif.innerHTML = [photo.camera && `<span class="cam">${esc(photo.camera)}</span>`, photo.exif && esc(photo.exif), when]
+    .filter(Boolean).join('<span class="sep">·</span>');
+  // filmstrip: mark the current frame and keep it in view
+  [...lbStrip.children].forEach((b, i) => b.classList.toggle("on", i === current));
+  const on = lbStrip.children[current];
+  if (on) on.scrollIntoView({ block: "nearest", inline: "center", behavior: lightbox.classList.contains("open") ? "smooth" : "instant" });
   preload(current + 1); preload(current - 1);
 }
 function openLightbox(list, i, card) {
+  if (list !== lbList) buildStrip(list);
   lbList = list; lastFocus = document.activeElement;
   const thumb = card && card.querySelector(".photo-frame img:last-of-type");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -360,3 +402,5 @@ lightbox.addEventListener("touchend", (e) => {
 })();
 
 route();
+// debug: ?lb=slug:index opens the lightbox on load (screenshots)
+if (Q.has("lb")) { const [sl, ix] = Q.get("lb").split(":"); if (bySlug[sl]) openLightbox(bySlug[sl].photos, Number(ix || 0)); }
