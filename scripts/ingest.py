@@ -309,6 +309,9 @@ def main():
     DATA.write_text("\n".join(lines) + "\n")
     total = sum(len(s["photos"]) for s in manifest)
     print(f"\nwrote {DATA.relative_to(ROOT)}: {len(manifest)} series, {total} photos")
+    # version-stamp the asset links so browsers never mix old CSS/JS with new HTML
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import stamp; stamp.stamp()
 
 if __name__ == "__main__":
     main()

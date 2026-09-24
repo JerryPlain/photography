@@ -220,7 +220,9 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   if (missing.size) console.warn("atlas: no coordinates for", [...missing].join(", "), "— add them in scripts/build_map.py");
   const countries = new Set();
   byPlace.forEach((pl) => pl.photos.forEach((p) => { if (subjectOf(p._series) === "place" && p.location) countries.add(p.location); }));
-  stats.innerHTML = `${plural(byPlace.size, "place")}<br>${plural(countries.size, "country")}`;
+  const years = [...byPlace.values()].flatMap((pl) => pl.photos.map((p) => p.date && Number(p.date.slice(0, 4)))).filter(Boolean);
+  const span = years.length ? (Math.min(...years) === Math.max(...years) ? `${years[0]}` : `${Math.min(...years)}–${Math.max(...years)}`) : "";
+  stats.innerHTML = `${plural(byPlace.size, "place")}<br>${plural(countries.size, "country")}${span ? `<br>${span}` : ""}`;
 
   // permanent labels: most photographed first, skipping any that would sit on top of one already placed;
   // everything else names itself on hover

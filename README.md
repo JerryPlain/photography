@@ -27,12 +27,17 @@
 放好照片后运行：
 
 ```sh
-python3 scripts/ingest.py           # 压缩到 photos/ 并重新生成 js/data.js
+python3 scripts/ingest.py           # 压缩到 photos/ 并重新生成 js/data.js（同时会给资源链接打版本号）
 # python3 scripts/ingest.py --force # 改了压缩参数后，强制重新生成全部
+# python3 scripts/stamp.py          # 只改了 css/js 没动照片时，单独打版本号
 git add -A && git commit -m "Update photos" && git push
 ```
 
 脚本只依赖 macOS 自带的 `sips`。每张照片生成最大 2000px 的全图和最大 1000px 的缩略图（**原图更小就保持原尺寸，不放大**），文件名带内容 hash，重复运行是增量的；源库里删掉的照片会被自动清理。
+
+## 缓存
+
+GitHub Pages 把所有文件缓存 10 分钟。`scripts/stamp.py` 会把 `index.html` 里每个 css/js 链接加上内容哈希（`css/style.css?v=b14e8d52`），这样浏览器永远不会拿旧样式配新页面。**改了 css 或 js 之后提交前一定要跑一次**（ingest 会自动跑）。部署后如果页面看着不对，先强制刷新一次（Cmd+Shift+R）。
 
 ## 文案
 
