@@ -34,6 +34,17 @@ function placesOf(s) {
 const GROUPED = new Set(["place", "country", "act"]);
 function placesHTML(s, cls) {
   if (!GROUPED.has(subjectOf(s))) {
+    // photos titled by filename still belong to a folder (a university, an office): group by it in red
+    if (s.photos.some((p) => p.group)) {
+      const byGroup = new Map();
+      placesOf(s).forEach((p) => {
+        const k = p.group || p.location || "";
+        if (!byGroup.has(k)) byGroup.set(k, []);
+        byGroup.get(k).push(p.title);
+      });
+      return `<div class="series-places ${cls}">${[...byGroup.entries()].map(([label, names]) => `
+        <div class="pl wide">${label ? `<span class="pl-label">${esc(label)}</span>` : ""}<span class="pl-names">${names.map(esc).join('&nbsp;<span class="sep">·</span> ')}</span></div>`).join("")}</div>`;
+    }
     const names = placesOf(s).map((p) => p.title);
     return names.length < 2 ? "" : `<div class="series-places ${cls}"><div class="pl wide"><span class="pl-names">${names.map(esc).join('&nbsp;<span class="sep">·</span> ')}</span></div></div>`;
   }

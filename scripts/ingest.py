@@ -253,9 +253,9 @@ def scan():
             for p in sorted(files, key=fkey):
                 title, label = labelled[key][p]
                 if title:
-                    photos.append((title, label or key[1] or key[0], p))
+                    photos.append((title, label or key[1] or key[0], p, key[0]))
                 else:
-                    photos.append((key[0], key[1], p))
+                    photos.append((key[0], key[1], p, key[0]))
         series.append({"slug": slug, "title": series_title(folder.name), "photos": photos})
     return series
 
@@ -269,7 +269,7 @@ def main():
     keep = set()
     for s in series:
         entries = []
-        for title, location, src in s["photos"]:
+        for title, location, src, group in s["photos"]:
             base = f"{slugify(title) if title else s['slug']}-{file_hash(src)}.jpg"
             full = OUT / s["slug"] / base
             thumb = OUT / s["slug"] / "thumbs" / base
@@ -292,6 +292,7 @@ def main():
                      "location": location, "w": dims[0], "h": dims[1]}
             when = exif_date(meta) or created_date(src)
             if when: entry["date"] = when
+            if group and group != title: entry["group"] = group   # the folder a renamed file lives in
             if camera: entry["camera"] = camera
             if settings: entry["exif"] = settings
             entries.append(entry)
