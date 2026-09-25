@@ -33,6 +33,24 @@ function placesOf(s) {
 // places grouped under their label: GERMANY  Berlin · Frankfurt · …
 const GROUPED = new Set(["place", "country", "act"]);
 function placesHTML(s, cls) {
+  if (subjectOf(s) === "model") {
+    // cars: the maker in red, the models after it (BMW  Vision EfficientDynamics)
+    const TWO_WORD = ["Aston Martin", "Alfa Romeo", "Land Rover", "Range Rover", "Rolls Royce"];
+    const split = (t) => {
+      const two = TWO_WORD.find((b) => t.toLowerCase().startsWith(b.toLowerCase() + " "));
+      const brand = two || t.split(" ")[0];
+      return [brand, t.slice(brand.length).trim() || t];
+    };
+    const byBrand = new Map();
+    placesOf(s).forEach((p) => {
+      const [brand, model] = split(p.title);
+      if (!byBrand.has(brand)) byBrand.set(brand, []);
+      byBrand.get(brand).push(model);
+    });
+    if (placesOf(s).length < 2) return "";
+    return `<div class="series-places ${cls}">${[...byBrand.entries()].map(([brand, names]) => `
+      <div class="pl${names.join("").length + names.length * 2 > 30 ? " wide" : ""}"><span class="pl-label">${esc(brand)}</span><span class="pl-names">${names.map(esc).join('&nbsp;<span class="sep">·</span> ')}</span></div>`).join("")}</div>`;
+  }
   if (!GROUPED.has(subjectOf(s))) {
     // photos titled by filename still belong to a folder (a university, an office): group by it in red
     if (s.photos.some((p) => p.group)) {
