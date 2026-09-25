@@ -31,7 +31,7 @@ function placesOf(s) {
   return out;
 }
 // places grouped under their label: GERMANY  Berlin · Frankfurt · …
-const GROUPED = new Set(["place", "country", "act"]);
+const GROUPED = new Set(["place", "country", "act", "site"]);
 function placesHTML(s, cls) {
   if (subjectOf(s) === "model") {
     // cars: the maker in red, the models after it (BMW  Vision EfficientDynamics)
@@ -72,7 +72,8 @@ function placesHTML(s, cls) {
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k).push(p.title);
   });
-  if ([...groups.values()].reduce((a, v) => a + v.length, 0) < 2) return "";
+  const total = [...groups.values()].reduce((a, v) => a + v.length, 0);
+  if (total < 2 && !(subjectOf(s) === "site" && !groups.has(""))) return "";
   const rows = [...groups.entries()].sort((a, b) => (a[0] === "") - (b[0] === "") || b[1].length - a[1].length);
   return `<div class="series-places ${cls}">${rows.map(([label, names]) => `
     <div class="pl${names.join("").length + names.length * 2 > 30 ? " wide" : ""}">${label ? `<span class="pl-label">${esc(label)}</span>` : ""}<span class="pl-names">${names.map(esc).join('&nbsp;<span class="sep">·</span> ')}</span></div>`).join("")}</div>`;

@@ -113,7 +113,7 @@ const SERIES = [
     slug: "company",
     title: "Company",
     photos: [
-      {"file": "company/huawei-munich-research-center-aa4e1b9e.jpg", "src": "IMG_9770", "title": "Huawei Munich Research Center", "location": "", "w": 1846, "h": 2000, "date": "2025-10-30", "camera": "iPhone 14 Pro Max", "exif": "31 mm · ƒ/1.78 · 1/104 s · ISO 250"},
+      {"file": "company/huawei-munich-research-center-aa4e1b9e.jpg", "src": "IMG_9770", "title": "Huawei Munich Research Center", "location": "Munich", "w": 1846, "h": 2000, "date": "2025-10-30", "camera": "iPhone 14 Pro Max", "exif": "31 mm · ƒ/1.78 · 1/104 s · ISO 250"},
     ],
   },
   {
