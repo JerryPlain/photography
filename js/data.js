@@ -10,6 +10,7 @@ const SERIES = [
     title: "City",
     photos: [
       {"file": "city/kufstein-9bf0c194.jpg", "src": "DSCF2197", "title": "Kufstein", "location": "Austria", "w": 2000, "h": 1333, "date": "2026-03-08", "camera": "Fujifilm X-T50", "exif": "17.5 mm · ƒ/2.8 · 1/1300 s · ISO 80"},
+      {"file": "city/qingdao-bf69cac7.jpg", "src": "C90DA214-D55F-4BDF-881E-E62A54F09957", "title": "Qingdao", "location": "China", "w": 1440, "h": 1800, "date": "2022-08-19"},
       {"file": "city/dubrovnik-47dcde5e.jpg", "src": "DSCF2365", "title": "Dubrovnik", "location": "Croatia", "w": 2000, "h": 1333, "date": "2026-06-29", "camera": "Fujifilm X-T50", "exif": "34 mm · ƒ/2.8 · 1/3000 s · ISO 160"},
       {"file": "city/dubrovnik-ecc208f2.jpg", "src": "IMG_6134", "title": "Dubrovnik", "location": "Croatia", "w": 1471, "h": 2000, "date": "2026-06-29"},
       {"file": "city/paris-88d91bab.jpg", "src": "fxn 2024-12-24 164606.269", "title": "Paris", "location": "France", "w": 1499, "h": 2000, "date": "2024-12-24", "camera": "iPhone 13", "exif": "26 mm · ƒ/1.6 · 1/100 s · ISO 64"},

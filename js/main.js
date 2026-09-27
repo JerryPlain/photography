@@ -359,12 +359,19 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   const month = (d) => d ? new Date(d + "T12:00:00").toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : "";
   // a tick per city, a year label where each year begins
   let lastYear = "";
-  jrMarks.innerHTML = visits.map((v, k) => {
-    const at = ((k + 1) / N * 100).toFixed(3), y = (v.first || "").slice(0, 4);
-    const yr = y && y !== lastYear ? `<span class="jr-year" style="left:${at}%">${y}</span>` : "";
+  const yearAt = [];
+  const ticks = visits.map((v, k) => {
+    const at = (k + 1) / N * 100, y = (v.first || "").slice(0, 4);
+    if (y && y !== lastYear) yearAt.push({ y, at });
     lastYear = y || lastYear;
-    return `<i style="left:${at}%"></i>${yr}`;
-  }).join("");
+    return `<i style="left:${at.toFixed(3)}%"></i>`;
+  });
+  // years that begin close together (a lone early visit) split apart: the earlier one ends at its tick
+  const yearLabels = yearAt.map((o, k) => {
+    const next = yearAt[k + 1], tight = next && next.at - o.at < 7, after = k > 0 && o.at - yearAt[k - 1].at < 7;
+    return `<span class="jr-year${tight ? " end" : after ? " start" : ""}" style="left:${o.at.toFixed(3)}%">${o.y}</span>`;
+  });
+  jrMarks.innerHTML = ticks.join("") + yearLabels.join("");
 
   const ease = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
   let p = 0, playing = false, raf = 0, last = 0;

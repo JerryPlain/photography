@@ -632,4 +632,6 @@ html.noreveal .intro-text > .eyebrow, html.noreveal .intro-statement, html.norev
   .visitors .atlas-stats { text-align: left; }
   .visitors-cta { opacity: 1; transform: none; }
 }
+.jr-year.end { transform: translateX(calc(-100% + 3px)); }
+.jr-year.start { transform: translateX(-3px); }
 
