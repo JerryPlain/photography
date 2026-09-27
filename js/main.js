@@ -11,7 +11,7 @@ const thumbSrc = (p) => { const i = p.file.lastIndexOf("/"); return `photos/${p.
 const caption = (p) => [p.title, p.location].filter(Boolean).join(", ");
 const PLURALS = { series: "series", photograph: "photographs", place: "places",
                   country: "countries", model: "models", act: "acts", campus: "campuses", site: "sites",
-                  scene: "scenes", city: "cities" };
+                  scene: "scenes", city: "cities", moment: "moments" };
 const plural = (n, w) => `${n} ${n === 1 ? w : PLURALS[w] || w + "s"}`;
 const subjectOf = (s) => (typeof SUBJECT !== "undefined" && SUBJECT[s.slug]) || "place";
 

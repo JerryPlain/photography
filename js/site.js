@@ -53,7 +53,7 @@ const HOME_COUNT = { "city": 6, "me": 3, "sea-and-lake": 3, "car": 3, "school": 
 // 每个系列的"条目"叫什么（系列标题下方的计数、以及地点行）。没写的默认 place。
 // 复数形式见 js/main.js 的 PLURALS。
 const SUBJECT = {
-  "me": "country",
+  "me": "place",
   "car": "model",
   "robot": "model",
   "concert": "act",
