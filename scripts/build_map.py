@@ -23,7 +23,7 @@ TOL = 1.0                                             # simplify tolerance (svg 
 PLACES = {  # name: (lon, lat)
     "Bangkok": (100.50, 13.75), "Barcelona": (2.17, 41.39), "Berlin": (13.40, 52.52),
     "Dubrovnik": (18.09, 42.65), "Florence": (11.26, 43.77), "Frankfurt": (8.68, 50.11),
-    "Freising": (11.75, 48.40), "Füssen": (10.70, 47.57), "Heidelberg": (8.69, 49.40),
+    "Freising": (11.75, 48.40), "Füssen": (10.70, 47.57), "Schwangau": (10.74, 47.58), "Heidelberg": (8.69, 49.40),
     "Lindau": (9.69, 47.55), "Lisbon": (-9.14, 38.72), "Ljubljana": (14.51, 46.06),
     "Manarola": (9.73, 44.11), "Mannheim": (8.47, 49.49), "Munich": (11.58, 48.14),
     "Naxos": (25.38, 37.10), "Nürnberg": (11.08, 49.45), "Osaka": (135.50, 34.69),
