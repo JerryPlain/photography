@@ -215,14 +215,40 @@ body, .topbar, .index-overlay, .lightbox { transition: background-color 0.4s eas
   letter-spacing: -0.01em;
   text-wrap: balance;
 }
+.intro-quote { margin: 1.6rem 0 0; max-width: 30em; }
 .intro-statement {
+  margin: 0;
   font-family: var(--serif);
-  font-size: clamp(1.05rem, 1.5vw, 1.25rem);
-  line-height: 1.5;
+  font-size: clamp(1.15rem, 1.7vw, 1.4rem);
+  line-height: 1.45;
   color: var(--ink-soft);
-  margin-top: 1.4rem;
-  max-width: 28em;
   text-wrap: pretty;
+}
+/* a quotation: italic, with a large red opening mark hanging in the margin */
+.intro-quote.is-quote .intro-statement {
+  position: relative;
+  font-style: italic;
+  color: var(--ink);
+  letter-spacing: 0.005em;
+}
+.intro-quote.is-quote .intro-statement::before {
+  content: "\201C";
+  position: absolute; left: -0.62em; top: -0.32em;
+  font-family: var(--serif); font-style: normal;
+  font-size: 2.6em; line-height: 1;
+  color: var(--accent); opacity: 0.85;
+}
+.quote-by {
+  margin-top: 0.7rem;
+  font-family: var(--sans); font-size: 0.66rem; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.quote-by:empty { display: none; }
+.quote-by .dash { color: var(--accent); margin-right: 0.6em; }
+.quote-by cite {
+  font-family: var(--serif); font-style: italic; font-size: 1.28em;
+  letter-spacing: 0.01em; text-transform: none; color: var(--ink-soft);
 }
 .intro-stats { margin-top: 2rem; font-size: 0.78rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .intro-stats .n { color: var(--ink); font-weight: 500; }
@@ -344,6 +370,7 @@ body, .topbar, .index-overlay, .lightbox { transition: background-color 0.4s eas
 @keyframes rise { to { transform: none; } }
 .intro-text > .eyebrow { animation: fadeUp 0.8s var(--ease) 0ms both; }
 .intro-statement { animation: fadeUp 0.9s var(--ease) 320ms both; }
+.intro-quote .quote-by { animation: fadeUp 0.9s var(--ease) 420ms both; }
 .intro-stats { animation: fadeUp 0.9s var(--ease) 440ms both; }
 .contents > .eyebrow { animation: fadeUp 0.8s var(--ease) 260ms both; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
@@ -363,7 +390,8 @@ body, .topbar, .index-overlay, .lightbox { transition: background-color 0.4s eas
 }
 .footer-mark { width: 2.2rem; height: 2.2rem; margin: 0 auto 1rem; }
 .footer-name { font-family: var(--serif); font-size: 1.4rem; }
-.footer-statement { font-family: var(--serif); font-style: italic; color: var(--ink-soft); margin-top: 0.3rem; }
+.footer-statement { font-family: var(--serif); font-style: italic; font-size: 1.08rem; color: var(--ink-soft); margin-top: 0.4rem; }
+.footer-by { margin-top: 0.4rem; }
 .footer-links { display: flex; justify-content: center; gap: 1.8rem; margin: 1.8rem 0 1.4rem; }
 .footer-links a { color: var(--ink); }
 .footer-links a:hover { color: var(--accent); }
@@ -590,7 +618,7 @@ body, .topbar, .index-overlay, .lightbox { transition: background-color 0.4s eas
 
 /* screenshot mode: every entrance already finished */
 html.noreveal .atlas-map .land, html.noreveal .intro-title .w > span,
-html.noreveal .intro-text > .eyebrow, html.noreveal .intro-statement, html.noreveal .intro-stats, html.noreveal .contents > .eyebrow {
+html.noreveal .intro-text > .eyebrow, html.noreveal .intro-statement, html.noreveal .intro-quote .quote-by, html.noreveal .intro-stats, html.noreveal .contents > .eyebrow {
   animation: none !important; opacity: 1 !important; transform: none !important;
 }
 
@@ -610,4 +638,9 @@ html.noreveal .intro-text > .eyebrow, html.noreveal .intro-statement, html.norev
 }
 .jr-year.end { transform: translateX(calc(-100% + 3px)); }
 .jr-year.start { transform: translateX(-3px); }
+/* narrow screens have no margin to hang the quote mark in: indent the quote instead */
+@media (max-width: 1100px) {
+  .intro-quote.is-quote { padding-left: 1.5rem; }
+  .intro-quote.is-quote .intro-statement::before { left: -0.72em; }
+}
 

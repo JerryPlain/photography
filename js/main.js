@@ -104,6 +104,11 @@ document.getElementById("homeLink").href = SITE.home;
 document.getElementById("introTitle").innerHTML = SITE.title.split(" ")
   .map((w, i) => `<span class="w"><span style="--d:${i * 90}ms">${esc(w)}</span></span>`).join(" ");
 document.getElementById("introStatement").textContent = SITE.statement;
+const quoteBy = SITE.statementBy
+  ? `<span class="dash" aria-hidden="true">—</span>${esc(SITE.statementBy)}${SITE.statementSource ? `, <cite>${esc(SITE.statementSource)}</cite>` : ""}`
+  : "";
+document.getElementById("introQuoteBy").innerHTML = quoteBy;
+document.getElementById("introQuote").classList.toggle("is-quote", !!SITE.statementBy);
 const places = new Set();
 SERIES.filter((s) => subjectOf(s) === "place")
   .forEach((s) => s.photos.forEach((p) => p.location && places.add(p.title)));
@@ -227,7 +232,8 @@ watchImages(document);
 
 // ---------- footer ----------
 document.getElementById("footerName").textContent = SITE.author;
-document.getElementById("footerStatement").textContent = SITE.statement;
+document.getElementById("footerStatement").textContent = SITE.statementBy ? `“${SITE.statement}”` : SITE.statement;
+document.getElementById("footerQuoteBy").innerHTML = quoteBy;
 document.getElementById("footerLinks").innerHTML = SITE.footerLinks
   .map((l) => `<a href="${esc(l.url)}"${l.url.startsWith("http") ? ' target="_blank" rel="noopener"' : ""}>${esc(l.label)}</a>`).join("");
 document.getElementById("footerCopy").textContent = SITE.copyright;

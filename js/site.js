@@ -6,7 +6,10 @@ const SITE = {
   author: "Shijie Zhou",
   title: "Selected Photographs",
   // 扉页上的一句话
-  statement: "A record of places passed through, and the light that stayed.",
+  statement: "Not all those who wander are lost.",
+  // 引用的出处（扉页和页脚都会显示）；不是引用就把两个都留空
+  statementBy: "J.R.R. Tolkien",
+  statementSource: "The Fellowship of the Ring",
   // 个人主页
   home: "https://jerryplain.github.io/",
   footerLinks: [
