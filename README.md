@@ -77,9 +77,9 @@ python3 scripts/build_map.py ne_50m_land.geojson
 
 ## 访客地图
 
-页面最后、页脚之前是「Where it was seen from」：和个人主页同一个 [MapMyVisitors](https://mapmyvisitors.com/web/1c6fd) 访客地图，配色改成了本站的纸色和红点，深色模式下自动换成深色地图。点地图打开完整统计页。
+页面最后、页脚之前是「Where it was seen from」：和个人主页同一个 [RevolverMaps2](https://revolvermaps2.com/) 访客地球，会转、可以拖，按城市标出访客，最新访客带国旗。
 
-这张地图图片本身就是计数器：页面一加载、图片被请求，就记一次访问（所以它故意不懒加载）。账号、`id` 和 `profile` 在 [js/site.js](js/site.js) 的 `VISITORS` 里。**现在和主页共用一个账号**，统计的是主页和摄影站加在一起的访客；想分开，就去 MapMyVisitors 为摄影站新建一个小部件，换上新的 `id` / `profile`。`id` 留空则这一节不显示。
+页面一打开、`embed.js` 一运行就记一次访问；地球本身是懒加载的 iframe。`id`、主题和图钉颜色在 [js/site.js](js/site.js) 的 `VISITORS` 里。**现在和主页共用一个 key**，统计的是主页和摄影站加在一起的访客；想分开，就在 revolvermaps2.com 为摄影站再加一个地球，换上新的 `id`。`id` 留空则这一节不显示。
 
 ## 扉页
 
