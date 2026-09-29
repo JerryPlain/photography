@@ -232,7 +232,7 @@ watchImages(document);
 
 // ---------- footer ----------
 document.getElementById("footerName").textContent = SITE.author;
-document.getElementById("footerStatement").textContent = SITE.statementBy ? `“${SITE.statement}”` : SITE.statement;
+document.getElementById("footerStatement").textContent = SITE.statement;
 document.getElementById("footerQuoteBy").innerHTML = quoteBy;
 document.getElementById("footerLinks").innerHTML = SITE.footerLinks
   .map((l) => `<a href="${esc(l.url)}"${l.url.startsWith("http") ? ' target="_blank" rel="noopener"' : ""}>${esc(l.label)}</a>`).join("");
