@@ -85,7 +85,7 @@ const SERIES = [
     title: "Me",
     photos: [
       {"file": "me/manarola-a4541608.jpg", "src": "Manarola, Italy", "title": "Manarola", "location": "Italy", "w": 2000, "h": 1125, "date": "2024-12-28", "group": "Europe", "camera": "DJI PP-101", "exif": "6.5 mm · ƒ/2 · 1/8000 s · ISO 100"},
-      {"file": "me/tossa-5455fdda.jpg", "src": "Tossa, Spain", "title": "Tossa", "location": "Spain", "w": 2000, "h": 1500, "date": "2024-12-28", "group": "Europe", "camera": "iPhone 14 Pro Max", "exif": "38 mm · ƒ/1.78 · 1/1541 s · ISO 80"},
+      {"file": "me/tossa-de-mar-5455fdda.jpg", "src": "Tossa de Mar, Spain", "title": "Tossa de Mar", "location": "Spain", "w": 2000, "h": 1500, "date": "2024-12-28", "group": "Europe", "camera": "iPhone 14 Pro Max", "exif": "38 mm · ƒ/1.78 · 1/1541 s · ISO 80"},
       {"file": "me/florence-5f52f1d8.jpg", "src": "Florence, Italy", "title": "Florence", "location": "Italy", "w": 2000, "h": 1538, "date": "2025-03-02", "group": "Europe", "camera": "iPhone 14 Pro", "exif": "48 mm · ƒ/1.78 · 1/120 s · ISO 125"},
       {"file": "me/pisa-04735653.jpg", "src": "Pisa, Italy", "title": "Pisa", "location": "Italy", "w": 1448, "h": 2000, "date": "2025-03-04", "group": "Europe", "camera": "Panasonic DC-GF10", "exif": "14 mm · ƒ/3.5 · 1/3200 s · ISO 200"},
       {"file": "me/berlin-a60e7036.jpg", "src": "Berlin, Germany", "title": "Berlin", "location": "Germany", "w": 2000, "h": 1333, "date": "2026-01-01", "group": "Europe", "camera": "Fujifilm X-T50", "exif": "16 mm · ƒ/2.8 · 1/25 s · ISO 6400"},
