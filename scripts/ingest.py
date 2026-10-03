@@ -252,6 +252,9 @@ def scan():
                 return (when or "9999", p.name.lower())
             for p in sorted(files, key=fkey):
                 title, label = labelled[key][p]
+                # a filename that only repeats the folder ("raye.png" in "Raye, Berlin 2026") is not a new title
+                if title and not label and key[0] and title.lower() in key[0].lower():
+                    title = ""
                 if title:
                     photos.append((title, label or key[1] or key[0], p, key[0]))
                 else:

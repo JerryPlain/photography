@@ -49,7 +49,7 @@ function placesHTML(s, cls) {
     });
     if (placesOf(s).length < 2) return "";
     return `<div class="series-places ${cls}">${[...byBrand.entries()].map(([brand, names]) => `
-      <div class="pl${names.join("").length + names.length * 2 > 30 ? " wide" : ""}"><span class="pl-label">${esc(brand)}</span><span class="pl-names">${names.map(esc).join('&nbsp;<span class="sep">·</span> ')}</span></div>`).join("")}</div>`;
+      <div class="pl${names.join("").length + names.length * 2 > 30 ? " wide" : ""}"><span class="pl-label">${esc(brand)}</span><span class="pl-names">${names.map((n) => `<span class="nm">${esc(n)}</span>`).join('&nbsp;<span class="sep">·</span> ')}</span></div>`).join("")}</div>`;
   }
   if (!GROUPED.has(subjectOf(s))) {
     // photos titled by filename still belong to a folder (a university, an office): group by it in red
@@ -61,10 +61,10 @@ function placesHTML(s, cls) {
         byGroup.get(k).push(p.title);
       });
       return `<div class="series-places ${cls}">${[...byGroup.entries()].map(([label, names]) => `
-        <div class="pl wide">${label ? `<span class="pl-label">${esc(label)}</span>` : ""}<span class="pl-names">${names.map(esc).join('&nbsp;<span class="sep">·</span> ')}</span></div>`).join("")}</div>`;
+        <div class="pl wide">${label ? `<span class="pl-label">${esc(label)}</span>` : ""}<span class="pl-names">${names.map((n) => `<span class="nm">${esc(n)}</span>`).join('&nbsp;<span class="sep">·</span> ')}</span></div>`).join("")}</div>`;
     }
     const names = placesOf(s).map((p) => p.title);
-    return names.length < 2 ? "" : `<div class="series-places ${cls}"><div class="pl wide"><span class="pl-names">${names.map(esc).join('&nbsp;<span class="sep">·</span> ')}</span></div></div>`;
+    return names.length < 2 ? "" : `<div class="series-places ${cls}"><div class="pl wide"><span class="pl-names">${names.map((n) => `<span class="nm">${esc(n)}</span>`).join('&nbsp;<span class="sep">·</span> ')}</span></div></div>`;
   }
   const groups = new Map();
   placesOf(s).forEach((p) => {
@@ -76,7 +76,7 @@ function placesHTML(s, cls) {
   if (total < 2 && !(subjectOf(s) === "site" && !groups.has(""))) return "";
   const rows = [...groups.entries()].sort((a, b) => (a[0] === "") - (b[0] === "") || b[1].length - a[1].length);
   return `<div class="series-places ${cls}">${rows.map(([label, names]) => `
-    <div class="pl${names.join("").length + names.length * 2 > 30 ? " wide" : ""}">${label ? `<span class="pl-label">${esc(label)}</span>` : ""}<span class="pl-names">${names.map(esc).join('&nbsp;<span class="sep">·</span> ')}</span></div>`).join("")}</div>`;
+    <div class="pl${names.join("").length + names.length * 2 > 30 ? " wide" : ""}">${label ? `<span class="pl-label">${esc(label)}</span>` : ""}<span class="pl-names">${names.map((n) => `<span class="nm">${esc(n)}</span>`).join('&nbsp;<span class="sep">·</span> ')}</span></div>`).join("")}</div>`;
 }
 
 const shuffle = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };

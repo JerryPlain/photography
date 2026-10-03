@@ -13,8 +13,7 @@ const SITE = {
   // 个人主页
   home: "https://jerryplain.github.io/",
   footerLinks: [
-    { label: "About", url: "https://jerryplain.github.io/" },
-    { label: "Publications", url: "https://jerryplain.github.io/publications/" },
+    { label: "Home", url: "https://jerryplain.github.io/" },
     { label: "Email", url: "mailto:jerryplain@outlook.com" },
   ],
   copyright: "© 2026 Shijie Zhou · All photographs by the author.",

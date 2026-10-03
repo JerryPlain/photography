@@ -72,6 +72,7 @@ const SERIES = [
       {"file": "city/sintra-69d0d30e.jpg", "src": "DSCF2034", "title": "Sintra", "location": "Portugal", "w": 2000, "h": 1333, "date": "2026-03-01", "camera": "Fujifilm X-T50", "exif": "28.1 mm · ƒ/4.5 · 1/2200 s · ISO 160"},
       {"file": "city/ljubljana-8f1a9164.jpg", "src": "IMG_2053", "title": "Ljubljana", "location": "Slovenia", "w": 2000, "h": 1494, "date": "2025-12-28", "camera": "iPhone 14 Pro Max", "exif": "43 mm · ƒ/1.78 · 1/50 s · ISO 640"},
       {"file": "city/barcelona-1ced115d.jpg", "src": "IMG_1912", "title": "Barcelona", "location": "Spain", "w": 2000, "h": 1772, "date": "2024-12-27", "camera": "iPhone 14 Pro Max", "exif": "116 mm · ƒ/2.8 · 1/138 s · ISO 32"},
+      {"file": "city/barcelona-ad8a0e36.jpg", "src": "IMG_2414", "title": "Barcelona", "location": "Spain", "w": 1500, "h": 2000, "date": "2024-12-29", "camera": "iPhone 14 Pro Max", "exif": "22 mm · ƒ/2.2 · 1/1208 s · ISO 40"},
       {"file": "city/tossa-de-mar-efb48567.jpg", "src": "IMG_2088", "title": "Tossa de Mar", "location": "Spain", "w": 1500, "h": 2000, "date": "2024-12-28", "camera": "iPhone 14 Pro Max", "exif": "54 mm · ƒ/1.78 · 1/1376 s · ISO 64"},
       {"file": "city/bangkok-6701f911.jpg", "src": "IMG_5332", "title": "Bangkok", "location": "Thailand", "w": 2000, "h": 1500, "date": "2024-07-04"},
       {"file": "city/phuket-9065a832.jpg", "src": "087EFD15-C984-469E-AF9B-AB662B8EACBC", "title": "Phuket", "location": "Thailand", "w": 1744, "h": 1308, "date": "2024-07-09"},
@@ -99,6 +100,8 @@ const SERIES = [
       {"file": "sea-and-lake/eibsee-71c68e94.jpg", "src": "IMG_5214", "title": "Eibsee", "location": "Germany", "w": 1500, "h": 2000, "date": "2025-04-20", "camera": "iPhone 14 Pro Max", "exif": "70 mm · ƒ/1.78 · 1/1517 s · ISO 64"},
       {"file": "sea-and-lake/eibsee-7a1e375e.jpg", "src": "IMG_5243", "title": "Eibsee", "location": "Germany", "w": 1500, "h": 2000, "date": "2025-04-20", "camera": "iPhone 14 Pro Max", "exif": "93 mm · ƒ/2.8 · 1/266 s · ISO 32"},
       {"file": "sea-and-lake/eibsee-4d1e041a.jpg", "src": "IMG_5278", "title": "Eibsee", "location": "Germany", "w": 1500, "h": 2000, "date": "2025-04-20", "camera": "iPhone 14 Pro Max", "exif": "29 mm · ƒ/1.78 · 1/2967 s · ISO 80"},
+      {"file": "sea-and-lake/eibsee-0660f47d.jpg", "src": "IMG_5334", "title": "Eibsee", "location": "Germany", "w": 1678, "h": 2000, "date": "2025-04-20", "camera": "iPhone 14 Pro Max", "exif": "21 mm · ƒ/2.2 · 1/739 s · ISO 40"},
+      {"file": "sea-and-lake/lautersee-40042c56.jpg", "src": "IMG_9626", "title": "Lautersee", "location": "Germany", "w": 2000, "h": 1998, "date": "2024-10-27", "camera": "iPhone 14 Pro Max", "exif": "44 mm · ƒ/1.78 · 1/535 s · ISO 80"},
     ],
   },
   {
@@ -127,12 +130,12 @@ const SERIES = [
     slug: "school",
     title: "School",
     photos: [
-      {"file": "school/tum-rutsche-ii-a2681c93.jpg", "src": "TUM-Rutsche II, CIT", "title": "TUM-Rutsche II", "location": "CIT", "w": 2000, "h": 1691, "date": "2024-10-06", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "32 mm · ƒ/1.78 · 1/480 s · ISO 80"},
-      {"file": "school/main-library-7e4d47c0.jpg", "src": "Main Library", "title": "Main Library", "location": "Technical University of Munich", "w": 1905, "h": 2000, "date": "2024-10-09", "group": "Technical University of Munich"},
-      {"file": "school/rainbow-8cd5055e.jpg", "src": "Rainbow@TUM", "title": "Rainbow", "location": "TUM", "w": 1635, "h": 2000, "date": "2024-10-14", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "85 mm · ƒ/2.8 · 1/570 s · ISO 32"},
-      {"file": "school/studitum-85209918.jpg", "src": "StudiTUM", "title": "StudiTUM", "location": "Technical University of Munich", "w": 1568, "h": 2000, "date": "2025-01-01", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "41 mm · ƒ/1.78 · 1/121 s · ISO 64"},
+      {"file": "school/tum-rutsche-upstairs-a2681c93.jpg", "src": "TUM-Rutsche Upstairs, CIT", "title": "TUM-Rutsche Upstairs", "location": "CIT", "w": 2000, "h": 1691, "date": "2024-10-06", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "32 mm · ƒ/1.78 · 1/480 s · ISO 80"},
+      {"file": "school/main-library-front-door-7e4d47c0.jpg", "src": "Main Library Front Door", "title": "Main Library Front Door", "location": "Technical University of Munich", "w": 1905, "h": 2000, "date": "2024-10-09", "group": "Technical University of Munich"},
+      {"file": "school/opening-ceremony-rainbow-8cd5055e.jpg", "src": "Opening Ceremony Rainbow", "title": "Opening Ceremony Rainbow", "location": "Technical University of Munich", "w": 1635, "h": 2000, "date": "2024-10-14", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "85 mm · ƒ/2.8 · 1/570 s · ISO 32"},
+      {"file": "school/studitum-rooftop-view-85209918.jpg", "src": "StudiTUM Rooftop View", "title": "StudiTUM Rooftop View", "location": "Technical University of Munich", "w": 1568, "h": 2000, "date": "2025-01-01", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "41 mm · ƒ/1.78 · 1/121 s · ISO 64"},
       {"file": "school/weihenstephan-library-4133cb23.jpg", "src": "Weihenstephan Library", "title": "Weihenstephan Library", "location": "Technical University of Munich", "w": 1818, "h": 2000, "date": "2025-06-27", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "38 mm · ƒ/1.78 · 1/328 s · ISO 80"},
-      {"file": "school/tum-rutsche-334105a7.jpg", "src": "TUM-Rutsche, CIT", "title": "TUM-Rutsche", "location": "CIT", "w": 2000, "h": 1500, "date": "2026-08-14", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "45 mm · ƒ/1.78 · 1/171 s · ISO 100"},
+      {"file": "school/tum-rutsche-downstairs-334105a7.jpg", "src": "TUM-Rutsche Downstairs, CIT", "title": "TUM-Rutsche Downstairs", "location": "CIT", "w": 2000, "h": 1500, "date": "2026-08-14", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "45 mm · ƒ/1.78 · 1/171 s · ISO 100"},
     ],
   },
   {
@@ -141,6 +144,7 @@ const SERIES = [
     photos: [
       {"file": "concert/bruno-mars-aa4640e6.jpg", "src": "图像", "title": "Bruno Mars", "location": "Berlin 2026", "w": 852, "h": 896, "date": "2026-09-24"},
       {"file": "concert/laufey-e688d094.jpg", "src": "IMG_3395", "title": "Laufey", "location": "Berlin 2026", "w": 1654, "h": 2000, "date": "2026-02-24", "camera": "iPhone 14 Pro Max", "exif": "245 mm · ƒ/2.8 · 1/83 s · ISO 125"},
+      {"file": "concert/raye-f717dd80.jpg", "src": "raye", "title": "Raye", "location": "Berlin 2026", "w": 848, "h": 748, "date": "2026-10-03"},
       {"file": "concert/sza-kendrick-lamar-069844ca.jpg", "src": "FullSizeRender", "title": "SZA & Kendrick Lamar", "location": "Frankfurt 2025", "w": 1499, "h": 2000, "date": "2025-07-04", "camera": "iPhone 14 Pro Max", "exif": "124 mm · ƒ/2.8 · 1/20 s · ISO 1600"},
       {"file": "concert/dua-lipa-ca6d5ed7.jpg", "src": "IMG_6363", "title": "Dua Lipa", "location": "Munich 2025", "w": 1500, "h": 2000, "date": "2025-06-01", "camera": "iPhone 14 Pro Max", "exif": "83 mm · ƒ/2.8 · 1/60 s · ISO 640"},
       {"file": "concert/dua-lipa-b6251a7f.jpg", "src": "originalImage_164890831_livephoto", "title": "Dua Lipa", "location": "Munich 2025", "w": 1080, "h": 1440, "date": "2025-06-01"},

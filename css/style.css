@@ -225,11 +225,15 @@ body, .topbar, .index-overlay, .lightbox { transition: background-color 0.4s eas
   text-wrap: pretty;
 }
 /* a quotation: italic, credited below */
+/* the quotation gets its own face: a calligraphic Garamond italic, larger and lighter than the title */
 .intro-quote.is-quote .intro-statement {
   position: relative;
-  font-style: italic;
+  font-family: "Cormorant Garamond", "EB Garamond", Garamond, var(--serif);
+  font-style: italic; font-weight: 500;
+  font-size: clamp(1.55rem, 2.3vw, 1.95rem);
+  line-height: 1.25;
+  letter-spacing: 0.003em;
   color: var(--ink);
-  letter-spacing: 0.005em;
 }
 
 .quote-by {
@@ -241,7 +245,7 @@ body, .topbar, .index-overlay, .lightbox { transition: background-color 0.4s eas
 .quote-by:empty { display: none; }
 .quote-by .dash { color: var(--accent); margin-right: 0.6em; }
 .quote-by cite {
-  font-family: var(--serif); font-style: italic; font-size: 1.28em;
+  font-family: "Cormorant Garamond", "EB Garamond", Garamond, var(--serif); font-style: italic; font-weight: 500; font-size: 1.5em;
   letter-spacing: 0.01em; text-transform: none; color: var(--ink-soft);
 }
 .intro-stats { margin-top: 2rem; font-size: 0.78rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
@@ -384,7 +388,7 @@ body, .topbar, .index-overlay, .lightbox { transition: background-color 0.4s eas
 }
 .footer-mark { width: 2.2rem; height: 2.2rem; margin: 0 auto 1rem; }
 .footer-name { font-family: var(--serif); font-size: 1.4rem; }
-.footer-statement { font-family: var(--serif); font-style: italic; font-size: 1.08rem; color: var(--ink-soft); margin-top: 0.4rem; }
+.footer-statement { font-family: "Cormorant Garamond", "EB Garamond", Garamond, var(--serif); font-style: italic; font-weight: 500; font-size: 1.35rem; color: var(--ink-soft); margin-top: 0.4rem; }
 .footer-by { margin-top: 0.4rem; }
 .footer-links { display: flex; justify-content: center; gap: 1.8rem; margin: 1.8rem 0 1.4rem; }
 .footer-links a { color: var(--ink); }
@@ -632,4 +636,4 @@ html.noreveal .intro-text > .eyebrow, html.noreveal .intro-statement, html.norev
 }
 .jr-year.end { transform: translateX(calc(-100% + 3px)); }
 .jr-year.start { transform: translateX(-3px); }
-
+.pl-names .nm { white-space: nowrap; }
