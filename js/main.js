@@ -326,12 +326,66 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
     for (let lat = Math.ceil(lat0 / 5) * 5; lat <= lat1; lat += 5) grat += `M0,${py(lat).toFixed(1)}H${pl.w}`;
     const here = visits.filter((v) => v.plate === pk);
     const arcs = visits.filter((v) => v.k > 0 && v.plate === pk && visits[v.k - 1].plate === pk);
+    const { w: W, h: H } = pl;
+
+    // neatline: a paper margin, a band of alternating whole degrees between two rules, and every 10° named
+    const B0 = 6, B1 = 11, clampX = (x) => Math.min(Math.max(x, B0), W - B0), clampY = (y) => Math.min(Math.max(y, B0), H - B0);
+    let band = "", deg = "";
+    for (let lon = Math.floor(lon0); lon < lon1; lon++) if (lon % 2 === 0) {
+      const a = clampX(px(lon)), b = clampX(px(lon + 1));
+      if (b > a) band += `M${a.toFixed(1)},${B0}H${b.toFixed(1)}V${B1}H${a.toFixed(1)}ZM${a.toFixed(1)},${H - B1}H${b.toFixed(1)}V${H - B0}H${a.toFixed(1)}Z`;
+    }
+    for (let lat = Math.floor(lat0); lat < lat1; lat++) if (lat % 2 === 0) {
+      const a = clampY(py(lat + 1)), b = clampY(py(lat));
+      if (b > a) band += `M${B0},${a.toFixed(1)}H${B1}V${b.toFixed(1)}H${B0}ZM${W - B1},${a.toFixed(1)}H${W - B0}V${b.toFixed(1)}H${W - B1}Z`;
+    }
+    const fmt = (v, pos, neg) => (v === 0 ? "0°" : `${Math.abs(v)}°${v > 0 ? pos : neg}`);
+    for (let lon = Math.ceil(lon0 / 10) * 10; lon <= lon1; lon += 10)
+      if (px(lon) > 40 && px(lon) < W - 40) deg += `<text x="${px(lon).toFixed(1)}" y="${B1 + 14}" text-anchor="middle">${fmt(lon, "E", "W")}</text>`;
+    for (let lat = Math.ceil(lat0 / 10) * 10; lat <= lat1; lat += 10)
+      if (py(lat) > 40 && py(lat) < H - 60) deg += pl.latSide === "right"
+        ? `<text x="${W - B1 - 6}" y="${(py(lat) + 4).toFixed(1)}" text-anchor="end">${fmt(lat, "N", "S")}</text>`
+        : `<text x="${B1 + 6}" y="${(py(lat) + 4).toFixed(1)}">${fmt(lat, "N", "S")}</text>`;
+
+    // scale bar for the latitude it sits at (Mercator stretches toward the poles)
+    const sx = W - B1 - 22, sy = H - B1 - 26, latS = lat0 + (lat1 - lat0) * 0.04;
+    const perKm = K / (6371 * Math.cos(latS * Math.PI / 180));
+    const km = [250, 500, 1000, 2000].find((k) => k * perKm >= 110) || 2000, len = km * perKm;
+    const scale = `<g class="scale" transform="translate(${(sx - len).toFixed(1)},${sy})">
+      <rect class="card" x="-16" y="-22" width="${(len + 40).toFixed(1)}" height="34" rx="3"/>
+      ${[0, 1, 2, 3].map((i) => `<rect x="${(i * len / 4).toFixed(1)}" y="0" width="${(len / 4).toFixed(1)}" height="4" class="${i % 2 ? "o" : "f"}"/>`).join("")}
+      <text x="0" y="-6" text-anchor="middle">0</text><text x="${(len / 2).toFixed(1)}" y="-6" text-anchor="middle">${km / 2}</text>
+      <text x="${len.toFixed(1)}" y="-6" text-anchor="middle">${km} km</text></g>`;
+
+    // water-lining: three fine rings that follow the coast outward, each fainter than the last
+    const rings = [[26, 0.3], [17, 0.55], [9, 0.9]].map(([w, o]) =>
+      `<use href="#coast${pk}" class="ring" stroke-width="${w}" style="opacity:${o}"/><use href="#coast${pk}" stroke-width="${w - 1.6}" style="stroke:url(#sea${pk})"/>`).join("");
+
     return `
-    <div class="plate" style="flex-grow:${(pl.w / pl.h).toFixed(3)}">
-      <svg viewBox="0 0 ${pl.w} ${pl.h}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(pl.name)}: ${plural(here.length, "city")}">
-        <rect class="sea" width="${pl.w}" height="${pl.h}"/>
+    <div class="plate" style="flex-grow:${(W / H).toFixed(3)}">
+      <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${esc(pl.name)}: ${plural(here.length, "city")}">
+        <defs>
+          <radialGradient id="sea${pk}" gradientUnits="userSpaceOnUse" cx="${W / 2}" cy="${H * 0.45}" r="${Math.max(W, H) * 0.75}"><stop offset="0" class="sea-hi"/><stop offset="1" class="sea-lo"/></radialGradient>
+          <path id="coast${pk}" d="${pl.land}"/>
+        </defs>
+        <rect class="sea" width="${W}" height="${H}" fill="url(#sea${pk})"/>
         <path class="grat" d="${grat}"/>
-        <path class="land" d="${pl.land}"/>
+        <g class="ripples">${rings}</g>
+        <use class="land" href="#coast${pk}"/>
+        <path class="lake" d="${pl.lakes || ""}"/>
+        <path class="border" d="${pl.borders || ""}"/>
+        <g class="names" aria-hidden="true">${(pl.labels || []).map(([kind, text, x, y, rot]) => {
+          const lines = text.split("|"), sea = "Osg".includes(kind), lh = kind === "O" ? 21 : sea ? 18 : kind === "C" ? 17 : 14;
+          return `<text class="${sea ? "sea-name" : "country"} t-${kind}" text-anchor="middle" transform="translate(${x},${y})${rot ? ` rotate(${rot})` : ""}">${lines.map((t, i) =>
+            `<tspan x="0" y="${((i - (lines.length - 1) / 2) * lh + 5).toFixed(1)}">${esc(t)}</tspan>`).join("")}</text>`; }).join("")}</g>
+        <g class="frame" aria-hidden="true">
+          <path class="margin" d="M0,0H${W}V${H}H0ZM${B0},${B0}V${H - B0}H${W - B0}V${B0}Z"/>
+          <path class="band" d="${band}"/>
+          <rect class="rule" x="${B0}" y="${B0}" width="${W - 2 * B0}" height="${H - 2 * B0}"/>
+          <rect class="rule thin" x="${B1}" y="${B1}" width="${W - 2 * B1}" height="${H - 2 * B1}"/>
+          <g class="deg">${deg}</g>
+          ${scale}
+        </g>
         <g class="routes">${arcs.map((v) => `<path class="arc" data-k="${v.k}" d="${arcPath(visits[v.k - 1].xy, v.xy)}"/>`).join("")}</g>
         ${here.map((v) => {
           const [x, y] = v.xy, n = v.photos.length;

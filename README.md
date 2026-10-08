@@ -68,11 +68,13 @@ python3 -m http.server 8000
 
 滚到地图时自动**回放旅程**：按每个城市第一次拍照的时间一站站点亮，同一图版内相邻两站之间画一道弧线，一个亮点沿弧线飞过去，身后留下渐隐的尾迹；左下显示当时的月份和城市。播完只留下干净的红点。下面的时间轴可以拖动、暂停、重播。悬停红点显示缩略图、国家、首次到访月份和张数，点击打开该城市全部照片。
 
-海岸线来自 [Natural Earth](https://www.naturalearthdata.com/) 50m 陆地数据（公有领域），由 `scripts/build_map.py` 裁剪、简化、投影后写进 `js/map.js`（约 55 KB，不联网）。**新城市出现时**：浏览器控制台会提示 `atlas: no coordinates for …`，把经纬度加进 `scripts/build_map.py` 的 `PLACES`，再跑：
+海岸线、湖泊、国界来自 [Natural Earth](https://www.naturalearthdata.com/) 50m 数据（公有领域），由 `scripts/build_map.py` 裁剪、简化、投影后写进 `js/map.js`（约 80 KB，不联网）。国家名和海名是手工摆放的，在同一个脚本的 `LABELS` 里调位置和角度。**新城市出现时**：浏览器控制台会提示 `atlas: no coordinates for …`，把经纬度加进 `scripts/build_map.py` 的 `PLACES`，再跑：
 
 ```sh
-curl -sLO https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_land.geojson
-python3 scripts/build_map.py ne_50m_land.geojson
+mkdir -p ne && for f in land lakes admin_0_boundary_lines_land; do
+  curl -sL -o ne/ne_50m_$f.geojson https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_$f.geojson
+done
+python3 scripts/build_map.py ne
 ```
 
 ## 访客地图

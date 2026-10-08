@@ -507,10 +507,42 @@ body, .topbar, .index-overlay, .lightbox { transition: background-color 0.4s eas
   font-family: var(--serif); font-style: italic; font-size: 0.85rem; color: var(--ink-soft);
 }
 
-.atlas-map .sea { fill: var(--paper); }
-.atlas-map .land { fill: color-mix(in srgb, var(--ink) 7%, var(--paper)); stroke: color-mix(in srgb, var(--ink) 28%, transparent); stroke-width: 1.3; stroke-linejoin: round; fill-rule: evenodd; }
-.atlas-map .grat { fill: none; stroke: color-mix(in srgb, var(--ink) 8%, transparent); stroke-width: 1; stroke-dasharray: 3 8; }
-:root[data-theme="dark"] .atlas-map .land { fill: color-mix(in srgb, var(--ink) 10%, var(--paper)); stroke: color-mix(in srgb, var(--ink) 32%, transparent); }
+/* engraved-atlas look: tinted sea with water-lining along the coast, land with a fine coastline, dashed frontiers, spaced caps for countries and italics for seas */
+.atlas-map { --sea: #5b87a8; --sea-tint: 9%; }
+:root[data-theme="dark"] .atlas-map { --sea: #6f9cc2; --sea-tint: 11%; }
+.atlas-map .sea-hi { stop-color: color-mix(in srgb, var(--sea) calc(var(--sea-tint) * 0.6), var(--paper)); }
+.atlas-map .sea-lo { stop-color: color-mix(in srgb, var(--sea) var(--sea-tint), var(--paper)); }
+.atlas-map .grat { fill: none; stroke: color-mix(in srgb, var(--sea) 22%, transparent); stroke-width: 0.8; stroke-dasharray: 2 6; }
+.atlas-map .ripples use { fill: none; stroke-linejoin: round; }
+.atlas-map .ripples .ring { stroke: color-mix(in srgb, var(--sea) 45%, var(--paper)); }
+:root[data-theme="dark"] .atlas-map .ripples .ring { stroke: color-mix(in srgb, var(--sea) 42%, var(--paper)); }
+.atlas-map .land { fill: color-mix(in srgb, var(--ink) 6%, var(--paper)); stroke: color-mix(in srgb, var(--ink) 45%, transparent); stroke-width: 1; stroke-linejoin: round; fill-rule: evenodd; }
+:root[data-theme="dark"] .atlas-map .land { fill: color-mix(in srgb, var(--ink) 9%, var(--paper)); stroke: color-mix(in srgb, var(--ink) 42%, transparent); }
+.atlas-map .lake { fill: color-mix(in srgb, var(--sea) var(--sea-tint), var(--paper)); stroke: color-mix(in srgb, var(--ink) 30%, transparent); stroke-width: 0.7; fill-rule: evenodd; }
+.atlas-map .border { fill: none; stroke: color-mix(in srgb, var(--ink) 30%, transparent); stroke-width: 0.9; stroke-dasharray: 5 2.5 1 2.5; stroke-linejoin: round; }
+.atlas-map .names, .atlas-map .frame { pointer-events: none; }
+.atlas-map .names text { paint-order: stroke; stroke-linejoin: round; }
+.atlas-map .country {
+  font-family: var(--sans); font-weight: 500; text-transform: uppercase;
+  fill: color-mix(in srgb, var(--ink) 42%, transparent); stroke: color-mix(in srgb, var(--ink) 6%, var(--paper)); stroke-width: 3;
+}
+.atlas-map .t-C { font-size: 14px; letter-spacing: 0.42em; }
+.atlas-map .t-c { font-size: 11.5px; letter-spacing: 0.3em; }
+.atlas-map .t-k { font-size: 9.5px; letter-spacing: 0.2em; fill: color-mix(in srgb, var(--ink) 36%, transparent); }
+:root[data-theme="dark"] .atlas-map .country { stroke: color-mix(in srgb, var(--ink) 9%, var(--paper)); }
+.atlas-map .sea-name { font-family: var(--serif); font-style: italic; fill: color-mix(in srgb, var(--sea) 72%, var(--ink-soft)); }
+.atlas-map .t-O { font-size: 17px; letter-spacing: 0.34em; text-transform: uppercase; }
+.atlas-map .t-s { font-size: 15px; letter-spacing: 0.16em; }
+.atlas-map .t-g { font-size: 12.5px; letter-spacing: 0.12em; }
+.atlas-map .frame .margin { fill: var(--paper); fill-rule: evenodd; }
+.atlas-map .frame .band { fill: color-mix(in srgb, var(--ink) 55%, var(--paper)); }
+.atlas-map .frame .rule { fill: none; stroke: color-mix(in srgb, var(--ink) 55%, var(--paper)); stroke-width: 1; }
+.atlas-map .frame .rule.thin { stroke-width: 0.6; }
+.atlas-map .frame text { font-family: var(--sans); font-size: 9.5px; letter-spacing: 0.08em; fill: color-mix(in srgb, var(--ink) 50%, transparent); paint-order: stroke; stroke: color-mix(in srgb, var(--sea) var(--sea-tint), var(--paper)); stroke-width: 3; }
+.atlas-map .scale rect { stroke: color-mix(in srgb, var(--ink) 55%, var(--paper)); stroke-width: 0.6; }
+.atlas-map .scale .f { fill: color-mix(in srgb, var(--ink) 55%, var(--paper)); }
+.atlas-map .scale .o { fill: var(--paper); }
+.atlas-map .scale .card { fill: color-mix(in srgb, var(--paper) 82%, transparent); stroke: none; }
 
 /* one visited place = a dot, a ring that breathes, and a label on hover */
 .atlas-map .pin { cursor: pointer; transform-box: fill-box; transform-origin: center; }
