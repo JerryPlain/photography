@@ -19,8 +19,8 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Cormorant+Garamond:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=b7e346e2">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=0c7a985b">
 </head>
 <body>
   <a class="skip-link" href="#contents">Skip to contents</a>
@@ -29,6 +29,7 @@
   <canvas id="stars" aria-hidden="true"></canvas>
 
   <header class="topbar" id="topbar">
+    <i class="progress" id="progress" aria-hidden="true"></i>
     <a class="brand" href="#top">
       <img class="brand-mark" src="assets/sz-mark.svg" alt="" width="28" height="28">
       <span class="brand-name" id="brandName"></span>
@@ -69,13 +70,30 @@
     <div id="home">
     <section class="intro" id="hero">
       <div class="intro-text">
-        <p class="eyebrow">Photography</p>
+        <div class="compass" id="compass" aria-hidden="true">
+          <svg viewBox="0 0 100 100">
+            <circle class="c-ring" cx="50" cy="50" r="46"/>
+            <circle class="c-ring2" cx="50" cy="50" r="38"/>
+            <g class="c-ticks"></g>
+            <text class="c-l" x="50" y="13" text-anchor="middle">N</text>
+            <text class="c-l" x="89" y="53" text-anchor="middle">E</text>
+            <text class="c-l" x="50" y="93" text-anchor="middle">S</text>
+            <text class="c-l" x="11" y="53" text-anchor="middle">W</text>
+            <g class="c-needle" id="needle">
+              <path class="c-n" d="M50 14 L55 50 L45 50 Z"/>
+              <path class="c-s" d="M50 86 L55 50 L45 50 Z"/>
+            </g>
+            <circle class="c-pin" cx="50" cy="50" r="3"/>
+          </svg>
+        </div>
+        <p class="eyebrow" id="introKicker"></p>
         <h1 class="intro-title" id="introTitle"></h1>
-        <figure class="intro-quote" id="introQuote">
-          <blockquote class="intro-statement" id="introStatement"></blockquote>
-          <figcaption class="quote-by" id="introQuoteBy"></figcaption>
-        </figure>
+        <p class="quote-by" id="introQuoteBy"></p>
         <p class="intro-stats" id="introStats"></p>
+        <div class="intro-actions">
+          <button class="wander" id="wanderBtn" type="button">Wander <span aria-hidden="true">→</span></button>
+          <span class="wander-hint">a photograph at random</span>
+        </div>
       </div>
       <nav class="contents" id="contents" aria-label="Contents">
         <p class="eyebrow">Contents</p>
@@ -154,6 +172,22 @@
     <p class="footer-copy" id="footerCopy"></p>
   </footer>
 
+  <!-- 背景音乐：Spotify 官方播放器，访客点唱片才会播放（浏览器不允许自动播放） -->
+  <aside class="soundtrack" id="soundtrack" aria-label="Soundtrack" hidden>
+    <div class="st-panel" id="stPanel" hidden>
+      <div class="st-embed" id="stEmbed"></div>
+      <div class="st-foot"><a class="st-alt" id="stAlt" target="_blank" rel="noopener">Open on YouTube <span aria-hidden="true">↗</span></a><button class="st-close" id="stClose" type="button" aria-label="Hide player">×</button></div>
+    </div>
+    <button class="st-disc" id="stDisc" type="button" aria-label="Play the soundtrack" aria-pressed="false">
+      <span class="st-vinyl"><span class="st-label"></span></span>
+    </button>
+    <div class="st-meta" id="stMeta">
+      <span class="st-kicker">Soundtrack</span>
+      <span class="st-title" id="stTitle"></span>
+      <span class="st-artist" id="stArtist"></span>
+    </div>
+  </aside>
+
   <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Photograph viewer">
     <button class="lb-close" id="lbClose" aria-label="Close">
       <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -174,10 +208,10 @@
     <div class="lb-strip" id="lbStrip" aria-label="Photographs in this series"></div>
   </div>
 
-  <script src="js/site.js?v=b1850fd5"></script>
+  <script src="js/site.js?v=2fe37ca3"></script>
   <script src="js/data.js?v=38c0c6dd"></script>
   <script src="js/map.js?v=72988a55"></script>
   <script src="js/stars.js?v=d5e12b97"></script>
-  <script src="js/main.js?v=c4d6dabf"></script>
+  <script src="js/main.js?v=5d4ed4f8"></script>
 </body>
 </html>

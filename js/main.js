@@ -101,14 +101,14 @@ function highlightsOf(s) {
 // ---------- header / intro ----------
 document.getElementById("brandName").textContent = SITE.author;
 document.getElementById("homeLink").href = SITE.home;
-document.getElementById("introTitle").innerHTML = SITE.title.split(" ")
-  .map((w, i) => `<span class="w"><span style="--d:${i * 90}ms">${esc(w)}</span></span>`).join(" ");
-document.getElementById("introStatement").textContent = SITE.statement;
+document.getElementById("introKicker").textContent = SITE.title;
+// the quotation is the headline: each word rises out of a mask
+document.getElementById("introTitle").innerHTML = SITE.statement.split(" ")
+  .map((w, i) => `<span class="w"><span style="--d:${i * 70}ms">${esc(w)}</span></span>`).join(" ");
 const quoteBy = SITE.statementBy
   ? `<span class="dash" aria-hidden="true">—</span>${esc(SITE.statementBy)}${SITE.statementSource ? `, <cite>${esc(SITE.statementSource)}</cite>` : ""}`
   : "";
 document.getElementById("introQuoteBy").innerHTML = quoteBy;
-document.getElementById("introQuote").classList.toggle("is-quote", !!SITE.statementBy);
 const places = new Set();
 SERIES.filter((s) => subjectOf(s) === "place")
   .forEach((s) => s.photos.forEach((p) => p.location && places.add(p.title)));
@@ -655,6 +655,84 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   }, 1150);
 })();
 
+// ---------- compass: the needle follows the pointer, and drifts when left alone ----------
+(function compass() {
+  const el = document.getElementById("compass"), needle = document.getElementById("needle");
+  if (!el || !needle) return;
+  const ticks = el.querySelector(".c-ticks");
+  ticks.innerHTML = Array.from({ length: 72 }, (_, i) => {
+    const a = i * 5 * Math.PI / 180, major = i % 18 === 0, mid = i % 6 === 0;
+    const r1 = 46, r0 = major ? 39 : mid ? 42 : 44;
+    return `<line x1="${(50 + r0 * Math.sin(a)).toFixed(2)}" y1="${(50 - r0 * Math.cos(a)).toFixed(2)}" x2="${(50 + r1 * Math.sin(a)).toFixed(2)}" y2="${(50 - r1 * Math.cos(a)).toFixed(2)}"${major ? ' class="major"' : ""}/>`;
+  }).join("");
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || NO_REVEAL) return;
+  let target = 0, angle = 0, vel = 0, lastMove = 0, raf = 0;
+  const fine = matchMedia("(pointer: fine)").matches;
+  addEventListener("pointermove", (e) => {
+    if (!fine) return;
+    const r = el.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    target = Math.atan2(e.clientX - cx, -(e.clientY - cy)) * 180 / Math.PI;
+    lastMove = performance.now();
+  }, { passive: true });
+  function tick(now) {
+    // a real needle: springy, slightly under-damped, and it never quite sits still
+    const idle = now - lastMove > 1800 || !fine;
+    const goal = idle ? (fine ? target : now / 40) + Math.sin(now / 900) * 4 + Math.sin(now / 230) * 0.8 : target;
+    let d = ((goal - angle + 540) % 360) - 180;
+    vel = vel * 0.86 + d * 0.035;
+    angle += vel;
+    needle.style.transform = `rotate(${angle.toFixed(2)}deg)`;
+    raf = requestAnimationFrame(tick);
+  }
+  raf = requestAnimationFrame(tick);
+  document.addEventListener("visibilitychange", () => { cancelAnimationFrame(raf); if (!document.hidden) raf = requestAnimationFrame(tick); });
+})();
+
+// ---------- wander: a photograph at random ----------
+(function wander() {
+  const btn = document.getElementById("wanderBtn");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const all = shuffle(SERIES.flatMap((s) => s.photos));
+    openLightbox(all, 0, null);
+  });
+})();
+
+// ---------- soundtrack: a record that spins while the Spotify player plays ----------
+(function soundtrack() {
+  if (typeof SOUNDTRACK === "undefined" || !SOUNDTRACK.spotify) return;
+  const root = document.getElementById("soundtrack"), disc = document.getElementById("stDisc");
+  const panel = document.getElementById("stPanel"), embed = document.getElementById("stEmbed");
+  document.getElementById("stTitle").textContent = SOUNDTRACK.title || "";
+  document.getElementById("stArtist").textContent = SOUNDTRACK.artist || "";
+  const alt = document.getElementById("stAlt");
+  if (SOUNDTRACK.youtube) alt.href = `https://www.youtube.com/watch?v=${encodeURIComponent(SOUNDTRACK.youtube)}`;
+  else { alt.href = `https://open.spotify.com/track/${encodeURIComponent(SOUNDTRACK.spotify)}`; alt.firstChild.textContent = "Open on Spotify "; }
+  root.hidden = false;
+  let ctrl = null, loading = false, wantPlay = false;
+  const setPlaying = (p) => { root.classList.toggle("playing", p); disc.setAttribute("aria-pressed", String(p)); disc.setAttribute("aria-label", p ? "Pause the soundtrack" : "Play the soundtrack"); };
+  function loadPlayer() {
+    if (loading) return; loading = true;
+    window.onSpotifyIframeApiReady = (API) => {
+      API.createController(embed, { uri: `spotify:track:${SOUNDTRACK.spotify}`, width: "100%", height: 80 }, (c) => {
+        ctrl = c;
+        c.addListener("playback_update", (e) => setPlaying(!e.data.isPaused));
+        c.addListener("ready", () => { if (wantPlay) c.play(); });
+      });
+    };
+    const sc = document.createElement("script"); sc.src = "https://open.spotify.com/embed/iframe-api/v1"; sc.async = true;
+    document.head.appendChild(sc);
+  }
+  const open = () => { panel.hidden = false; root.classList.add("open"); };
+  disc.addEventListener("click", () => {
+    open();
+    if (!ctrl) { wantPlay = true; loadPlayer(); return; }
+    ctrl.togglePlay();
+  });
+  document.getElementById("stClose").addEventListener("click", () => { panel.hidden = true; root.classList.remove("open"); });
+  if (Q.has("st")) { open(); loadPlayer(); }   // debug: show the player without playing
+})();
+
 // ---------- intro parallax (desktop) ----------
 const intro = document.getElementById("hero");
 if (intro && matchMedia("(min-width: 900px) and (prefers-reduced-motion: no-preference)").matches) {
@@ -670,7 +748,12 @@ if (intro && matchMedia("(min-width: 900px) and (prefers-reduced-motion: no-pref
 
 // ---------- topbar + rail scrollspy ----------
 const topbar = document.getElementById("topbar");
-addEventListener("scroll", () => topbar.classList.toggle("scrolled", scrollY > 8), { passive: true });
+const progress = document.getElementById("progress");
+addEventListener("scroll", () => {
+  topbar.classList.toggle("scrolled", scrollY > 8);
+  const max = document.documentElement.scrollHeight - innerHeight;
+  progress.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`;
+}, { passive: true });
 const railLinks = rail.querySelectorAll("a");
 const spy = new IntersectionObserver((entries) => {
   entries.forEach((e) => {
