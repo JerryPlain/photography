@@ -75,3 +75,10 @@ const TRAIL_SKIP = ["robot"];
 // color 是图钉颜色（不带 #）。id 留空则不显示这一节。
 const VISITORS = { id: "a2tgw4xdkrzv", theme: "blue", color: "13dc04" };
 
+// 护照：环游世界的进度。目标是全部 195 个国家。
+// 国家从 City / Me 的小字标注读出来；演唱会所在城市在 VENUE_COUNTRY 里对应到国家。
+const PASSPORT = {
+  goal: 195,
+  dream: "The dream: every one of them.",
+  VENUE_COUNTRY: { Singapore: "Singapore", Tokyo: "Japan", Munich: "Germany", Berlin: "Germany", Frankfurt: "Germany" },
+};

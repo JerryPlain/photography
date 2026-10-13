@@ -669,3 +669,71 @@ html.noreveal .intro-text > .eyebrow, html.noreveal .intro-statement, html.norev
 .jr-year.end { transform: translateX(calc(-100% + 3px)); }
 .jr-year.start { transform: translateX(-3px); }
 .pl-names .nm { white-space: nowrap; }
+
+/* ---------- passport ---------- */
+.passport {
+  position: relative; margin: 0 0 1.4rem; padding: 1.6rem 1.8rem 1.5rem;
+  background: var(--paper); border-radius: 6px;
+  box-shadow: 0 1px 2px var(--shadow), 0 20px 50px -30px var(--shadow);
+  overflow: hidden;
+}
+.passport::before {   /* faint guilloche-like rule, the way passport pages are printed */
+  content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.5;
+  background: repeating-linear-gradient(135deg, transparent 0 9px, color-mix(in srgb, var(--accent) 5%, transparent) 9px 10px);
+}
+.passport > * { position: relative; }
+.pp-top { display: flex; align-items: flex-end; gap: 1.6rem; flex-wrap: wrap; }
+.pp-count { display: flex; align-items: baseline; gap: 0.5rem; line-height: 0.85; }
+.pp-n {
+  font-family: var(--serif); font-size: clamp(4.2rem, 9vw, 6.8rem); font-weight: 400; color: var(--accent);
+  font-variant-numeric: tabular-nums; letter-spacing: -0.03em;
+}
+.pp-of { font-family: var(--serif); font-size: clamp(1.4rem, 2.6vw, 2rem); color: var(--ink-soft); }
+.pp-words { padding-bottom: 0.45rem; }
+.pp-label { font-family: var(--sans); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink); }
+.pp-dream {
+  margin-top: 0.35rem; font-family: "Cormorant Garamond", Garamond, var(--serif); font-style: italic; font-weight: 500;
+  font-size: 1.2rem; color: var(--ink-soft);
+}
+.pp-dream .sep { margin: 0 0.5em; color: var(--ink-faint); font-style: normal; }
+
+.pp-bar { margin: 1.2rem 0 1.3rem; height: 3px; border-radius: 3px; background: var(--hairline); overflow: hidden; }
+.pp-bar i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: inherit; transition: width 1.6s var(--ease) 0.25s; }
+
+.pp-continents { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.6rem 1.2rem; margin-bottom: 1.4rem; }
+.pp-c { display: grid; grid-template-columns: 1fr auto; row-gap: 0.35rem; font-family: var(--sans); font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.pp-cn { color: var(--ink); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-cv { color: var(--accent); font-weight: 600; font-variant-numeric: tabular-nums; }
+.pp-cv span { color: var(--ink-faint); font-weight: 500; }
+.pp-c.none .pp-cn { color: var(--ink-soft); }
+.pp-cb { grid-column: 1 / -1; height: 2px; background: var(--hairline); border-radius: 2px; overflow: hidden; }
+.pp-cb i { display: block; height: 100%; width: 0; background: var(--accent); transition: width 1.4s var(--ease) 0.5s; }
+.passport.open .pp-cb i { width: var(--w); }
+
+.pp-stamps { display: flex; flex-wrap: wrap; gap: 0.7rem 0.75rem; }
+.stamp {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 4.6rem; height: 4.6rem; border-radius: 50%;
+  border: 1.5px solid var(--accent); box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px color-mix(in srgb, var(--accent) 55%, transparent);
+  color: var(--accent); text-align: center; line-height: 1.05;
+  transform: rotate(var(--r)) scale(0.4); opacity: 0;
+  transition: transform 0.55s cubic-bezier(0.3, 1.6, 0.5, 1), opacity 0.3s ease;
+  transition-delay: calc(0.6s + var(--i) * 55ms);
+  mix-blend-mode: multiply; cursor: default;
+}
+.passport.open .stamp { transform: rotate(var(--r)) scale(1); opacity: 0.88; }
+.stamp:hover { opacity: 1; transform: rotate(0deg) scale(1.08) !important; transition-delay: 0s; }
+.stamp b { font-family: var(--sans); font-size: 0.92rem; font-weight: 700; letter-spacing: 0.08em; }
+.stamp small { font-family: var(--sans); font-size: 0.48rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.15rem; max-width: 3.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stamp em { font-family: var(--sans); font-style: normal; font-size: 0.55rem; letter-spacing: 0.12em; margin-top: 0.12rem; opacity: 0.8; }
+:root[data-theme="dark"] .stamp { mix-blend-mode: normal; box-shadow: inset 0 0 0 3px var(--paper), inset 0 0 0 4px color-mix(in srgb, var(--accent) 55%, transparent); }
+
+@media (max-width: 900px) { .pp-continents { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 560px) {
+  .passport { padding: 1.3rem 1.1rem 1.2rem; }
+  .pp-top { gap: 0.4rem 1rem; }
+  .pp-continents { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stamp { width: 4.1rem; height: 4.1rem; }
+}
+html.noreveal .stamp { transition: none; }
+

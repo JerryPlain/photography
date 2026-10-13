@@ -263,6 +263,7 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
     const v = byPlace.get(name);
     v.photos.push(p);
     if (subjectOf(p._series) === "place" && p.location && !v.country) v.country = p.location;
+    if (!v.country && typeof PASSPORT !== "undefined" && PASSPORT.VENUE_COUNTRY[name]) v.country = PASSPORT.VENUE_COUNTRY[name];
     if (p.date && (!v.first || p.date < v.first)) v.first = p.date;
   }));
   if (missing.size) console.warn("atlas: no coordinates for", [...missing].join(", "), "— add them in scripts/build_map.py");
@@ -536,6 +537,77 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   s.async = true;
   document.body.appendChild(s);
   document.getElementById("visitors").hidden = false;
+})();
+
+// ---------- passport: countries visited, on the way to all of them ----------
+(function passport() {
+  const root = document.getElementById("passport");
+  if (!root || typeof PASSPORT === "undefined") return;
+  // ISO code + continent for every country that can appear (add more as the journey grows)
+  const C = {
+    Germany: ["DEU", "Europe"], Italy: ["ITA", "Europe"], Greece: ["GRC", "Europe"], Malta: ["MLT", "Europe"],
+    Portugal: ["PRT", "Europe"], Spain: ["ESP", "Europe"], France: ["FRA", "Europe"], Croatia: ["HRV", "Europe"],
+    Slovenia: ["SVN", "Europe"], Austria: ["AUT", "Europe"], "Vatican City": ["VAT", "Europe"],
+    Switzerland: ["CHE", "Europe"], Netherlands: ["NLD", "Europe"], Belgium: ["BEL", "Europe"], Czechia: ["CZE", "Europe"],
+    Hungary: ["HUN", "Europe"], Poland: ["POL", "Europe"], Denmark: ["DNK", "Europe"], Sweden: ["SWE", "Europe"],
+    Norway: ["NOR", "Europe"], Finland: ["FIN", "Europe"], Iceland: ["ISL", "Europe"], Ireland: ["IRL", "Europe"],
+    "United Kingdom": ["GBR", "Europe"], Luxembourg: ["LUX", "Europe"], Monaco: ["MCO", "Europe"], Liechtenstein: ["LIE", "Europe"],
+    "San Marino": ["SMR", "Europe"], Montenegro: ["MNE", "Europe"], Albania: ["ALB", "Europe"], Turkey: ["TUR", "Asia"],
+    China: ["CHN", "Asia"], Japan: ["JPN", "Asia"], Thailand: ["THA", "Asia"], Singapore: ["SGP", "Asia"],
+    "South Korea": ["KOR", "Asia"], Vietnam: ["VNM", "Asia"], Malaysia: ["MYS", "Asia"], Indonesia: ["IDN", "Asia"],
+    "United States": ["USA", "North America"], Canada: ["CAN", "North America"], Mexico: ["MEX", "North America"],
+    Australia: ["AUS", "Oceania"], "New Zealand": ["NZL", "Oceania"], Egypt: ["EGY", "Africa"], Morocco: ["MAR", "Africa"],
+    Brazil: ["BRA", "South America"], Argentina: ["ARG", "South America"], Peru: ["PER", "South America"],
+  };
+  const CONTINENTS = [["Europe", 44], ["Asia", 48], ["Africa", 54], ["North America", 23], ["South America", 12], ["Oceania", 14]];
+  const seen = new Map();   // country -> first date
+  const note = (country, date) => {
+    if (!country || !C[country]) return;
+    const prev = seen.get(country);
+    if (prev === undefined || (date && (!prev || date < prev))) seen.set(country, date || prev || "");
+  };
+  SERIES.forEach((s) => s.photos.forEach((p) => {
+    if (subjectOf(s) === "act") note(PASSPORT.VENUE_COUNTRY[(p.location || "").replace(/\s+\d{4}$/, "")], p.date);
+    else if (subjectOf(s) === "place") note(p.location, p.date);
+  }));
+  const list = [...seen.entries()].sort((a, b) => (a[1] || "9").localeCompare(b[1] || "9"));
+  const n = list.length, goal = PASSPORT.goal || 195;
+  const pct = n / goal * 100;
+  document.getElementById("ppTotal").textContent = goal;
+  document.getElementById("ppDream").innerHTML = `${pct < 10 ? pct.toFixed(1) : Math.round(pct)}% of the world so far<span class="sep">·</span>${esc(PASSPORT.dream || "")}`;
+  // continents: a thin bar each, visited / total
+  const byCont = {};
+  list.forEach(([c]) => { const k = C[c][1]; byCont[k] = (byCont[k] || 0) + 1; });
+  document.getElementById("ppCont").innerHTML = CONTINENTS.map(([name, total]) => {
+    const v = byCont[name] || 0;
+    return `<div class="pp-c${v ? "" : " none"}"><span class="pp-cn">${name}</span><span class="pp-cv">${v}<span>/${total}</span></span>
+      <span class="pp-cb"><i style="--w:${(v / total * 100).toFixed(1)}%"></i></span></div>`;
+  }).join("");
+  // stamps: one per country, in the order first visited, each slightly askew like real ink
+  document.getElementById("ppStamps").innerHTML = list.map(([country, date], i) => {
+    const [code] = C[country], y = (date || "").slice(0, 4);
+    const rot = ((i * 37) % 11) - 5;
+    return `<span class="stamp" style="--r:${rot}deg;--i:${i}" title="${esc(country)}${y ? `, first visited ${y}` : ""}">
+      <b>${code}</b><small>${esc(country.replace(/ City$/, ""))}</small>${y ? `<em>${y}</em>` : ""}</span>`;
+  }).join("");
+  // count up, fill the bars and drop the stamps when the passport scrolls into view
+  const ppN = document.getElementById("ppN"), fill = document.getElementById("ppFill");
+  const finish = () => { ppN.textContent = n; fill.style.width = `${Math.max(pct, 0.6)}%`; root.classList.add("open"); };
+  if (NO_REVEAL || matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
+  const io = new IntersectionObserver((es) => {
+    if (!es.some((e) => e.isIntersecting)) return;
+    io.disconnect();
+    root.classList.add("open");
+    fill.style.width = `${Math.max(pct, 0.6)}%`;
+    const t0 = performance.now() + 250, dur = 1300;
+    const step = (now) => {
+      const k = Math.min(1, Math.max(0, (now - t0) / dur)), e = 1 - Math.pow(1 - k, 3);
+      ppN.textContent = String(Math.round(n * e));
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, { threshold: 0.3 });
+  io.observe(root);
 })();
 
 // ---------- intro: photographs trail the cursor (and sweep across once on arrival) ----------

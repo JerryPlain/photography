@@ -77,6 +77,12 @@ done
 python3 scripts/build_map.py ne
 ```
 
+## 护照（环游世界进度）
+
+地图上方是一块「护照」：大号红字显示已经去过的国家数 / 195，下面一条进度条、六大洲各自的进度，以及每个国家一枚邮戳（国家代码 + 首次到访年份，按时间排列）。滚到这里时数字从 0 数上来、进度条填满、邮戳一枚枚盖上去。
+
+国家从 City / Me 的小字标注读取；演唱会城市在 `js/site.js` 的 `PASSPORT.VENUE_COUNTRY` 里对应国家（Singapore 就是这样算进来的）。新国家如果不在 `js/main.js` 护照部分的国家表里，需要补一行代码和所属大洲。
+
 ## 访客地图
 
 页面最后、页脚之前是「Where it was seen from」：和个人主页同一个 [RevolverMaps2](https://revolvermaps2.com/) 访客地球，会转、可以拖，按城市标出访客，最新访客带国旗。

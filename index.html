@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Cormorant+Garamond:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=dd561c2d">
+  <link rel="stylesheet" href="css/style.css?v=b7e346e2">
 </head>
 <body>
   <a class="skip-link" href="#contents">Skip to contents</a>
@@ -92,6 +92,21 @@
         </div>
         <p class="atlas-stats reveal" id="atlasStats" style="--d:160ms"></p>
       </div>
+      <!-- 护照：去过多少个国家，离环游世界还有多远 -->
+      <div class="passport reveal" id="passport" style="--d:200ms" aria-label="Countries visited">
+        <div class="pp-top">
+          <div class="pp-count">
+            <span class="pp-n" id="ppN">0</span><span class="pp-of">/ <span id="ppTotal">195</span></span>
+          </div>
+          <div class="pp-words">
+            <p class="pp-label">countries visited</p>
+            <p class="pp-dream" id="ppDream"></p>
+          </div>
+        </div>
+        <div class="pp-bar" aria-hidden="true"><i id="ppFill"></i></div>
+        <div class="pp-continents" id="ppCont"></div>
+        <div class="pp-stamps" id="ppStamps"></div>
+      </div>
       <div class="atlas-frame reveal" style="--d:240ms">
         <div class="atlas-map" id="atlasMap"></div>
         <div class="journey" aria-label="Journey timeline">
@@ -159,10 +174,10 @@
     <div class="lb-strip" id="lbStrip" aria-label="Photographs in this series"></div>
   </div>
 
-  <script src="js/site.js?v=e5e3aabf"></script>
+  <script src="js/site.js?v=b1850fd5"></script>
   <script src="js/data.js?v=38c0c6dd"></script>
   <script src="js/map.js?v=72988a55"></script>
   <script src="js/stars.js?v=d5e12b97"></script>
-  <script src="js/main.js?v=5422ff99"></script>
+  <script src="js/main.js?v=c4d6dabf"></script>
 </body>
 </html>
