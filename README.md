@@ -91,7 +91,7 @@ python3 scripts/build_map.py ne
 
 ## 扉页
 
-字体和个人主页一致：IBM Plex Serif（标题、引言、系列名）+ IBM Plex Sans（小字标签）。标题 "Selected Photographs" 逐词升起，下面一行引言（`SITE.statement`），作者和出处靠右小字，和主页署名歌词的方式一样。左上角一枚指南针，指针跟着鼠标转，没人动时自己轻轻漂。顶栏底部有一条红色阅读进度线。
+字体和个人主页一致：IBM Plex Serif（标题、引言、系列名）+ IBM Plex Sans（小字标签）。标题 "Selected Photographs" 逐词升起，下面一行引言（`SITE.statement`），作者和出处靠右小字，和主页署名歌词的方式一样。打开页面时一串照片从标题下方扫过一次（`TRAIL_SKIP` 里的系列不参与，默认排除 Robot 的渲染图），之后不再有任何东西跟着鼠标出现。左上角一枚指南针，指针跟着鼠标转，没人动时自己轻轻漂。顶栏底部有一条红色阅读进度线。
 
 ## 背景音乐
 

@@ -949,3 +949,18 @@ html.noreveal .stamp { transition: none; }
   .compass { width: 3.4rem; height: 3.4rem; }
 }
 
+/* ---------- intro: photograph trail ---------- */
+.intro { position: relative; }
+.trail { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 3; }
+.trail img {
+  position: absolute; transform: translate(-50%, -50%);
+  object-fit: cover; border-radius: 3px;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.12);
+  animation: trailLife 1.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes trailLife {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.72); }
+  14%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  62%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -46%) scale(0.94); }
+}

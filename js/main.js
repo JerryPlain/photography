@@ -676,6 +676,47 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   if (Q.has("st")) { open(); loadPlayer(); }   // debug: show the player without playing
 })();
 
+// ---------- intro: on arrival a run of photographs sweeps across once (nothing follows the mouse) ----------
+(function trail() {
+  const intro = document.getElementById("hero");
+  if (!intro || matchMedia("(prefers-reduced-motion: reduce)").matches || NO_REVEAL) return;
+  const layer = document.createElement("div");
+  layer.className = "trail"; layer.setAttribute("aria-hidden", "true");
+  intro.prepend(layer);
+  // preload a shuffled pool so frames never appear blank
+  const skip = new Set(typeof TRAIL_SKIP !== "undefined" ? TRAIL_SKIP : []);
+  const pool = shuffle(SERIES.filter((s) => !skip.has(s.slug)).flatMap((s) => s.photos)).slice(0, 16).map((p) => {
+    const im = new Image(); im.decoding = "async"; im.src = thumbSrc(p); return { p, im };
+  });
+  let n = 0, z = 0, live = 0;
+  function drop(x, y) {
+    const ready = pool.filter((o) => o.im.complete && o.im.naturalWidth);
+    if (!ready.length || live > 10) return;
+    const { p, im } = ready[n++ % ready.length];
+    const small = innerWidth < 640;
+    let H = small ? 150 : 230, W = H * p.w / p.h;
+    const maxW = small ? 190 : 300;
+    if (W > maxW) { W = maxW; H = W * p.h / p.w; }
+    const el = document.createElement("img");
+    el.src = im.src; el.alt = "";
+    el.style.cssText = `left:${x}px;top:${y}px;width:${W.toFixed(0)}px;height:${H.toFixed(0)}px;z-index:${++z}`;
+    layer.appendChild(el); live++;
+    el.addEventListener("animationend", () => { el.remove(); live--; }, { once: true });
+  }
+  // on arrival: one sweep across the intro, as if someone flipped through the prints
+  setTimeout(() => {
+    // on phones the intro stacks the contents below the text, so the sweep stays within the text block
+    const box = innerWidth < 640 ? intro.querySelector(".intro-text") || intro : intro;
+    const W = intro.clientWidth, H = box.offsetHeight, steps = innerWidth < 640 ? 7 : 11;
+    for (let i = 0; i < steps; i++) {
+      setTimeout(() => {
+        const t = i / (steps - 1);
+        drop(W * (0.1 + 0.8 * t), H * (0.7 + 0.08 * Math.sin(t * Math.PI * 1.6)));
+      }, i * 115);
+    }
+  }, 1150);
+})();
+
 // ---------- intro parallax (desktop) ----------
 const intro = document.getElementById("hero");
 if (intro && matchMedia("(min-width: 900px) and (prefers-reduced-motion: no-preference)").matches) {
