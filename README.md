@@ -91,21 +91,11 @@ python3 scripts/build_map.py ne
 
 ## 扉页
 
-扉页的主标题就是那句引言（`SITE.statement`，Tolkien），用 Instrument Serif 意大利体逐词升起；"Selected Photographs" 退成红色眉题。左上角一枚指南针，指针会跟着鼠标转，没人动时自己轻轻漂（手机上慢慢转）。下面的 **Wander →** 按钮随机打开一张照片，灯箱里左右键继续随机看。顶栏底部有一条红色阅读进度线。
-
-全站展示字体统一为 Instrument Serif（标题、系列名、护照大数字、页脚）；正文和图注仍是 Georgia，小字标签是 Inter。
+字体和个人主页一致：IBM Plex Serif（标题、引言、系列名）+ IBM Plex Sans（小字标签）。标题 "Selected Photographs" 逐词升起，下面一行引言（`SITE.statement`），作者和出处靠右小字，和主页署名歌词的方式一样。左上角一枚指南针，指针跟着鼠标转，没人动时自己轻轻漂。顶栏底部有一条红色阅读进度线。
 
 ## 背景音乐
 
-左下角的黑胶唱片是 Spotify 官方播放器（`js/site.js` 的 `SOUNDTRACK`）。点唱片展开播放器并开始播放，唱片随播放旋转；再点一下暂停。浏览器不允许网页自动放音乐，所以必须由访客点一下；没登录 Spotify 的访客只能听 30 秒试听，面板里有 "Open on YouTube" 链接可以听全曲。网站本身不存放任何音频文件。换歌：改 `title / artist / spotify（曲目 ID）/ youtube（视频 ID）`；`spotify` 留空则不显示唱片。
-
-
-
-首屏打开时，一串照片会从引言下方扫过；之后桌面端鼠标在扉页移动时照片会跟着出现、再淡出（目录那一栏除外）。照片从全部系列里随机取，`TRAIL_SKIP` 里的系列不用（默认排除 Robot 的仿真渲染）。
-
-每个系列标题下面是按小字标注分组的索引（GERMANY Berlin · Frankfurt …；Concert 则按场次分组）。灯箱里除了标题和位置，还会显示相机、焦段、光圈、快门、ISO 和拍摄月份（从原图 EXIF 读出来，导入时写进 `js/data.js`），底部有一条可点击的胶片条在系列内跳转。
-
-动效：扉页标题逐词升起、数字从 0 数上来、目录悬停时在行尾浮出该系列的一张缩略图、目录逐行进入、卡片按序去模糊浮现、点开灯箱时缩略图会直接放大成大图（View Transitions，不支持的浏览器退化为淡入），浅色模式的背景色晕缓慢漂移。
+左下角的黑胶唱片是 Spotify 官方播放器（`js/site.js` 的 `SOUNDTRACK`，现在是 Lana Del Rey《The greatest》）。点唱片展开播放器并开始播放，唱片随播放旋转；再点一下暂停。浏览器不允许网页自动放音乐，必须由访客点一下；没登录 Spotify 的访客只能听 30 秒试听，面板里有 "Open on YouTube" 链接可以听全曲。网站本身不存放任何音频文件。换歌：改 `title / artist / spotify（曲目 ID）/ youtube（视频 ID）`；`spotify` 留空则不显示唱片。
 
 ## 样式
 

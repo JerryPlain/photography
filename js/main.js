@@ -101,10 +101,9 @@ function highlightsOf(s) {
 // ---------- header / intro ----------
 document.getElementById("brandName").textContent = SITE.author;
 document.getElementById("homeLink").href = SITE.home;
-document.getElementById("introKicker").textContent = SITE.title;
-// the quotation is the headline: each word rises out of a mask
-document.getElementById("introTitle").innerHTML = SITE.statement.split(" ")
-  .map((w, i) => `<span class="w"><span style="--d:${i * 70}ms">${esc(w)}</span></span>`).join(" ");
+document.getElementById("introTitle").innerHTML = SITE.title.split(" ")
+  .map((w, i) => `<span class="w"><span style="--d:${i * 90}ms">${esc(w)}</span></span>`).join(" ");
+document.getElementById("introStatement").textContent = SITE.statement;
 const quoteBy = SITE.statementBy
   ? `<span class="dash" aria-hidden="true">—</span>${esc(SITE.statementBy)}${SITE.statementSource ? `, <cite>${esc(SITE.statementSource)}</cite>` : ""}`
   : "";
@@ -135,9 +134,8 @@ const indexList = document.getElementById("indexList");
 const rail = document.getElementById("rail");
 SERIES.forEach((s, i) => {
   const id = `series-${s.num}`, n = s.photos.length;
-  const peek = s.photos[Math.floor(Math.random() * s.photos.length)];
   contentsList.insertAdjacentHTML("beforeend",
-    `<li class="reveal" style="--d:${300 + i * 55}ms"><a href="#${id}"><span class="num">${s.num}</span><span class="name">${esc(s.title)}</span><span class="count">${n}</span><img class="peek" src="${thumbSrc(peek)}" alt="" loading="lazy" style="--ar:${peek.w} / ${peek.h}"></a></li>`);
+    `<li class="reveal" style="--d:${300 + i * 55}ms"><a href="#${id}"><span class="num">${s.num}</span><span class="name">${esc(s.title)}</span><span class="count">${n}</span></a></li>`);
   indexList.insertAdjacentHTML("beforeend",
     `<li><a href="#${id}"><span class="num">${s.num}</span>${esc(s.title)}<span class="count">${n}</span></a></li>`);
   rail.insertAdjacentHTML("beforeend",
@@ -610,51 +608,6 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   io.observe(root);
 })();
 
-// ---------- intro: photographs trail the cursor (and sweep across once on arrival) ----------
-(function trail() {
-  const intro = document.getElementById("hero");
-  if (!intro || matchMedia("(prefers-reduced-motion: reduce)").matches || NO_REVEAL) return;
-  const layer = document.createElement("div");
-  layer.className = "trail"; layer.setAttribute("aria-hidden", "true");
-  intro.prepend(layer);
-  // preload a shuffled pool so frames never appear blank
-  const skip = new Set(typeof TRAIL_SKIP !== "undefined" ? TRAIL_SKIP : []);
-  const pool = shuffle(SERIES.filter((s) => !skip.has(s.slug)).flatMap((s) => s.photos)).slice(0, 16).map((p) => {
-    const im = new Image(); im.decoding = "async"; im.src = thumbSrc(p); return { p, im };
-  });
-  let n = 0, z = 0, live = 0, lx = -1e9, ly = -1e9;
-  function drop(x, y) {
-    const ready = pool.filter((o) => o.im.complete && o.im.naturalWidth);
-    if (!ready.length || live > 10) return;
-    const { p, im } = ready[n++ % ready.length];
-    const small = innerWidth < 640;
-    let H = small ? 150 : 230, W = H * p.w / p.h;
-    const maxW = small ? 190 : 300;
-    if (W > maxW) { W = maxW; H = W * p.h / p.w; }
-    const el = document.createElement("img");
-    el.src = im.src; el.alt = "";
-    el.style.cssText = `left:${x}px;top:${y}px;width:${W.toFixed(0)}px;height:${H.toFixed(0)}px;z-index:${++z}`;
-    layer.appendChild(el); live++;
-    el.addEventListener("animationend", () => { el.remove(); live--; }, { once: true });
-  }
-  intro.addEventListener("pointermove", (e) => {
-    if (e.pointerType !== "mouse" || e.target.closest(".contents")) return;
-    const r = intro.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-    if (Math.hypot(x - lx, y - ly) < 90) return;
-    lx = x; ly = y; drop(x, y);
-  });
-  // on arrival: one sweep across the intro, as if someone flipped through the prints
-  setTimeout(() => {
-    const W = intro.clientWidth, H = intro.clientHeight, steps = innerWidth < 640 ? 7 : 11;
-    for (let i = 0; i < steps; i++) {
-      setTimeout(() => {
-        const t = i / (steps - 1);
-        drop(W * (0.1 + 0.8 * t), H * (0.7 + 0.08 * Math.sin(t * Math.PI * 1.6)));
-      }, i * 115);
-    }
-  }, 1150);
-})();
-
 // ---------- compass: the needle follows the pointer, and drifts when left alone ----------
 (function compass() {
   const el = document.getElementById("compass"), needle = document.getElementById("needle");
@@ -686,16 +639,6 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   }
   raf = requestAnimationFrame(tick);
   document.addEventListener("visibilitychange", () => { cancelAnimationFrame(raf); if (!document.hidden) raf = requestAnimationFrame(tick); });
-})();
-
-// ---------- wander: a photograph at random ----------
-(function wander() {
-  const btn = document.getElementById("wanderBtn");
-  if (!btn) return;
-  btn.addEventListener("click", () => {
-    const all = shuffle(SERIES.flatMap((s) => s.photos));
-    openLightbox(all, 0, null);
-  });
 })();
 
 // ---------- soundtrack: a record that spins while the Spotify player plays ----------

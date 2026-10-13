@@ -86,9 +86,9 @@ const PASSPORT = {
 // 背景音乐（Spotify 官方播放器）。spotify 填曲目 ID（open.spotify.com/track/<ID>），youtube 填视频 ID。
 // 留空 spotify 则不显示唱片。浏览器不允许网页自动放音乐，访客点唱片才会播放。
 const SOUNDTRACK = {
-  title: "Not All Who Wander Are Lost",
+  title: "The greatest",
   artist: "Lana Del Rey",
-  spotify: "0Z3JiHn6mhcObPmKhV9WRW",
-  youtube: "aK_lWrowOwg",
+  spotify: "6ERZ30cRjVWGtVLhczX9aL",
+  youtube: "EqOwBkxhSZI",
 };
 
