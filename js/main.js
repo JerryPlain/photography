@@ -573,21 +573,38 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   const pct = n / goal * 100;
   document.getElementById("ppTotal").textContent = goal;
   document.getElementById("ppDream").innerHTML = `${pct < 10 ? pct.toFixed(1) : Math.round(pct)}% of the world so far<span class="sep">·</span>${esc(PASSPORT.dream || "")}`;
-  // continents: a thin bar each, visited / total
+  // the ledger: one row per continent — a progress ring, the count, and that continent's stamps
   const byCont = {};
-  list.forEach(([c]) => { const k = C[c][1]; byCont[k] = (byCont[k] || 0) + 1; });
-  document.getElementById("ppCont").innerHTML = CONTINENTS.map(([name, total]) => {
-    const v = byCont[name] || 0;
-    return `<div class="pp-c${v ? "" : " none"}"><span class="pp-cn">${name}</span><span class="pp-cv">${v}<span>/${total}</span></span>
-      <span class="pp-cb"><i style="--w:${(v / total * 100).toFixed(1)}%"></i></span></div>`;
-  }).join("");
-  // stamps: one per country, in the order first visited, each slightly askew like real ink
-  document.getElementById("ppStamps").innerHTML = list.map(([country, date], i) => {
-    const [code] = C[country], y = (date || "").slice(0, 4);
-    const rot = ((i * 37) % 11) - 5;
-    return `<span class="stamp" style="--r:${rot}deg;--i:${i}" title="${esc(country)}${y ? `, first visited ${y}` : ""}">
+  list.forEach(([c, date]) => { const k = C[c][1]; (byCont[k] = byCont[k] || []).push([c, date]); });
+  const CONT_NOTE = { Europe: "Home ground", Asia: "The far side", Africa: "Uncharted", "North America": "Uncharted", "South America": "Uncharted", Oceania: "Uncharted" };
+  let si = 0;
+  const stamp = (country, date) => {
+    const [code] = C[country], y = (date || "").slice(0, 4), i = si++;
+    return `<span class="stamp" style="--r:${((i * 37) % 11) - 5}deg;--i:${i}" title="${esc(country)}${y ? `, first visited ${y}` : ""}">
       <b>${code}</b><small>${esc(country.replace(/ City$/, ""))}</small>${y ? `<em>${y}</em>` : ""}</span>`;
-  }).join("");
+  };
+  const R = 26, CIRC = 2 * Math.PI * R;
+  document.getElementById("ppCont").innerHTML = CONTINENTS
+    .map(([name, total], k) => ({ name, total, k, got: (byCont[name] || []).sort((a, b) => (a[1] || "9").localeCompare(b[1] || "9")) }))
+    .sort((a, b) => b.got.length - a.got.length || a.k - b.k)
+    .map(({ name, total, got }, row) => {
+      const v = got.length, p = v / total * 100;
+      const ptxt = v === 0 ? "0%" : p < 10 ? `${p.toFixed(1)}%` : `${Math.round(p)}%`;
+      const first = got[0] && got[0][1] ? got[0][1].slice(0, 4) : "";
+      return `<div class="pp-row${v ? "" : " none"}" style="--row:${row}">
+        <svg class="pp-ring" viewBox="0 0 60 60" aria-hidden="true">
+          <circle class="pp-ring-bg" cx="30" cy="30" r="${R}"/>
+          <circle class="pp-ring-fg" cx="30" cy="30" r="${R}" style="--len:${CIRC.toFixed(2)};--to:${(CIRC * (1 - v / total)).toFixed(2)}"/>
+          <text class="pp-ring-t" x="30" y="30">${ptxt}</text>
+        </svg>
+        <div class="pp-rowhead">
+          <span class="pp-cn">${name}</span>
+          <span class="pp-cv"><b>${v}</b> / ${total} countries</span>
+          <span class="pp-cnote">${v ? `${CONT_NOTE[name] || ""}${first ? ` · since ${first}` : ""}` : "No stamps yet"}</span>
+        </div>
+        <div class="pp-rowstamps">${v ? got.map(([c, d]) => stamp(c, d)).join("") : `<span class="stamp ghost" aria-hidden="true"><b>?</b><small>someday</small></span>`}</div>
+      </div>`;
+    }).join("");
   // count up, fill the bars and drop the stamps when the passport scrolls into view
   const ppN = document.getElementById("ppN"), fill = document.getElementById("ppFill");
   const finish = () => { ppN.textContent = n; fill.style.width = `${Math.max(pct, 0.6)}%`; root.classList.add("open"); };
