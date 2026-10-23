@@ -74,6 +74,7 @@ const SERIES = [
       {"file": "city/barcelona-1ced115d.jpg", "src": "IMG_1912", "title": "Barcelona", "location": "Spain", "w": 2000, "h": 1772, "date": "2024-12-27", "camera": "iPhone 14 Pro Max", "exif": "116 mm · ƒ/2.8 · 1/138 s · ISO 32"},
       {"file": "city/barcelona-ad8a0e36.jpg", "src": "IMG_2414", "title": "Barcelona", "location": "Spain", "w": 1500, "h": 2000, "date": "2024-12-29", "camera": "iPhone 14 Pro Max", "exif": "22 mm · ƒ/2.2 · 1/1208 s · ISO 40"},
       {"file": "city/tossa-de-mar-efb48567.jpg", "src": "IMG_2088", "title": "Tossa de Mar", "location": "Spain", "w": 1500, "h": 2000, "date": "2024-12-28", "camera": "iPhone 14 Pro Max", "exif": "54 mm · ƒ/1.78 · 1/1376 s · ISO 64"},
+      {"file": "city/zurich-e6218c9e.jpg", "src": "DSCF3098", "title": "Zurich", "location": "Switzerland", "w": 2000, "h": 1333, "date": "2026-10-23", "camera": "Fujifilm X-T50", "exif": "19.9 mm · ƒ/2.8 · 1/100 s · ISO 2000"},
       {"file": "city/bangkok-6701f911.jpg", "src": "IMG_5332", "title": "Bangkok", "location": "Thailand", "w": 2000, "h": 1500, "date": "2024-07-04"},
       {"file": "city/phuket-9065a832.jpg", "src": "087EFD15-C984-469E-AF9B-AB662B8EACBC", "title": "Phuket", "location": "Thailand", "w": 1744, "h": 1308, "date": "2024-07-09"},
       {"file": "city/phuket-1e1d8682.jpg", "src": "IMG_5850", "title": "Phuket", "location": "Thailand", "w": 1500, "h": 2000, "date": "2024-07-09", "camera": "iPhone 14 Pro Max", "exif": "50 mm · ƒ/1.78 · 1/44 s · ISO 250"},
