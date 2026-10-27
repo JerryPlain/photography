@@ -8,6 +8,8 @@ const pad2 = (n) => String(n).padStart(2, "0");
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const fullSrc = (p) => `photos/${p.file}`;
 const thumbSrc = (p) => { const i = p.file.lastIndexOf("/"); return `photos/${p.file.slice(0, i)}/thumbs/${p.file.slice(i + 1)}`; };
+const videoSrc = (p) => `photos/${p.video}`;
+const clock = (sec) => `${Math.floor(sec / 60)}:${String(Math.round(sec % 60)).padStart(2, "0")}`;
 const caption = (p) => [p.title, p.location].filter(Boolean).join(", ");
 const PLURALS = { series: "series", photograph: "photographs", place: "places",
                   country: "countries", model: "models", act: "acts", campus: "campuses", site: "sites",
@@ -144,9 +146,10 @@ SERIES.forEach((s, i) => {
 
 function masonryHTML(s, photos) {
   return `<div class="masonry">${photos.map((p, i) => `
-    <figure class="photo-card reveal" style="--d:${Math.min(i, 8) * 70}ms" data-slug="${s.slug}" data-index="${p._index}" tabindex="0" role="button" aria-label="View ${esc(caption(p) || s.title)}">
+    <figure class="photo-card reveal${p.video ? " is-video" : ""}" style="--d:${Math.min(i, 8) * 70}ms" data-slug="${s.slug}" data-index="${p._index}" tabindex="0" role="button" aria-label="View ${esc(caption(p) || s.title)}">
       <div class="photo-frame" style="--ar:${p.w} / ${p.h}">
         <img src="${thumbSrc(p)}" alt="${esc(caption(p) || `${s.title} ${pad2(p._index + 1)}`)}" loading="lazy" decoding="async" width="${p.w}" height="${p.h}">
+        ${p.video ? `<video class="clip" muted loop playsinline preload="none" data-src="${videoSrc(p)}" aria-hidden="true"></video><span class="clip-badge" aria-hidden="true"><i></i>${clock(p.duration || 0)}</span>` : ""}
       </div>
       <figcaption class="photo-caption"><span class="t">${esc(p.title || `${s.title} ${pad2(p._index + 1)}`)}</span>${p.location ? `<span class="l">${esc(p.location)}</span>` : ""}</figcaption>
     </figure>`).join("")}</div>`;
@@ -219,7 +222,21 @@ let routedOnce = false;
 addEventListener("hashchange", route);
 
 // ---------- image load state ----------
+const clipObserver = new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    const v = e.target;
+    if (e.isIntersecting) {
+      if (!v.src) v.src = v.dataset.src;
+      v.play().then(() => v.closest(".photo-frame").classList.add("playing")).catch(() => {});
+    } else v.pause();
+  });
+}, { threshold: 0.35 });
+function watchClips(scope) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || NO_REVEAL) return;
+  scope.querySelectorAll("video.clip").forEach((v) => clipObserver.observe(v));
+}
 function watchImages(scope) {
+  watchClips(scope);
   scope.querySelectorAll(".photo-frame img").forEach((img) => {
     const box = img.closest(".photo-frame");
     const done = () => box.classList.add("loaded");
@@ -518,6 +535,66 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   const open = (g) => { if (!g.classList.contains("on")) return; const v = byPlace.get(g.dataset.place); tip.hidden = true; openLightbox(v.photos, 0, null); };
   mapEl.addEventListener("click", (e) => { const g = e.target.closest(".pin"); if (g) open(g); });
   mapEl.addEventListener("keydown", (e) => { const g = e.target.closest(".pin"); if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(g); } });
+
+  // ---- by continent: tabs, a single enlarged plate, and the continent's own index beside it ----
+  const PLATE_CONTINENT = { "Europe": "Europe", "Southeast Asia & Japan": "Asia" };
+  const ALL_CONTINENTS = ["Europe", "Asia", "Africa", "North America", "South America", "Oceania"];
+  const plateEls = [...mapEl.querySelectorAll(".plate")];
+  const contOf = (v) => PLATE_CONTINENT[MAP.plates[v.plate].name] || "";
+  const tabs = document.getElementById("continents"), side = document.getElementById("atlasSide");
+  const tally = (list) => ({ cities: list.length, countries: new Set(list.map((v) => v.country).filter(Boolean)).size,
+    photos: list.reduce((a, v) => a + v.photos.length, 0), since: list.map((v) => v.first).filter(Boolean).sort()[0] || "" });
+  const allTally = tally(visits);
+  tabs.innerHTML = [["All", visits], ...ALL_CONTINENTS.map((c) => [c, visits.filter((v) => contOf(v) === c)])].map(([name, list]) => {
+    const st = name === "All" ? allTally : tally(list), empty = !list.length;
+    return `<button type="button" role="tab" class="ct${empty ? " empty" : ""}" data-c="${name}" aria-selected="${name === "All"}"${empty ? ' aria-disabled="true" title="No stamps yet — someday"' : ""}>
+      <span class="ct-name">${name === "All" ? "The world" : name}</span>
+      <span class="ct-num">${empty ? "someday" : `${st.cities} ${st.cities === 1 ? "city" : "cities"} · ${st.countries} ${st.countries === 1 ? "country" : "countries"}`}</span>
+    </button>`;
+  }).join("");
+  function sideHTML(c) {
+    const list = visits.filter((v) => contOf(v) === c), st = tally(list);
+    const byCountry = new Map();
+    list.slice().sort((a, b) => (a.first || "9").localeCompare(b.first || "9")).forEach((v) => {
+      const k = v.country || "Elsewhere"; if (!byCountry.has(k)) byCountry.set(k, []); byCountry.get(k).push(v);
+    });
+    const rows = [...byCountry.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
+    return `
+      <p class="as-kicker">${esc(c)}</p>
+      <div class="as-figs">
+        <div><b>${st.cities}</b><span>cities</span></div>
+        <div><b>${st.countries}</b><span>countries</span></div>
+        <div><b>${st.photos}</b><span>frames</span></div>
+      </div>
+      <p class="as-since">${st.since ? `First light in ${month(st.since)}` : ""}</p>
+      <div class="as-list">${rows.map(([country, vs]) => `
+        <div class="as-country"><span class="as-cn">${esc(country)}</span>
+          <div class="as-cities">${vs.map((v) => `<button type="button" class="as-city" data-place="${esc(v.name)}"><span>${esc(v.name)}</span><i>${v.photos.length}</i></button>`).join("")}</div>
+        </div>`).join("")}</div>`;
+  }
+  function select(c) {
+    tabs.querySelectorAll(".ct").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.c === c)));
+    const solo = c !== "All";
+    frame.classList.toggle("solo", solo);
+    plateEls.forEach((el, k) => { el.hidden = solo && PLATE_CONTINENT[MAP.plates[k].name] !== c; });
+    side.hidden = !solo;
+    if (solo) { side.innerHTML = sideHTML(c); side.classList.remove("in"); void side.offsetWidth; side.classList.add("in"); }
+    tip.hidden = true;
+    fitSide();
+  }
+  // beside the map the list never runs taller than the plate; it scrolls instead
+  function fitSide() {
+    const shown = plateEls.find((el) => !el.hidden);
+    side.style.maxHeight = frame.classList.contains("solo") && innerWidth > 900 && shown ? `${shown.offsetHeight}px` : "";
+  }
+  addEventListener("resize", fitSide, { passive: true });
+  tabs.addEventListener("click", (e) => { const b = e.target.closest(".ct"); if (b && !b.classList.contains("empty")) select(b.dataset.c); });
+  // city list ↔ map: hovering a city lights its pin; clicking opens its photographs
+  const pinOf = (name) => mapEl.querySelector(`.pin[data-place="${CSS.escape(name)}"]`);
+  side.addEventListener("pointerover", (e) => { const b = e.target.closest(".as-city"); mapEl.querySelectorAll(".pin.hl").forEach((g) => g.classList.remove("hl")); if (b) { const g = pinOf(b.dataset.place); if (g) g.classList.add("hl"); } });
+  side.addEventListener("pointerleave", () => mapEl.querySelectorAll(".pin.hl").forEach((g) => g.classList.remove("hl")));
+  side.addEventListener("click", (e) => { const b = e.target.closest(".as-city"); if (b) openLightbox(byPlace.get(b.dataset.place).photos, 0, null); });
+  if (Q.has("continent")) select(Q.get("continent"));
 })();
 
 // ---------- visitors: the RevolverMaps2 globe counts the visit when its script runs ----------
@@ -805,6 +882,7 @@ overlay.addEventListener("click", (e) => { if (e.target.closest("a") || e.target
 // ---------- scroll reveal ----------
 if (Q.has("nohero")) document.getElementById("hero").style.display = "none";
 if (Q.has("noatlas")) document.getElementById("atlas").style.display = "none";
+if (Q.has("nopassport")) { const pp = document.getElementById("passport"); if (pp) pp.style.display = "none"; }
 if (Q.has("from")) document.querySelectorAll(".series").forEach((el, i) => { if (i < Number(Q.get("from"))) el.style.display = "none"; });
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("visible"); revealObserver.unobserve(e.target); } });
@@ -820,7 +898,7 @@ const lbExif = document.getElementById("lbExif");
 const lbStrip = document.getElementById("lbStrip");
 function buildStrip(list) {
   lbStrip.innerHTML = list.map((p, i) =>
-    `<button type="button" data-i="${i}" aria-label="Photograph ${i + 1}" style="--ar:${p.w} / ${p.h}"><img src="${thumbSrc(p)}" alt="" loading="lazy" decoding="async"></button>`).join("");
+    `<button type="button" data-i="${i}" aria-label="${p.video ? "Video" : "Photograph"} ${i + 1}" style="--ar:${p.w} / ${p.h}"${p.video ? ' class="vid"' : ""}><img src="${thumbSrc(p)}" alt="" loading="lazy" decoding="async"></button>`).join("");
 }
 lbStrip.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) showPhoto(Number(b.dataset.i)); });
 let lbList = [], current = -1, lastFocus = null;
@@ -828,6 +906,15 @@ const preload = (i) => { const im = new Image(); im.src = fullSrc(lbList[(i + lb
 function showPhoto(i, fromCard) {
   current = (i + lbList.length) % lbList.length;
   const photo = lbList[current], s = photo._series;
+  if (photo.video) {
+    const v = document.createElement("video");
+    v.className = "lb-video"; v.controls = true; v.autoplay = true; v.loop = true; v.playsInline = true;
+    v.poster = fullSrc(photo); v.src = videoSrc(photo);
+    v.width = photo.w; v.height = photo.h;
+    lbMedia.innerHTML = ""; lbMedia.appendChild(v);
+    requestAnimationFrame(() => v.classList.add("in"));
+    v.play().catch(() => {});
+  } else {
   // show the (cached) thumbnail at once, then upgrade to the full file
   const img = new Image();
   img.alt = caption(photo) || `${s.title} ${pad2(current + 1)}`;
@@ -839,10 +926,11 @@ function showPhoto(i, fromCard) {
   const full = new Image();
   full.onload = () => { if (lbList[current] === photo) img.src = full.src; };
   full.src = fullSrc(photo);
+  }
   lbTitle.textContent = photo.title || s.title;
   lbMeta.textContent = [photo.location, s.title, `${current + 1} / ${lbList.length}`].filter(Boolean).join("  ·  ");
   const when = photo.date ? new Date(photo.date + "T12:00:00").toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : "";
-  lbExif.innerHTML = [photo.camera && `<span class="cam">${esc(photo.camera)}</span>`, photo.exif && esc(photo.exif), when]
+  lbExif.innerHTML = [photo.video && `<span class="cam">Video · ${clock(photo.duration || 0)}</span>`, photo.camera && `<span class="cam">${esc(photo.camera)}</span>`, photo.exif && esc(photo.exif), when]
     .filter(Boolean).join('<span class="sep">·</span>');
   // filmstrip: mark the current frame and keep it in view
   [...lbStrip.children].forEach((b, i) => b.classList.toggle("on", i === current));
@@ -869,6 +957,7 @@ function openLightbox(list, i, card) {
   document.getElementById("lbClose").focus();
 }
 function closeLightbox() {
+  lbMedia.querySelectorAll("video").forEach((v) => v.pause());
   lightbox.classList.remove("open"); lightbox.setAttribute("aria-hidden", "true");
   document.body.classList.remove("no-scroll");
   if (lastFocus) lastFocus.focus();
@@ -909,7 +998,7 @@ lightbox.addEventListener("touchend", (e) => {
     if (document.hidden || !home || home.hidden || lightbox.classList.contains("open")) return;
     const cards = [...home.querySelectorAll(".photo-card")].filter((c) => {
       const r = c.getBoundingClientRect();
-      return r.bottom > 0 && r.top < innerHeight && !c.matches(":hover") && !c.classList.contains("swapping");
+      return r.bottom > 0 && r.top < innerHeight && !c.matches(":hover") && !c.classList.contains("swapping") && !c.classList.contains("is-video");
     });
     if (!cards.length) return;
     const card = cards[Math.floor(Math.random() * cards.length)];
@@ -917,7 +1006,7 @@ lightbox.addEventListener("touchend", (e) => {
     const cur = s.photos[Number(card.dataset.index)];
     const shown = new Set([...home.querySelectorAll(`.photo-card[data-slug="${s.slug}"]`)].map((c) => Number(c.dataset.index)));
     const shownTitles = new Set([...shown].filter((i) => i !== cur._index).map((i) => s.photos[i].title));
-    let options = poolOf(s).filter((p) => !shown.has(p._index) && orient(p) === orient(cur));
+    let options = poolOf(s).filter((p) => !p.video && !shown.has(p._index) && orient(p) === orient(cur));
     if (options.some((p) => !shownTitles.has(p.title))) options = options.filter((p) => !shownTitles.has(p.title));
     if (!options.length) return;
     const next = options[Math.floor(Math.random() * options.length)];

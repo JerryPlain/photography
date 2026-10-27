@@ -29,7 +29,10 @@ DATA = ROOT / "js" / "data.js"
 
 FULL_MAX, FULL_Q = 2000, 72
 THUMB_MAX, THUMB_Q = 1000, 70
-EXTS = {".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp", ".tif", ".tiff"}
+IMG_EXTS = {".jpg", ".jpeg", ".png", ".heic", ".heif", ".webp", ".tif", ".tiff"}
+VIDEO_EXTS = {".mov", ".mp4", ".m4v"}
+EXTS = IMG_EXTS | VIDEO_EXTS
+VIDEO_PRESET = "Preset1280x720"   # avconvert (built into macOS): H.264 720p, ~1 MB/s, keeps sound
 
 # ---------------------------------------------------------------- helpers
 
@@ -211,6 +214,25 @@ def sips(src: Path, dst: Path, max_px: int, q: int):
 
 # ---------------------------------------------------------------- scan
 
+def is_video(p: Path) -> bool:
+    return p.suffix.lower() in VIDEO_EXTS
+
+def video_poster(src: Path, dst: Path):
+    """A frame about a third of the way in, via AVFoundation (scripts/poster.swift)."""
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["swift", str(ROOT / "scripts" / "poster.swift"), str(src), str(dst), "2000"],
+                   check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+def video_encode(src: Path, dst: Path):
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(["avconvert", "-s", str(src), "-p", VIDEO_PRESET, "-o", str(dst), "--replace"],
+                   check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+def video_seconds(p: Path) -> float:
+    out = subprocess.run(["mdls", "-raw", "-name", "kMDItemDurationSeconds", str(p)], capture_output=True, text=True).stdout
+    try: return round(float(out), 1)
+    except ValueError: return 0.0
+
 def scan():
     series = []
     for folder in sorted(SRC.iterdir()):
@@ -273,13 +295,26 @@ def main():
     for s in series:
         entries = []
         for title, location, src, group in s["photos"]:
-            base = f"{slugify(title) if title else s['slug']}-{file_hash(src)}.jpg"
+            stem = f"{slugify(title) if title else s['slug']}-{file_hash(src)}"
+            base = f"{stem}.jpg"
             full = OUT / s["slug"] / base
             thumb = OUT / s["slug"] / "thumbs" / base
-            for dst, mx, q in ((full, FULL_MAX, FULL_Q), (thumb, THUMB_MAX, THUMB_Q)):
-                if FORCE or not dst.exists() or dst.stat().st_mtime < src.stat().st_mtime:
-                    sips(src, dst, mx, q)
-                    print(f"  {dst.relative_to(ROOT)}")
+            video = OUT / s["slug"] / "videos" / f"{stem}.mp4" if is_video(src) else None
+            stale = lambda dst: FORCE or not dst.exists() or dst.stat().st_mtime < src.stat().st_mtime
+            if video:
+                # a video becomes a 720p mp4 plus a poster frame that stands in for the "full" image
+                if stale(video):
+                    video_encode(src, video); print(f"  {video.relative_to(ROOT)}")
+                if stale(full):
+                    video_poster(src, full); sips(full, full, FULL_MAX, FULL_Q); print(f"  {full.relative_to(ROOT)}")
+                if stale(thumb):
+                    sips(full, thumb, THUMB_MAX, THUMB_Q); print(f"  {thumb.relative_to(ROOT)}")
+                keep.add(video)
+            else:
+                for dst, mx, q in ((full, FULL_MAX, FULL_Q), (thumb, THUMB_MAX, THUMB_Q)):
+                    if stale(dst):
+                        sips(src, dst, mx, q)
+                        print(f"  {dst.relative_to(ROOT)}")
             keep.add(full); keep.add(thumb)
             dims = displayed_dims(full)
             if not dims:
@@ -298,13 +333,16 @@ def main():
             if group and group != title: entry["group"] = group   # the folder a renamed file lives in
             if camera: entry["camera"] = camera
             if settings: entry["exif"] = settings
+            if video:
+                entry["video"] = f"{s['slug']}/videos/{video.name}"
+                entry["duration"] = video_seconds(src)
             entries.append(entry)
         manifest.append({"slug": s["slug"], "title": s["title"], "photos": entries})
         print(f"{s['slug']}: {len(entries)} photos")
 
     # prune
     if OUT.exists():
-        for p in OUT.rglob("*.jpg"):
+        for p in [*OUT.rglob("*.jpg"), *OUT.rglob("*.mp4")]:
             if p not in keep:
                 p.unlink(); print(f"  pruned {p.relative_to(ROOT)}")
         for d in sorted(OUT.rglob("*"), reverse=True):

@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=dee6dab3">
+  <link rel="stylesheet" href="css/style.css?v=56909949">
 </head>
 <body>
   <a class="skip-link" href="#contents">Skip to contents</a>
@@ -123,8 +123,13 @@
         <div class="pp-bar" aria-hidden="true"><i id="ppFill"></i></div>
         <div class="pp-ledger" id="ppCont"></div>
       </div>
+      <!-- 按大洲看：All 显示两幅图版；选中某个大洲时那幅图版放大，右侧列出该洲的国家与城市 -->
+      <div class="continents reveal" id="continents" role="tablist" aria-label="Continents" style="--d:220ms"></div>
       <div class="atlas-frame reveal" style="--d:240ms">
-        <div class="atlas-map" id="atlasMap"></div>
+        <div class="atlas-body">
+          <div class="atlas-map" id="atlasMap"></div>
+          <aside class="atlas-side" id="atlasSide" hidden></aside>
+        </div>
         <div class="journey" aria-label="Journey timeline">
           <button class="jr-play" id="jrPlay" type="button" data-state="play" aria-label="Play the journey">
             <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg>
@@ -207,9 +212,9 @@
   </div>
 
   <script src="js/site.js?v=0bd6717f"></script>
-  <script src="js/data.js?v=5b909082"></script>
-  <script src="js/map.js?v=72988a55"></script>
+  <script src="js/data.js?v=5d905c3a"></script>
+  <script src="js/map.js?v=7d000ee0"></script>
   <script src="js/stars.js?v=d5e12b97"></script>
-  <script src="js/main.js?v=8d1d67cd"></script>
+  <script src="js/main.js?v=66ae11f4"></script>
 </body>
 </html>

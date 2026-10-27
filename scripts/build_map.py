@@ -78,7 +78,7 @@ PLACES = {  # name: (lon, lat)
     "Milan": (9.19, 45.46), "Hong Kong": (114.17, 22.32), "Shanghai": (121.47, 31.23), "Qingdao": (120.38, 36.07),
     "Beijing": (116.40, 39.90), "Seoul": (126.98, 37.57), "Kyoto": (135.77, 35.01),
     "Vienna": (16.37, 48.21), "Prague": (14.42, 50.08), "Amsterdam": (4.90, 52.37),
-    "London": (-0.13, 51.51), "Zurich": (8.54, 47.38), "Salzburg": (13.05, 47.81),
+    "London": (-0.13, 51.51), "Zurich": (8.54, 47.38), "Interlaken": (7.86, 46.69), "Ringgenberg": (7.9, 46.7), "Mürren": (7.89, 46.56), "Lauterbrunnen": (7.91, 46.59), "Kleine Scheidegg": (7.96, 46.585), "Grindelwald": (8.04, 46.62), "Salzburg": (13.05, 47.81),
     "Innsbruck": (11.40, 47.27), "Venice": (12.32, 45.44), "Athens": (23.73, 37.98),
     "Istanbul": (28.98, 41.01), "Copenhagen": (12.57, 55.68), "Hamburg": (9.99, 53.55),
     "Cologne": (6.96, 50.94), "Dresden": (13.74, 51.05), "Bratislava": (17.11, 48.15),

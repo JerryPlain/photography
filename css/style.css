@@ -976,3 +976,88 @@ html.noreveal .stamp { transition: none; }
   62%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -46%) scale(0.94); }
 }
+
+/* ---------- video ---------- */
+.photo-frame .clip { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.8s ease; pointer-events: none; z-index: 1; }
+.photo-frame.playing .clip { opacity: 1; }
+.clip-badge {
+  position: absolute; left: 0.6rem; bottom: 0.6rem; z-index: 2;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.22rem 0.55rem 0.22rem 0.45rem; border-radius: 999px;
+  background: rgba(0, 0, 0, 0.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  color: #fff; font-family: var(--sans); font-size: 0.62rem; font-weight: 600; letter-spacing: 0.08em; font-variant-numeric: tabular-nums;
+}
+.clip-badge i { width: 0; height: 0; border-left: 6px solid #fff; border-top: 4px solid transparent; border-bottom: 4px solid transparent; }
+.photo-frame.playing .clip-badge i { width: 6px; height: 6px; border: 0; border-radius: 50%; background: var(--accent); animation: rec 1.6s ease-in-out infinite; }
+@keyframes rec { 50% { opacity: 0.25; } }
+.lb-media video.lb-video {
+  max-width: min(94vw, 90rem); max-height: 80vh; width: auto; height: auto; display: block;
+  border-radius: var(--radius); box-shadow: 0 30px 60px -24px var(--shadow); background: #000;
+  opacity: 0; transition: opacity 0.35s ease;
+}
+.lb-media video.lb-video.in { opacity: 1; }
+.lb-strip button.vid { position: relative; }
+.lb-strip button.vid::after { content: ""; position: absolute; left: 50%; top: 50%; transform: translate(-40%, -50%);
+  border-left: 7px solid #fff; border-top: 5px solid transparent; border-bottom: 5px solid transparent; filter: drop-shadow(0 0 2px rgba(0,0,0,0.6)); }
+@media (max-width: 640px) { .lb-media video.lb-video { max-height: 66vh; } }
+
+/* ---------- atlas by continent ---------- */
+.continents { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 1rem; }
+.ct {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0.12rem;
+  padding: 0.55rem 0.95rem 0.6rem; border-radius: 8px;
+  border: 1px solid var(--hairline); background: color-mix(in srgb, var(--paper) 70%, transparent);
+  text-align: left; transition: border-color 0.25s ease, background-color 0.25s ease, transform 0.3s var(--ease), box-shadow 0.3s ease;
+}
+.ct-name { font-family: var(--serif); font-size: 1rem; color: var(--ink); }
+.ct-num { font-family: var(--sans); font-size: 0.6rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.ct:not(.empty):hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--hairline)); transform: translateY(-1px); }
+.ct[aria-selected="true"] { background: var(--accent); border-color: var(--accent); box-shadow: 0 8px 20px -12px var(--accent); }
+.ct[aria-selected="true"] .ct-name, .ct[aria-selected="true"] .ct-num { color: #fff; }
+.ct.empty { border-style: dashed; background: transparent; cursor: default; }
+.ct.empty .ct-name { color: var(--ink-soft); }
+.ct.empty .ct-num { font-family: var(--serif); font-style: italic; text-transform: none; letter-spacing: 0.02em; font-size: 0.78rem; color: var(--ink-faint); }
+.ct:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.atlas-body { display: block; }
+.atlas-frame.solo .atlas-body { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(15rem, 1fr); gap: 1rem; align-items: start; }
+.plate[hidden] { display: none !important; }
+.atlas-frame.solo .plate { flex: 1 1 100%; animation: pageIn 0.5s var(--ease) both; }
+
+.atlas-side {
+  background: var(--paper); border-radius: 6px; padding: 1.3rem 1.3rem 1.1rem;
+  box-shadow: 0 1px 2px var(--shadow), 0 20px 50px -30px var(--shadow);
+  max-height: 100%; overflow: auto;
+}
+.atlas-side.in { animation: pageIn 0.5s var(--ease) 80ms both; }
+.as-kicker { font-family: var(--sans); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); }
+.as-figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0.7rem 0 0.4rem; }
+.as-figs div { display: flex; flex-direction: column; }
+.as-figs b { font-family: var(--serif); font-weight: 400; font-size: 2.1rem; line-height: 1; color: var(--ink); font-variant-numeric: tabular-nums; }
+.as-figs span { font-family: var(--sans); font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); margin-top: 0.25rem; }
+.as-since { font-family: var(--serif); font-style: italic; font-size: 0.88rem; color: var(--ink-soft); padding-bottom: 0.9rem; border-bottom: 1px solid var(--hairline); }
+.as-list { display: flex; flex-direction: column; }
+.as-country { padding: 0.7rem 0; border-bottom: 1px solid var(--hairline); }
+.as-cn { display: block; font-family: var(--sans); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.4rem; }
+.as-cities { display: flex; flex-wrap: wrap; gap: 0.3rem 0.35rem; }
+.as-city {
+  display: inline-flex; align-items: baseline; gap: 0.35rem; padding: 0.18rem 0.55rem; border-radius: 999px;
+  font-family: var(--serif); font-size: 0.88rem; color: var(--ink); background: color-mix(in srgb, var(--ink) 4%, transparent);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.as-city i { font-style: normal; font-family: var(--sans); font-size: 0.6rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.as-city:hover { background: var(--accent); color: #fff; }
+.as-city:hover i { color: rgba(255,255,255,0.8); }
+/* the pin of the city under the pointer in the list */
+.atlas-map .pin.hl circle.dot { r: 13; }
+.atlas-map .pin.hl .lbl { opacity: 1; }
+.atlas-map .pin.hl circle.halo { animation: halo 1.2s ease-out infinite; }
+
+@media (max-width: 900px) {
+  .atlas-frame.solo .atlas-body { grid-template-columns: 1fr; }
+  .continents { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-bottom: 0.2rem; }
+  .continents::-webkit-scrollbar { display: none; }
+  .ct { flex: 0 0 auto; }
+}
+html.noreveal .reveal, html.noreveal .atlas-side.in, html.noreveal .atlas-frame.solo .plate { transition: none !important; animation: none !important; }
+
