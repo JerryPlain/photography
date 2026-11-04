@@ -1,42 +1,66 @@
 /* ============================================================
-   Shijie Zhou — Photography
-   Warm paper, one red, an orderly grid. Dark mode brings the stars.
+   Shijie Zhou — Photography Gallery
+   Warm paper, glass cards, one caramel accent, an orderly grid —
+   the homepage's "paper & glass" look. Dark mode brings the stars.
    ============================================================ */
 
 :root {
-  --bg: #f9f7f4;
-  --paper: #ffffff;
-  --ink: #1c1b19;
-  --ink-soft: #6d6a64;
-  --ink-faint: #b5b0a7;
-  --hairline: rgba(28, 27, 25, 0.12);
-  --accent: #c0392b;
+  /* the homepage's "paper & glass" palette: warm paper, ink-blue text, one caramel accent */
+  --bg: #f4f1ea;
+  --bg-rgb: 244 241 234;
+  --paper: #fbf9f4;
+  --ink: #1a2332;
+  --ink-soft: #6b7a8d;
+  --ink-faint: #b3b9c2;
+  --hairline: rgba(70, 55, 40, 0.1);
+  --accent: #a5643a;
+  --accent-soft: #c58b5c;
   --link: #2e86c1;
-  --shadow: rgba(28, 27, 25, 0.14);
+  --shadow: rgba(70, 55, 40, 0.14);
   --stars-alpha: 0;
 
-  --serif: "IBM Plex Serif", Georgia, "Times New Roman", "Songti SC", serif;
-  --display: "IBM Plex Serif", Georgia, "Times New Roman", "Songti SC", serif;
-  --sans: "IBM Plex Sans", "Segoe UI", -apple-system, Helvetica, Arial, sans-serif;
+  /* glass cards, as on the homepage */
+  --glass: rgb(251 249 244 / 0.8);
+  --glass-hover: rgb(251 249 244 / 0.92);
+  --glass-border: rgb(255 255 255 / 0.6);
+  --glass-border-hi: rgb(255 255 255 / 0.85);
+  --glass-shadow: 0 8px 40px rgb(70 55 40 / 0.08), 0 2px 8px rgb(70 55 40 / 0.04);
+  --glass-shadow-hover: 0 12px 48px rgb(70 55 40 / 0.14), 0 4px 12px rgb(70 55 40 / 0.06);
+  --glow: rgb(233 226 212 / 0.4);
+
+  /* one family throughout, Source Serif 4, like the homepage */
+  --serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", "Songti SC", serif;
+  --display: var(--serif);
+  --sans: var(--serif);
 
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --gutter: clamp(1.1rem, 4vw, 2.5rem);
   --container: 72rem;
-  --radius: 4px;
+  --radius: 12px;
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
-  --bg: #0e0f12;
-  --paper: #17181c;
-  --ink: #ebe8e1;
-  --ink-soft: #9a968e;
-  --ink-faint: #4d4c4a;
-  --hairline: rgba(235, 232, 225, 0.14);
-  --accent: #e0584a;
+  --bg: #16130e;
+  --bg-rgb: 22 19 14;
+  --paper: #1f1c17;
+  --ink: #e9e6e0;
+  --ink-soft: #9a958c;
+  --ink-faint: #57524b;
+  --hairline: rgba(255, 255, 255, 0.09);
+  --accent: #d29a72;
+  --accent-soft: #c89472;
   --link: #6db3e6;
-  --shadow: rgba(0, 0, 0, 0.6);
+  --shadow: rgba(0, 0, 0, 0.55);
   --stars-alpha: 1;
+
+  --glass: rgb(255 255 255 / 0.04);
+  --glass-hover: rgb(255 255 255 / 0.06);
+  --glass-border: rgb(255 255 255 / 0.07);
+  --glass-border-hi: rgb(255 255 255 / 0.1);
+  --glass-shadow: 0 8px 40px rgb(0 0 0 / 0.22);
+  --glass-shadow-hover: 0 12px 48px rgb(0 0 0 / 0.32);
+  --glow: rgb(48 38 22 / 0.35);
   color-scheme: dark;
 }
 
@@ -1073,3 +1097,144 @@ html.noreveal .reveal, html.noreveal .atlas-side.in, html.noreveal .atlas-frame.
   .pp-ch { flex-direction: column; align-items: flex-start; }
 }
 
+
+/* ============================================================
+   Paper & glass — the homepage's look, applied to the gallery.
+   The tokens at the top carry the palette and type; the rules
+   below give the larger surfaces the same frosted cards, the
+   same navbar, the same heavier headings and the same pills.
+   ============================================================ */
+
+/* ground: one wide warm glow behind the top of the page (instead of the
+   three colour washes) and a faint paper grain; the glass blurs both */
+body::before {
+  inset: auto; top: -60px; left: 50%;
+  width: min(900px, 100vw); height: 500px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: var(--glow);
+  background-image: none;
+  filter: blur(160px);
+  animation: none;
+}
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+:root[data-theme="dark"] body::after { opacity: 0.05; }
+body { font-size: 16px; }
+::selection { background: rgb(197 139 92 / 0.28); color: inherit; }
+
+/* small caps labels, set in the serif */
+.eyebrow, .label,
+.contents-list .num, .contents-list .count,
+.series-num, .series-meta,
+.index-list .num, .rail-num,
+.footer-copy, .lb-meta { font-size: 0.72rem; letter-spacing: 0.14em; font-weight: 600; }
+.pl-names { font-size: 1rem; letter-spacing: 0; }
+.pl-label { font-size: 0.66rem; }
+
+/* navbar: the homepage's frosted bar — 64px, name in semibold, quiet links */
+.topbar {
+  min-height: 64px; padding-top: 0; padding-bottom: 0;
+  background: rgb(var(--bg-rgb) / 0.82);
+  border-bottom: 1px solid rgb(255 255 255 / 0.35);
+  box-shadow: 0 1px 0 rgb(70 55 40 / 0.05);
+}
+:root[data-theme="dark"] .topbar { background: rgb(var(--bg-rgb) / 0.55); border-bottom-color: rgb(255 255 255 / 0.06); box-shadow: none; }
+.topbar.scrolled { border-bottom-color: rgb(255 255 255 / 0.35); }
+.brand-mark { width: 1.6rem; height: 1.6rem; }
+.brand-name { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; }
+.topbar-nav { gap: 0.25rem; }
+.topbar-link, .index-toggle {
+  padding: 6px 12px; border-radius: 999px;
+  font-size: 0.9375rem; font-weight: 400; letter-spacing: 0; text-transform: none;
+  color: var(--ink-soft);
+  transition: color 0.25s ease;
+}
+.topbar-link:hover, .index-toggle:hover { color: var(--ink); }
+.theme-toggle { width: 2.25rem; height: 2.25rem; border-radius: 10px; color: var(--ink-soft); transition: background-color 0.2s ease, color 0.2s ease; }
+.theme-toggle:hover { color: var(--ink); background: var(--glass); }
+.progress { height: 2px; background: linear-gradient(90deg, rgb(197 139 92 / 0.25), rgb(197 139 92 / 0.85)); }
+
+/* headings: bold and tight, like the homepage's */
+.intro-title { font-weight: 700; letter-spacing: -0.02em; font-size: clamp(2.4rem, 5vw, 3.8rem); }
+.atlas-title, .series-title { font-weight: 700; letter-spacing: -0.015em; }
+.atlas-title { font-size: clamp(1.6rem, 2.8vw, 2.15rem); }
+.series-title { font-size: clamp(1.7rem, 3vw, 2.3rem); }
+.series-page .series-title { font-size: clamp(2.1rem, 4vw, 3rem); }
+.intro-statement { font-size: clamp(1.08rem, 1.5vw, 1.25rem); letter-spacing: 0.01em; color: var(--ink); }
+.contents-list .name { font-size: 1.125rem; }
+.contents-list a:hover .name { color: var(--accent); }
+.intro-stats { font-size: 0.875rem; }
+.series-tagline { font-size: 1.0625rem; }
+.photo-caption .t { font-size: 0.9375rem; }
+.photo-caption .l { font-size: 0.66rem; }
+
+/* glass cards: the passport, the map plates and the city list beside them */
+.passport, .atlas-side, .atlas-tip {
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-top-color: var(--glass-border-hi); border-left-color: var(--glass-border-hi);
+  box-shadow: var(--glass-shadow);
+}
+.passport { border-radius: 24px; padding: 1.7rem 1.9rem 1.6rem; }
+.atlas-side { border-radius: 20px; }
+.atlas-tip { border-radius: 12px; }
+.atlas-tip img { border-radius: 6px; }
+.pp-c { border-radius: 14px; background: color-mix(in srgb, var(--ink) 3%, transparent); }
+.plate {
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* continent tabs: the homepage's pills — glass when idle, ink when chosen */
+.ct {
+  border-radius: 16px;
+  border: 1px solid rgb(255 255 255 / 0.5);
+  background: rgb(var(--bg-rgb) / 0.85);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgb(70 55 40 / 0.05);
+}
+:root[data-theme="dark"] .ct { background: rgb(255 255 255 / 0.05); border-color: rgb(255 255 255 / 0.08); }
+.ct:not(.empty):hover { border-color: rgb(255 255 255 / 0.7); background: var(--glass-hover); transform: translateY(-1px); }
+.ct[aria-selected="true"] { background: rgb(26 35 50 / 0.92); border-color: transparent; box-shadow: 0 2px 12px rgb(26 35 50 / 0.15); }
+:root[data-theme="dark"] .ct[aria-selected="true"] { background: rgb(255 255 255 / 0.9); }
+:root[data-theme="dark"] .ct[aria-selected="true"] .ct-name, :root[data-theme="dark"] .ct[aria-selected="true"] .ct-num { color: #1a2332; }
+.ct.empty { background: transparent; box-shadow: none; border-color: var(--hairline); }
+.as-city:hover { background: var(--ink); color: var(--bg); }
+
+/* photographs: softer corners, a warm lift on hover */
+.photo-frame { box-shadow: 0 2px 10px rgb(70 55 40 / 0.07); }
+.photo-card:hover .photo-frame { box-shadow: 0 18px 36px -16px rgb(70 55 40 / 0.35), 0 2px 8px rgb(70 55 40 / 0.06); }
+:root[data-theme="dark"] .photo-frame { box-shadow: 0 2px 10px rgb(0 0 0 / 0.3); }
+.lb-strip button { border-radius: 6px; }
+
+/* "View all" and the way back: glass pills, like "All publications" */
+.view-all, .back-link {
+  margin-top: 0.9rem; padding: 0.5rem 1rem; gap: 0.5rem;
+  border-radius: 999px; border: 1px solid var(--glass-border);
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+  box-shadow: 0 2px 8px rgb(70 55 40 / 0.06);
+  font-size: 0.875rem; font-weight: 500; letter-spacing: 0;
+  color: var(--ink-soft);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, gap 0.3s var(--ease);
+}
+.view-all:hover, .back-link:hover {
+  color: var(--ink); border-color: var(--glass-border-hi);
+  transform: translateY(-2px); box-shadow: 0 4px 16px rgb(70 55 40 / 0.1); gap: 0.7rem;
+}
+.back-link { margin-top: 0; }
+
+/* journey play button and the soundtrack in the caramel */
+.jr-play { box-shadow: 0 4px 14px -6px rgb(165 100 58 / 0.6); }
+
+/* footer: quieter, on a faint rule like the homepage's */
+.site-footer { border-top-color: var(--hairline); }
+.footer-name { font-weight: 700; letter-spacing: -0.01em; }
+.footer-links a { color: var(--ink-soft); text-transform: none; letter-spacing: 0; font-size: 0.9375rem; font-weight: 400; }
+.footer-links a:hover { color: var(--ink); }

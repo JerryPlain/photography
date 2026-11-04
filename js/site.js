@@ -4,7 +4,7 @@
 
 const SITE = {
   author: "Shijie Zhou",
-  title: "Selected Photographs",
+  title: "Photography Gallery",
   // 扉页上的一句话
   statement: "Not all those who wander are lost.",
   // 引用的出处（扉页和页脚都会显示）；不是引用就把两个都留空
