@@ -13,6 +13,7 @@ const SITE = {
   // 个人主页
   home: "https://jerryplain.github.io/",
   footerLinks: [
+    { label: "Collection", url: "collection/" },
     { label: "Home", url: "https://jerryplain.github.io/" },
     { label: "Email", url: "mailto:jerryplain@outlook.com" },
   ],

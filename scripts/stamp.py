@@ -13,20 +13,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 HTML = ROOT / "index.html"
 
-def stamp():
-    html = HTML.read_text()
+def stamp_file(html_path: Path):
+    """Hash every local css/js link in one HTML file; paths resolve relative to that file."""
+    html = html_path.read_text()
     def sub(m):
         attr, path = m.group(1), m.group(2)
-        f = ROOT / path
-        if not f.exists():
+        f = (html_path.parent / path).resolve()
+        if not f.exists() or ROOT not in f.parents:
             return m.group(0)
         v = hashlib.md5(f.read_bytes()).hexdigest()[:8]
         return f'{attr}="{path}?v={v}"'
-    new = re.sub(r'\b(href|src)="((?:css|js)/[^"?]+)(?:\?v=[0-9a-f]+)?"', sub, html)
+    new = re.sub(r'\b(href|src)="((?:\.\./)?(?:css/|js/)?[\w./-]+\.(?:css|js))(?:\?v=[0-9a-f]+)?"', sub, html)
     if new != html:
-        HTML.write_text(new)
-    stamped = re.findall(r'(?:css|js)/[^"?]+\?v=[0-9a-f]+', new)
-    print(f"stamped {len(stamped)} assets in index.html")
+        html_path.write_text(new)
+    return len(re.findall(r'\.(?:css|js)\?v=[0-9a-f]+', new))
+
+PAGES = [HTML, ROOT / "collection" / "index.html"]
+
+def stamp():
+    for page in PAGES:
+        if page.exists():
+            print(f"stamped {stamp_file(page)} assets in {page.relative_to(ROOT)}")
 
 if __name__ == "__main__":
     stamp()

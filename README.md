@@ -62,6 +62,17 @@ python3 -m http.server 8000
 首页每个系列只放几张（`HOME_COUNT` 基数，宽屏自动 ×1.5，手机 ×0.75），每次打开从整个系列里随机抽，尽量每个地点一张；页面停着时每 4 秒左右有一张在原位换成同方向的另一张（放大淡入），标签页不可见、开着灯箱、鼠标悬停时暂停，系统开了"减少动态效果"则完全静止。点 View all 进 `#/slug` 系列页看全部。
 想限定只从某些照片里抽，把原始文件名填进 [js/site.js](js/site.js) 的 `HIGHLIGHTS`；留空就是全部随机。
 
+## 精选集（Collection，自己的 Unsplash）
+
+`/photography/collection/` 是从全部作品里挑出来的精选：可以按 Nature / Cities / Architecture 筛选，每张都能直接下载 2000px JPEG，点开有拍摄信息、授权说明、一键复制署名、分享链接，以及打赏。个人主页导航栏的 **Collection** 和摄影站顶栏都能跳过来。
+
+全部设置都在 [collection/config.js](collection/config.js)：
+- `picks`：选哪些照片（原始文件名，不带后缀）和分类，顺序就是网格顺序。删掉的照片会在控制台提示。
+- `license`：默认 CC BY-NC 4.0（个人和非商业免费、需署名；商用来信）。想像 Unsplash 一样允许商用，换成 CC BY 4.0 或 CC0。
+- `support`：打赏方式。填 `url`（Ko-fi / Buy Me a Coffee / PayPal.me / Stripe 付款链接）就显示跳转按钮；填 `qr`（微信赞赏码、支付宝收款码图片放进 `collection/assets/`）就显示二维码。全部留空时只显示 "Say thanks" 邮件按钮。
+
+调试参数：`?support` 直接打开打赏面板，`?tipsdemo` 用示例打赏方式预览样式。
+
 ## 视频
 
 照片文件夹里直接放 `.mov / .mp4 / .m4v` 就行，和照片一样按文件夹命名。导入时用 macOS 自带的 `avconvert` 压成 720p H.264（`VIDEO_PRESET`，约 1 MB/秒，保留声音），再用 `scripts/poster.swift` 取三分之一处的一帧做封面。网格里视频卡片左下角有时长标记，滚到屏幕上时静音循环播放，离开就暂停；点开在灯箱里带声音、带控件播放。GitHub 单文件上限 100 MB，压缩后一般 10–25 MB。

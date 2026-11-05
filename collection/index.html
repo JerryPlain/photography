@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Collection — Shijie Zhou</title>
+  <meta name="description" content="Photographs by Shijie Zhou, free to download for personal and non-commercial use.">
+  <meta name="theme-color" content="#f4f1ea">
+  <link rel="icon" href="../assets/sz-mark.svg" type="image/svg+xml">
+  <script>
+    (function () { try {
+      var q = new URLSearchParams(location.search);
+      if (localStorage.getItem("theme") === "dark" || q.get("theme") === "dark") document.documentElement.dataset.theme = "dark";
+      if (q.has("noreveal")) document.documentElement.classList.add("noreveal");
+    } catch (e) {} })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css?v=d4f79719">
+  <link rel="stylesheet" href="collection.css?v=9312bfb7">
+</head>
+<body class="collection-page">
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <header class="topbar" id="topbar">
+    <a class="brand" href="../">
+      <img class="brand-mark" src="../assets/sz-mark.svg" alt="" width="28" height="28">
+      <span class="brand-name">Shijie Zhou</span>
+    </a>
+    <nav class="topbar-nav cl-nav" aria-label="Site">
+      <a class="topbar-link" href="../">Photography</a>
+      <a class="topbar-link" href="https://jerryplain.github.io/">Home</a>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg class="tt-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <mask id="ttMoonMask"><rect width="24" height="24" fill="white"/><circle class="tt-mask-circle" cx="12" cy="12" r="6" fill="black"/></mask>
+          <circle class="tt-core" cx="12" cy="12" r="5.2" fill="currentColor" mask="url(#ttMoonMask)"/>
+          <g class="tt-rays" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <line x1="12" y1="1.8" x2="12" y2="4.2"/><line x1="12" y1="19.8" x2="12" y2="22.2"/>
+            <line x1="1.8" y1="12" x2="4.2" y2="12"/><line x1="19.8" y1="12" x2="22.2" y2="12"/>
+            <line x1="4.6" y1="4.6" x2="6.3" y2="6.3"/><line x1="17.7" y1="17.7" x2="19.4" y2="19.4"/>
+            <line x1="17.7" y1="6.3" x2="19.4" y2="4.6"/><line x1="4.6" y1="19.4" x2="6.3" y2="17.7"/>
+          </g>
+        </svg>
+      </button>
+    </nav>
+  </header>
+
+  <main class="cl" id="top">
+    <section class="cl-hero">
+      <p class="eyebrow">Collection</p>
+      <h1 class="cl-title" id="clTitle"></h1>
+      <p class="cl-lede" id="clLede"></p>
+      <div class="cl-actions">
+        <button class="cl-btn primary" id="clSupportBtn" type="button"></button>
+        <a class="cl-btn" href="#license">License</a>
+      </div>
+      <p class="cl-stats" id="clStats"></p>
+    </section>
+
+    <div class="cl-topics" id="clTopics" role="tablist" aria-label="Topics"></div>
+    <div class="cl-grid" id="clGrid"></div>
+
+    <section class="cl-license" id="license">
+      <div>
+        <p class="eyebrow">License</p>
+        <h2 class="cl-h2" id="licName"></h2>
+        <p class="cl-p" id="licShort"></p>
+        <p class="cl-p soft" id="licCommercial"></p>
+      </div>
+      <div>
+        <p class="eyebrow">Credit</p>
+        <div class="cl-credit"><code id="creditLine"></code><button class="cl-copy" type="button" data-copy-credit>Copy</button></div>
+        <p class="cl-p soft">A credit line under the image, or a link back here, is all it takes.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <img class="footer-mark" src="../assets/sz-mark.svg" alt="" width="36" height="36">
+    <p class="footer-name">Shijie Zhou</p>
+    <nav class="footer-links"><a href="../">Photography</a><a href="https://jerryplain.github.io/">Home</a><a id="footerMail" href="#">Email</a></nav>
+    <p class="footer-copy" id="footerCopy"></p>
+  </footer>
+
+  <!-- photo sheet -->
+  <div class="cl-sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Photograph" hidden>
+    <button class="cl-x" id="sheetClose" type="button" aria-label="Close">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <button class="cl-nav-btn prev" id="sheetPrev" type="button" aria-label="Previous"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="cl-nav-btn next" id="sheetNext" type="button" aria-label="Next"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="cl-sheet-inner">
+      <div class="cl-sheet-media" id="sheetMedia"></div>
+      <aside class="cl-sheet-info" id="sheetInfo"></aside>
+    </div>
+  </div>
+
+  <!-- support sheet -->
+  <div class="cl-support" id="support" role="dialog" aria-modal="true" aria-label="Support" hidden>
+    <div class="cl-support-card">
+      <button class="cl-x small" id="supportClose" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+      <div id="supportBody"></div>
+    </div>
+  </div>
+
+  <script src="../js/site.js?v=f81ffa84"></script>
+  <script src="../js/data.js?v=5d905c3a"></script>
+  <script src="config.js?v=bfe87836"></script>
+  <script src="../js/stars.js?v=d5e12b97"></script>
+  <script src="collection.js?v=c6963682"></script>
+</body>
+</html>
