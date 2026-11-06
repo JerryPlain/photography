@@ -64,14 +64,14 @@ python3 -m http.server 8000
 
 ## 精选集（Collection，自己的 Unsplash）
 
-`/photography/collection/` 是从全部作品里挑出来的精选：可以按 Nature / Cities / Architecture 筛选，每张都能直接下载 2000px JPEG，点开有拍摄信息、授权说明、一键复制署名、分享链接，以及打赏。个人主页导航栏的 **Collection** 和摄影站顶栏都能跳过来。
+`/photography/collection/` 是从全部作品里挑出来的精选，只能从摄影站顶栏和页脚的 **Collection** 进入（个人主页不放入口）。每张都能直接下载 2000px JPEG，点开有拍摄信息、授权说明和分享链接；**Buy me a coffee** 打开 PayPal。
 
 全部设置都在 [collection/config.js](collection/config.js)：
-- `picks`：选哪些照片（原始文件名，不带后缀）和分类，顺序就是网格顺序。删掉的照片会在控制台提示。
-- `license`：默认 CC BY-NC 4.0（个人和非商业免费、需署名；商用来信）。想像 Unsplash 一样允许商用，换成 CC BY 4.0 或 CC0。
-- `support`：打赏方式。填 `url`（Ko-fi / Buy Me a Coffee / PayPal.me / Stripe 付款链接）就显示跳转按钮；填 `qr`（微信赞赏码、支付宝收款码图片放进 `collection/assets/`）就显示二维码。全部留空时只显示 "Say thanks" 邮件按钮。
+- `picks`：选哪些照片（原始文件名，不带后缀）和分类。四张及以下按两张一行等高排列，横竖搭配最好看；超过 8 张时出现 Nature / Cities / Architecture 筛选。
+- `support`：标题、那句话，以及 `methods`（现在只有 PayPal.me；以后可以加 Ko-fi 链接，或微信、支付宝收款码图片）。
+- `license`：默认 CC BY-NC 4.0（个人和非商业免费、需署名；商用来信）。
 
-调试参数：`?support` 直接打开打赏面板，`?tipsdemo` 用示例打赏方式预览样式。
+调试参数：`?support` 直接打开打赏面板。
 
 ## 视频
 

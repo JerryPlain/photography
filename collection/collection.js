@@ -35,33 +35,27 @@
   document.getElementById("licName").innerHTML = `<a href="${esc(C.license.url)}" target="_blank" rel="noopener">${esc(C.license.name)}</a>`;
   document.getElementById("licShort").textContent = C.license.short;
   document.getElementById("licCommercial").innerHTML = `${esc(C.license.commercial)} <a href="mailto:${esc(C.contact)}?subject=${encodeURIComponent("Licensing a photograph")}">${esc(C.contact)}</a>`;
-  document.getElementById("creditLine").textContent = C.credit;
   document.getElementById("footerMail").href = `mailto:${C.contact}`;
   document.getElementById("footerCopy").textContent = `© ${new Date().getFullYear()} Shijie Zhou · ${C.license.name}`;
 
-  // ---- support: tip methods from config, or a plain "say thanks" ----
-  const methods = (Q.has("tipsdemo") ? [
-    { label: "Buy me a coffee", note: "Card · Apple Pay · PayPal", url: "#" },
-    { label: "PayPal", note: "Any amount", url: "#" },
-    { label: "WeChat", note: "微信赞赏", qr: "" },
-  ] : C.support || []).filter((m) => m && (m.url || m.qr !== undefined));
+  // ---- support: buy me a coffee ----
+  const SUP = C.support || {}, methods = (SUP.methods || []).filter((m) => m && (m.url || m.qr));
+  const CUP = `<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5V9zM16 10.5h1.5a2.5 2.5 0 0 1 0 5H16M8 4.5c0 1 1 1.2 1 2.2M11.5 4.5c0 1 1 1.2 1 2.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const supportBtn = document.getElementById("clSupportBtn");
-  supportBtn.innerHTML = methods.length
-    ? `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 20s-7-4.4-7-9.6A4 4 0 0 1 12 8a4 4 0 0 1 7 2.4C19 15.6 12 20 12 20z" fill="currentColor"/></svg>Support my work`
-    : `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 20s-7-4.4-7-9.6A4 4 0 0 1 12 8a4 4 0 0 1 7 2.4C19 15.6 12 20 12 20z" fill="currentColor"/></svg>Say thanks`;
-  function supportHTML(photo) {
-    const head = `<p class="eyebrow">Support</p><h3 class="cl-h3">${photo ? `Enjoyed <em>${esc(photo.title)}</em>?` : "Keep the shutter clicking"}</h3>
-      <p class="cl-p">Every photograph here is free. If one found its way into your work or your day, a coffee goes straight into the next trip.</p>`;
-    const list = methods.length ? `<div class="cl-methods">${methods.map((m, i) => m.url
-      ? `<a class="cl-method" href="${esc(m.url)}" target="_blank" rel="noopener"><span class="m-label">${esc(m.label)}</span><span class="m-note">${esc(m.note || "")}</span><span class="m-go" aria-hidden="true">↗</span></a>`
-      : `<button class="cl-method" type="button" data-qr="${i}"><span class="m-label">${esc(m.label)}</span><span class="m-note">${esc(m.note || "")}</span><span class="m-go" aria-hidden="true">⌗</span></button>`).join("")}</div><div class="cl-qr" id="qrBox" hidden></div>`
-      : "";
-    const thanks = `<a class="cl-method soft" href="mailto:${esc(C.contact)}?subject=${encodeURIComponent(photo ? `About “${photo.title}”` : "About your photographs")}"><span class="m-label">Say thanks</span><span class="m-note">Tell me where a photo ended up</span><span class="m-go" aria-hidden="true">✉</span></a>`;
-    return head + list + `<div class="cl-methods">${thanks}</div>`;
+  if (methods.length) supportBtn.innerHTML = `${CUP}${esc(SUP.title || "Buy me a coffee")}`; else supportBtn.remove();
+  function supportHTML() {
+    return `<div class="cl-cup" aria-hidden="true">${CUP}</div>
+      <h3 class="cl-h3">${esc(SUP.title || "Buy me a coffee")}</h3>
+      <p class="cl-p">${esc(SUP.text || "")}</p>
+      <div class="cl-methods">${methods.map((m, i) => m.url
+        ? `<a class="cl-method" href="${esc(m.url)}" target="_blank" rel="noopener"><span class="m-label">${esc(m.label)}</span><span class="m-note">${esc(m.note || "")}</span><span class="m-go" aria-hidden="true">↗</span></a>`
+        : `<button class="cl-method" type="button" data-qr="${i}"><span class="m-label">${esc(m.label)}</span><span class="m-note">${esc(m.note || "")}</span><span class="m-go" aria-hidden="true">⌗</span></button>`).join("")}</div>
+      <div class="cl-qr" id="qrBox" hidden></div>`;
   }
   const supportEl = document.getElementById("support"), supportBody = document.getElementById("supportBody");
-  function openSupport(photo) {
-    supportBody.innerHTML = supportHTML(photo);
+  function openSupport() {
+    if (!methods.length) return;
+    supportBody.innerHTML = supportHTML();
     supportEl.hidden = false; requestAnimationFrame(() => supportEl.classList.add("on"));
     document.body.classList.add("no-scroll");
   }
@@ -69,36 +63,50 @@
     supportEl.classList.remove("on"); setTimeout(() => { supportEl.hidden = true; }, 250);
     if (sheet.hidden) document.body.classList.remove("no-scroll");
   }
-  supportBtn.addEventListener("click", () => openSupport(null));
+  supportBtn.addEventListener("click", openSupport);
   document.getElementById("supportClose").addEventListener("click", closeSupport);
   supportEl.addEventListener("click", (e) => {
     if (e.target === supportEl) closeSupport();
     const q = e.target.closest("[data-qr]");
     if (q) {
       const m = methods[Number(q.dataset.qr)], box = document.getElementById("qrBox");
-      box.innerHTML = m.qr ? `<img src="${esc(m.qr)}" alt="${esc(m.label)} QR code"><span>${esc(m.label)} · scan to send</span>` : `<span>QR code goes here</span>`;
+      box.innerHTML = `<img src="${esc(m.qr)}" alt="${esc(m.label)} QR code"><span>${esc(m.label)} · scan to send</span>`;
       box.hidden = false;
     }
   });
 
   // ---- topics + grid ----
   const topics = document.getElementById("clTopics"), grid = document.getElementById("clGrid");
+  grid.dataset.n = items.length <= 4 ? "few" : items.length <= 9 ? "some" : "many";
+  if (items.length < 9) topics.hidden = true;
   const counts = items.reduce((a, p) => (a[p.topic] = (a[p.topic] || 0) + 1, a), {});
   topics.innerHTML = [["all", "All", items.length], ...Object.entries(C.topics).map(([k, v]) => [k, v, counts[k] || 0])]
     .filter(([, , n]) => n).map(([k, v, n], i) =>
       `<button class="cl-topic" type="button" role="tab" data-t="${k}" aria-selected="${i === 0}">${esc(v)}<span>${n}</span></button>`).join("");
   const dlName = (p) => `shijie-zhou-${slug(p.title)}-${p.id.slice(-8)}.jpg`;
   const DL = `<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  function renderGrid(t) {
-    const list = items.filter((p) => t === "all" || p.topic === t);
-    grid.innerHTML = list.map((p, i) => `
+  function cardHTML(p, i) { return `
       <figure class="cl-card" data-id="${p.id}" style="--ar:${p.w} / ${p.h};--i:${Math.min(i, 12)}" tabindex="0" role="button" aria-label="${esc(p.where)}">
         <img src="${thumb(p)}" alt="${esc(p.where)}" loading="${i < 6 ? "eager" : "lazy"}"${i < 3 ? ' fetchpriority="high"' : ""} decoding="async" width="${p.w}" height="${p.h}">
         <figcaption class="cl-cap">
           <span class="cl-cap-t"><b>${esc(p.title)}</b>${p.location ? `<i>${esc(p.location)}</i>` : ""}</span>
           <a class="cl-dl" href="${full(p)}" download="${dlName(p)}" aria-label="Download ${esc(p.title)}" title="Download">${DL}</a>
         </figcaption>
-      </figure>`).join("");
+      </figure>`; }
+  function renderGrid(t) {
+    const list = items.filter((p) => t === "all" || p.topic === t);
+    if (grid.dataset.n === "few") {
+      // a handful: justified rows of two, every photograph at its own shape and the same height per row
+      const rows = [];
+      for (let i = 0; i < list.length; i += 2) rows.push(list.slice(i, i + 2));
+      grid.innerHTML = rows.map((r, ri) => `<div class="cl-row">${r.map((p, j) => cardHTML(p, ri * 2 + j)).join("")}</div>`).join("");
+      grid.querySelectorAll(".cl-card").forEach((c) => { const p = byId.get(c.dataset.id); c.style.flexGrow = (p.w / p.h).toFixed(4); });
+      // no row taller than ~72% of the screen: narrow and centre it instead
+      grid.querySelectorAll(".cl-row").forEach((row) => {
+        const sum = [...row.children].reduce((a, c) => a + Number(c.style.flexGrow), 0);
+        row.style.maxWidth = `calc(72vh * ${sum.toFixed(4)} + ${row.children.length - 1}rem)`;
+      });
+    } else grid.innerHTML = list.map(cardHTML).join("");
     grid.querySelectorAll("img").forEach((im) => { const done = () => im.closest(".cl-card").classList.add("loaded"); im.complete && im.naturalWidth ? done() : im.addEventListener("load", done, { once: true }); });
   }
   let topic = "all"; renderGrid(topic);
@@ -127,11 +135,10 @@
       <h2 class="cl-h2">${esc(p.title)}</h2>
       <p class="cl-where">${esc(p.location || "")}${p.date ? ` · ${month(p.date)}` : ""}</p>
       <a class="cl-btn primary wide" href="${full(p)}" download="${dlName(p)}">${DL}Download<span class="cl-btn-note">JPEG · ${p.w} × ${p.h}</span></a>
-      <button class="cl-btn wide" type="button" data-support>${methods.length ? "Support my work" : "Say thanks"}</button>
+      ${methods.length ? `<button class="cl-btn wide" type="button" data-support>${CUP}${esc(SUP.title || "Buy me a coffee")}</button>` : ""}
       ${p.camera || p.exif ? `<dl class="cl-exif">${p.camera ? `<div><dt>Camera</dt><dd>${esc(p.camera)}</dd></div>` : ""}${p.exif ? `<div><dt>Settings</dt><dd>${esc(p.exif)}</dd></div>` : ""}</dl>` : ""}
       <div class="cl-lic">
         <p><a href="${esc(C.license.url)}" target="_blank" rel="noopener">${esc(C.license.name)}</a> · ${esc(C.license.short)}</p>
-        <div class="cl-credit"><code>${esc(C.credit)}</code><button class="cl-copy" type="button" data-copy-credit>Copy</button></div>
         <button class="cl-link" type="button" data-share>Copy link to this photo</button>
       </div>`;
     history.replaceState(null, "", `#${p.id}`);
@@ -153,7 +160,7 @@
   document.getElementById("sheetNext").addEventListener("click", () => step(1));
   sheet.addEventListener("click", (e) => {
     if (e.target === sheet || e.target === media) closeSheet();
-    if (e.target.closest("[data-support]")) openSupport(cur);
+    if (e.target.closest("[data-support]")) openSupport();
     if (e.target.closest("[data-share]")) copy(location.href, e.target.closest("[data-share]"), "Link copied");
   });
   document.addEventListener("keydown", (e) => {
@@ -175,7 +182,6 @@
       try { document.execCommand("copy"); ok(); } catch (e) {} ta.remove();
     });
   }
-  document.addEventListener("click", (e) => { const b = e.target.closest("[data-copy-credit]"); if (b) copy(C.credit, b, "Copied"); });
 
   // ---- theme toggle (same key as the main site) ----
   const root = document.documentElement, tt = document.getElementById("themeToggle");
@@ -191,5 +197,5 @@
 
   // deep link: /collection/#<photo-id>
   if (location.hash && byId.has(location.hash.slice(1))) openSheet(location.hash.slice(1));
-  if (Q.has("support")) openSupport(null);
+  if (Q.has("support")) openSupport();
 })();
