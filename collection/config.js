@@ -28,6 +28,8 @@ const COLLECTION = {
 
   // 精选：[原始文件名（不带后缀）, 分类]。顺序就是网格顺序。分类：nature / city / architecture
   topics: { nature: "Nature", city: "Cities", architecture: "Architecture" },
+  // 现在精选由桌面 ~/Desktop/photography/Collection 文件夹决定（ingest 生成 collection/picks.js），
+  // 下面这份只在那个文件夹不存在时作为后备。
   // 只有几张时按两张一行排，每行等高；横竖搭配一行最好看（横 + 竖，竖 + 横）。
   picks: [
     ["DSCF3767", "nature"],   // Kleine Scheidegg

@@ -13,13 +13,16 @@
   const month = (d) => d ? new Date(d + "T12:00:00").toLocaleDateString("en-GB", { month: "long", year: "numeric" }) : "";
 
   // ---- resolve picks against the library ----
+  // picks come from the Collection folder on disk (picks.js); config.js picks are the fallback
   const bySrc = new Map();
   SERIES.forEach((s) => s.photos.forEach((p) => { if (!p.video) bySrc.set(p.src, { ...p, series: s.slug }); }));
   const items = [];
   const missing = [];
-  C.picks.forEach(([src, topic]) => {
-    const p = bySrc.get(src);
-    if (!p) { missing.push(src); return; }
+  const source = typeof COLLECTION_PICKS !== "undefined" && COLLECTION_PICKS.length
+    ? COLLECTION_PICKS.map((e) => [e, e.topic])
+    : C.picks.map(([src, topic]) => [bySrc.get(src) || src, topic]);
+  source.forEach(([p, topic]) => {
+    if (typeof p === "string") { missing.push(p); return; }
     const where = [p.title, p.location].filter(Boolean).join(", ");
     items.push({ ...p, topic, id: `${slug(p.title)}-${p.file.match(/-([0-9a-f]{8})\.jpg$/)[1]}`, where });
   });

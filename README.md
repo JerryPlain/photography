@@ -66,8 +66,10 @@ python3 -m http.server 8000
 
 `/photography/collection/` 是从全部作品里挑出来的精选，只能从摄影站顶栏和页脚的 **Collection** 进入（个人主页不放入口）。每张都能直接下载 2000px JPEG，点开有拍摄信息、授权说明和分享链接；**Buy me a coffee** 打开 PayPal。
 
-全部设置都在 [collection/config.js](collection/config.js)：
-- `picks`：选哪些照片（原始文件名，不带后缀）和分类。四张及以下按两张一行等高排列，横竖搭配最好看；超过 8 张时出现 Nature / Cities / Architecture 筛选。
+**选哪些照片：** 把照片放进桌面的 `~/Desktop/photography/Collection` 文件夹（不带序号，所以不会变成一个系列）。和库里一模一样的照片会直接复用那张；库里没有的照片也行，按文件名取标题（`05 Zermatt, Switzerland.jpg` → Zermatt / Switzerland）。顺序就是文件名顺序，开头的数字只用来排序。可选子文件夹 `Nature / Cities / Architecture` 决定分类。导入时生成 `collection/picks.js`。
+
+其余设置在 [collection/config.js](collection/config.js)：
+- `picks`（只在 Collection 文件夹不存在时作为后备）：选哪些照片（原始文件名，不带后缀）和分类。四张及以下按两张一行等高排列，横竖搭配最好看；超过 8 张时出现 Nature / Cities / Architecture 筛选。
 - `support`：标题、那句话，以及 `methods`（现在只有 PayPal.me；以后可以加 Ko-fi 链接，或微信、支付宝收款码图片）。
 - `license`：默认 CC BY-NC 4.0（个人和非商业免费、需署名；商用来信）。
 

@@ -32,7 +32,6 @@ const SERIES = [
       {"file": "city/munich-c370aac7.jpg", "src": "IMG_8971", "title": "Munich", "location": "Germany", "w": 1588, "h": 2000, "date": "2024-10-10", "camera": "iPhone 14 Pro Max", "exif": "30 mm · ƒ/1.78 · 1/54 s · ISO 500"},
       {"file": "city/munich-bdd8752a.jpg", "src": "IMG_8972", "title": "Munich", "location": "Germany", "w": 1500, "h": 2000, "date": "2024-10-10", "camera": "iPhone 14 Pro Max", "exif": "86 mm · ƒ/2.8 · 1/33 s · ISO 640"},
       {"file": "city/munich-5f4c7ddc.jpg", "src": "DSCF0224", "title": "Munich", "location": "Germany", "w": 2000, "h": 1333, "date": "2025-10-11", "camera": "Fujifilm X-T50", "exif": "39.8 mm · ƒ/2.8 · 1/42 s · ISO 64"},
-      {"file": "city/munich-87da7261.jpg", "src": "DSCF0329", "title": "Munich", "location": "Germany", "w": 2000, "h": 1333, "date": "2025-10-11", "camera": "Fujifilm X-T50", "exif": "34 mm · ƒ/3.2 · 1/105 s · ISO 250"},
       {"file": "city/nurnberg-bb4b026d.jpg", "src": "DSCF1364", "title": "Nürnberg", "location": "Germany", "w": 1333, "h": 2000, "date": "2025-12-13", "camera": "Fujifilm X-T50", "exif": "18.1 mm · ƒ/2.8 · 1/42 s · ISO 80"},
       {"file": "city/regensburg-8a2855e9.jpg", "src": "DSCF0393", "title": "Regensburg", "location": "Germany", "w": 1333, "h": 2000, "date": "2025-10-13", "camera": "Fujifilm X-T50", "exif": "26.4 mm · ƒ/4 · 1/900 s · ISO 250"},
       {"file": "city/regensburg-dc1aeee0.jpg", "src": "DSCF0454", "title": "Regensburg", "location": "Germany", "w": 2000, "h": 1333, "date": "2025-10-13", "camera": "Fujifilm X-T50", "exif": "45.2 mm · ƒ/2.8 · 1/56 s · ISO 6400"},
@@ -84,7 +83,6 @@ const SERIES = [
       {"file": "city/ringgenberg-048e1a08.jpg", "src": "DSCF3253", "title": "Ringgenberg", "location": "Switzerland", "w": 2000, "h": 1333, "date": "2026-10-24", "camera": "Fujifilm X-T50", "exif": "35.1 mm · ƒ/2.8 · 1/105 s · ISO 640"},
       {"file": "city/ringgenberg-6510ff39.jpg", "src": "DSCF3277", "title": "Ringgenberg", "location": "Switzerland", "w": 1333, "h": 2000, "date": "2026-10-24", "camera": "Fujifilm X-T50", "exif": "26.4 mm · ƒ/2.8 · 1/80 s · ISO 6400"},
       {"file": "city/ringgenberg-71697522.jpg", "src": "DSCF3279", "title": "Ringgenberg", "location": "Switzerland", "w": 2000, "h": 1291, "date": "2026-10-25", "camera": "Fujifilm X-T50", "exif": "29 mm · ƒ/3.6 · 1/150 s · ISO 250"},
-      {"file": "city/ringgenberg-cdbd8072.jpg", "src": "DSCF3835", "title": "Ringgenberg", "location": "Switzerland", "w": 2000, "h": 1131, "date": "2026-10-27", "camera": "Fujifilm X-T50", "exif": "16.5 mm · ƒ/4.5 · 1/125 s · ISO 250"},
       {"file": "city/zurich-e6218c9e.jpg", "src": "DSCF3098", "title": "Zurich", "location": "Switzerland", "w": 2000, "h": 1333, "date": "2026-10-23", "camera": "Fujifilm X-T50", "exif": "19.9 mm · ƒ/2.8 · 1/100 s · ISO 2000"},
       {"file": "city/zurich-5388df2a.jpg", "src": "DSCF3141", "title": "Zurich", "location": "Switzerland", "w": 1333, "h": 2000, "date": "2026-10-24", "camera": "Fujifilm X-T50", "exif": "22.6 mm · ƒ/2.8 · 1/100 s · ISO 500"},
       {"file": "city/zurich-faf31b14.jpg", "src": "DSCF3147", "title": "Zurich", "location": "Switzerland", "w": 1333, "h": 2000, "date": "2026-10-24", "camera": "Fujifilm X-T50", "exif": "53.1 mm · ƒ/2.8 · 1/160 s · ISO 1600"},
@@ -106,6 +104,7 @@ const SERIES = [
       {"file": "me/pisa-04735653.jpg", "src": "Pisa, Italy", "title": "Pisa", "location": "Italy", "w": 1448, "h": 2000, "date": "2025-03-04", "group": "Europe", "camera": "Panasonic DC-GF10", "exif": "14 mm · ƒ/3.5 · 1/3200 s · ISO 200"},
       {"file": "me/berlin-a60e7036.jpg", "src": "Berlin, Germany", "title": "Berlin", "location": "Germany", "w": 2000, "h": 1333, "date": "2026-01-01", "group": "Europe", "camera": "Fujifilm X-T50", "exif": "16 mm · ƒ/2.8 · 1/25 s · ISO 6400"},
       {"file": "me/dubrovnik-95cbb3be.jpg", "src": "Dubrovnik, Croatia", "title": "Dubrovnik", "location": "Croatia", "w": 2000, "h": 1333, "date": "2026-06-29", "group": "Europe", "camera": "Fujifilm X-T50", "exif": "16 mm · ƒ/4 · 1/1800 s · ISO 125"},
+      {"file": "me/murren-3d4fbda2.jpg", "src": "Mürren, Switzerland", "title": "Mürren", "location": "Switzerland", "w": 1506, "h": 2000, "date": "2026-10-26", "group": "Europe", "camera": "Fujifilm X-T50", "exif": "25.6 mm · ƒ/4 · 1/150 s · ISO 250"},
     ],
   },
   {
@@ -117,10 +116,9 @@ const SERIES = [
       {"file": "sea-and-lake/eibsee-7a1e375e.jpg", "src": "IMG_5243", "title": "Eibsee", "location": "Germany", "w": 1500, "h": 2000, "date": "2025-04-20", "camera": "iPhone 14 Pro Max", "exif": "93 mm · ƒ/2.8 · 1/266 s · ISO 32"},
       {"file": "sea-and-lake/eibsee-4d1e041a.jpg", "src": "IMG_5278", "title": "Eibsee", "location": "Germany", "w": 1500, "h": 2000, "date": "2025-04-20", "camera": "iPhone 14 Pro Max", "exif": "29 mm · ƒ/1.78 · 1/2967 s · ISO 80"},
       {"file": "sea-and-lake/eibsee-0660f47d.jpg", "src": "IMG_5334", "title": "Eibsee", "location": "Germany", "w": 1678, "h": 2000, "date": "2025-04-20", "camera": "iPhone 14 Pro Max", "exif": "21 mm · ƒ/2.2 · 1/739 s · ISO 40"},
-      {"file": "sea-and-lake/lautersee-40042c56.jpg", "src": "IMG_9626", "title": "Lautersee", "location": "Germany", "w": 2000, "h": 1998, "date": "2024-10-27", "camera": "iPhone 14 Pro Max", "exif": "44 mm · ƒ/1.78 · 1/535 s · ISO 80"},
-      {"file": "sea-and-lake/bled-lake-5e815280.jpg", "src": "IMG_2035", "title": "Bled lake", "location": "Slovenia", "w": 1920, "h": 1440, "date": "2025-12-28", "video": "sea-and-lake/videos/bled-lake-5e815280.mp4", "duration": 18.3},
       {"file": "sea-and-lake/brienz-lake-4a2a0829.jpg", "src": "IMG_8603", "title": "Brienz lake", "location": "Switzerland", "w": 1920, "h": 1440, "date": "2026-10-24", "video": "sea-and-lake/videos/brienz-lake-4a2a0829.mp4", "duration": 11.3},
-      {"file": "sea-and-lake/fallbodensee-d34e6240.jpg", "src": "DSCF3787", "title": "Fallbodensee", "location": "Switzerland", "w": 1920, "h": 1080, "date": "2026-10-26", "video": "sea-and-lake/videos/fallbodensee-d34e6240.mp4", "duration": 20.0},
+      {"file": "sea-and-lake/brienz-lake-37ab580f.jpg", "src": "DSCF3282", "title": "Brienz lake", "location": "Switzerland", "w": 2000, "h": 1333, "date": "2026-10-25", "camera": "Fujifilm X-T50", "exif": "16 mm · ƒ/5 · 1/180 s · ISO 250"},
+      {"file": "sea-and-lake/fallbodensee-8103ab81.jpg", "src": "DSCF3752", "title": "Fallbodensee", "location": "Switzerland", "w": 2000, "h": 1333, "date": "2026-10-26", "camera": "Fujifilm X-T50", "exif": "16 mm · ƒ/2.8 · 1/100 s · ISO 320"},
     ],
   },
   {
@@ -128,14 +126,10 @@ const SERIES = [
     title: "Car",
     photos: [
       {"file": "car/bmw-vision-efficientdynamics-dc2d9f9a.jpg", "src": "DSCF0862", "title": "BMW Vision EfficientDynamics", "location": "", "w": 1333, "h": 2000, "date": "2025-11-15", "camera": "Fujifilm X-T50", "exif": "16 mm · ƒ/2.8 · 1/100 s · ISO 2500"},
+      {"file": "car/lamborghini-urus-mansory-venatus-58ee9cc5.jpg", "src": "DSCF3116", "title": "Lamborghini Urus — MANSORY Venatus", "location": "", "w": 2000, "h": 1333, "date": "2026-10-23", "camera": "Fujifilm X-T50", "exif": "29 mm · ƒ/2.8 · 1/52 s · ISO 6400"},
+      {"file": "car/lamborghini-urus-mansory-venatus-a7fc19ba.jpg", "src": "DSCF3118", "title": "Lamborghini Urus — MANSORY Venatus", "location": "", "w": 2000, "h": 1333, "date": "2026-10-23", "camera": "Fujifilm X-T50", "exif": "17 mm · ƒ/2.8 · 1/52 s · ISO 6400"},
+      {"file": "car/lamborghini-urus-mansory-venatus-7e0e3576.jpg", "src": "DSCF3119", "title": "Lamborghini Urus — MANSORY Venatus", "location": "", "w": 2000, "h": 1333, "date": "2026-10-23", "camera": "Fujifilm X-T50", "exif": "20.5 mm · ƒ/2.8 · 1/52 s · ISO 6400"},
       {"file": "car/porsche-911-carrera-4-gts-cabriolet-e8bcfa89.jpg", "src": "DSCF2940", "title": "Porsche 911 Carrera 4 GTS Cabriolet", "location": "", "w": 2000, "h": 1333, "date": "2026-08-22", "camera": "Fujifilm X-T50", "exif": "28.1 mm · ƒ/2.8 · 1/100 s · ISO 400"},
-    ],
-  },
-  {
-    slug: "robot",
-    title: "Robot",
-    photos: [
-      {"file": "robot/talos-humanoid-robot-66a1a3fc.jpg", "src": "8b43dafa05e0c0478573dccd06ea9abb", "title": "TALOS Humanoid Robot", "location": "", "w": 1502, "h": 1486, "date": "2025-06-14"},
     ],
   },
   {
@@ -150,10 +144,9 @@ const SERIES = [
     title: "School",
     photos: [
       {"file": "school/tum-rutsche-upstairs-a2681c93.jpg", "src": "TUM-Rutsche Upstairs, CIT", "title": "TUM-Rutsche Upstairs", "location": "CIT", "w": 2000, "h": 1691, "date": "2024-10-06", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "32 mm · ƒ/1.78 · 1/480 s · ISO 80"},
-      {"file": "school/main-library-front-door-7e4d47c0.jpg", "src": "Main Library Front Door", "title": "Main Library Front Door", "location": "Technical University of Munich", "w": 1905, "h": 2000, "date": "2024-10-09", "group": "Technical University of Munich"},
       {"file": "school/opening-ceremony-rainbow-8cd5055e.jpg", "src": "Opening Ceremony Rainbow", "title": "Opening Ceremony Rainbow", "location": "Technical University of Munich", "w": 1635, "h": 2000, "date": "2024-10-14", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "85 mm · ƒ/2.8 · 1/570 s · ISO 32"},
-      {"file": "school/studitum-rooftop-view-85209918.jpg", "src": "StudiTUM Rooftop View", "title": "StudiTUM Rooftop View", "location": "Technical University of Munich", "w": 1568, "h": 2000, "date": "2025-01-01", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "41 mm · ƒ/1.78 · 1/121 s · ISO 64"},
-      {"file": "school/weihenstephan-library-4133cb23.jpg", "src": "Weihenstephan Library", "title": "Weihenstephan Library", "location": "Technical University of Munich", "w": 1818, "h": 2000, "date": "2025-06-27", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "38 mm · ƒ/1.78 · 1/328 s · ISO 80"},
+      {"file": "school/studitum-85209918.jpg", "src": "StudiTUM", "title": "StudiTUM", "location": "Technical University of Munich", "w": 1568, "h": 2000, "date": "2025-01-01", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "41 mm · ƒ/1.78 · 1/121 s · ISO 64"},
+      {"file": "school/weihenstephan-4133cb23.jpg", "src": "Weihenstephan", "title": "Weihenstephan", "location": "Technical University of Munich", "w": 1818, "h": 2000, "date": "2025-06-27", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "38 mm · ƒ/1.78 · 1/328 s · ISO 80"},
       {"file": "school/tum-rutsche-downstairs-334105a7.jpg", "src": "TUM-Rutsche Downstairs, CIT", "title": "TUM-Rutsche Downstairs", "location": "CIT", "w": 2000, "h": 1500, "date": "2026-08-14", "group": "Technical University of Munich", "camera": "iPhone 14 Pro Max", "exif": "45 mm · ƒ/1.78 · 1/171 s · ISO 100"},
     ],
   },
@@ -180,6 +173,7 @@ const SERIES = [
     photos: [
       {"file": "mountain/wallberg-37549fb0.jpg", "src": "DSCF0767", "title": "Wallberg", "location": "Germany", "w": 1333, "h": 2000, "date": "2025-10-25", "camera": "Fujifilm X-T50", "exif": "55 mm · ƒ/5.6 · 1/300 s · ISO 250"},
       {"file": "mountain/wallberg-c4996dcc.jpg", "src": "DSCF0768", "title": "Wallberg", "location": "Germany", "w": 2000, "h": 1333, "date": "2025-10-25", "camera": "Fujifilm X-T50", "exif": "27.2 mm · ƒ/4.5 · 1/200 s · ISO 250"},
+      {"file": "mountain/first-98d9ca22.jpg", "src": "DSCF3385", "title": "First", "location": "Switzerland", "w": 2000, "h": 1333, "date": "2026-10-25", "camera": "Fujifilm X-T50", "exif": "46.7 mm · ƒ/4.5 · 1/210 s · ISO 160"},
     ],
   },
 ];
