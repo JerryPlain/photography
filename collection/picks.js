@@ -5,4 +5,5 @@ const COLLECTION_PICKS = [
   {"file": "city/santorini-b95ddc5c.jpg", "src": "DSCF2705", "title": "Santorini", "location": "Greece", "w": 1333, "h": 2000, "date": "2026-07-02", "camera": "Fujifilm X-T50", "exif": "17.5 mm · ƒ/4 · 1/1000 s · ISO 250", "topic": "city"},
   {"file": "city/murren-c1c67b2b.jpg", "src": "DSCF3550", "title": "Mürren", "location": "Switzerland", "w": 1333, "h": 2000, "date": "2026-10-26", "camera": "Fujifilm X-T50", "exif": "24.8 mm · ƒ/5.6 · 1/210 s · ISO 250", "topic": "city"},
   {"file": "city/grindelwald-3286844a.jpg", "src": "DSCF3418", "title": "Grindelwald", "location": "Switzerland", "w": 2000, "h": 1333, "date": "2026-10-25", "camera": "Fujifilm X-T50", "exif": "30.9 mm · ƒ/5 · 1/220 s · ISO 250", "topic": "city"},
+  {"file": "city/regensburg-8a2855e9.jpg", "src": "DSCF0393", "title": "Regensburg", "location": "Germany", "w": 1333, "h": 2000, "date": "2025-10-13", "camera": "Fujifilm X-T50", "exif": "26.4 mm · ƒ/4 · 1/900 s · ISO 250", "topic": "city"},
 ];

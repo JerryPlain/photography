@@ -80,7 +80,7 @@
 
   // ---- topics + grid ----
   const topics = document.getElementById("clTopics"), grid = document.getElementById("clGrid");
-  grid.dataset.n = items.length <= 4 ? "few" : items.length <= 9 ? "some" : "many";
+  grid.dataset.n = items.length <= 9 ? "few" : "many";
   if (items.length < 9) topics.hidden = true;
   const counts = items.reduce((a, p) => (a[p.topic] = (a[p.topic] || 0) + 1, a), {});
   topics.innerHTML = [["all", "All", items.length], ...Object.entries(C.topics).map(([k, v]) => [k, v, counts[k] || 0])]
@@ -99,10 +99,18 @@
   function renderGrid(t) {
     const list = items.filter((p) => t === "all" || p.topic === t);
     if (grid.dataset.n === "few") {
-      // a handful: justified rows of two, every photograph at its own shape and the same height per row
-      const rows = [];
-      for (let i = 0; i < list.length; i += 2) rows.push(list.slice(i, i + 2));
-      grid.innerHTML = rows.map((r, ri) => `<div class="cl-row">${r.map((p, j) => cardHTML(p, ri * 2 + j)).join("")}</div>`).join("");
+      // a handful: justified rows, every photograph at its own shape and one height per row.
+      // Rows fill up to a target width (aspect sum ~2.1, two landscapes or a landscape and a portrait);
+      // a short leftover row joins the row above rather than sitting alone.
+      const ar = (p) => p.w / p.h, TARGET = 2.1, rows = [];
+      let row = [], sum = 0;
+      list.forEach((p) => { row.push(p); sum += ar(p); if (sum >= TARGET) { rows.push(row); row = []; sum = 0; } });
+      if (row.length) {
+        const prev = rows[rows.length - 1], prevSum = prev ? prev.reduce((a, p) => a + ar(p), 0) : 0;
+        if (prev && sum < TARGET * 0.6 && prevSum + sum <= 3.4) prev.push(...row); else rows.push(row);
+      }
+      let k = 0;
+      grid.innerHTML = rows.map((r) => `<div class="cl-row">${r.map((p) => cardHTML(p, k++)).join("")}</div>`).join("");
       grid.querySelectorAll(".cl-card").forEach((c) => { const p = byId.get(c.dataset.id); c.style.flexGrow = (p.w / p.h).toFixed(4); });
       // no row taller than ~72% of the screen: narrow and centre it instead
       grid.querySelectorAll(".cl-row").forEach((row) => {
