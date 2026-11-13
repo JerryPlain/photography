@@ -824,6 +824,7 @@ addEventListener("scroll", () => {
   const max = document.documentElement.scrollHeight - innerHeight;
   progress.style.transform = `scaleX(${max > 0 ? Math.min(1, scrollY / max) : 0})`;
 }, { passive: true });
+topbar.classList.toggle("scrolled", scrollY > 8); // a reload can land mid-page
 const railLinks = rail.querySelectorAll("a");
 const spy = new IntersectionObserver((entries) => {
   entries.forEach((e) => {

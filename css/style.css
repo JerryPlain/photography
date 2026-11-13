@@ -1,32 +1,40 @@
 /* ============================================================
    Shijie Zhou — Photography Gallery
-   Warm paper, glass cards, one caramel accent, an orderly grid —
+   Porcelain paper, glass cards, one baby-blue accent, an orderly grid —
    the homepage's "paper & glass" look. Dark mode brings the stars.
    ============================================================ */
 
 :root {
-  /* the homepage's "paper & glass" palette: warm paper, ink-blue text, one caramel accent */
-  --bg: #f4f1ea;
-  --bg-rgb: 244 241 234;
-  --paper: #fbf9f4;
+  /* the homepage's "paper & glass" palette: porcelain paper, ink-blue text, one
+     baby-blue accent in three strengths — --sky the colour itself (glow, selection,
+     highlighter), --accent-soft a step deeper for marks, --accent a denim that reads
+     as text (4.6:1 on the paper) */
+  --bg: #f4f6f8;
+  --bg-rgb: 244 246 248;
+  --paper: #fafbfc;
   --ink: #1a2332;
   --ink-soft: #6b7a8d;
   --ink-faint: #b3b9c2;
-  --hairline: rgba(70, 55, 40, 0.1);
-  --accent: #a5643a;
-  --accent-soft: #c58b5c;
+  --shade-rgb: 44 70 108; /* shadows: slate with a little blue in it */
+  --hairline: rgb(var(--shade-rgb) / 0.1);
+  --sky-rgb: 184 215 242;
+  --accent-rgb: 64 111 158;
+  --accent: rgb(var(--accent-rgb));
+  --accent-soft-rgb: 128 177 222;
+  --accent-soft: rgb(var(--accent-soft-rgb));
   --link: #2e86c1;
-  --shadow: rgba(70, 55, 40, 0.14);
+  --shadow: rgb(var(--shade-rgb) / 0.14);
   --stars-alpha: 0;
 
   /* glass cards, as on the homepage */
-  --glass: rgb(251 249 244 / 0.8);
-  --glass-hover: rgb(251 249 244 / 0.92);
+  --glass: rgb(255 255 255 / 0.72);
+  --glass-hover: rgb(255 255 255 / 0.9);
   --glass-border: rgb(255 255 255 / 0.6);
   --glass-border-hi: rgb(255 255 255 / 0.85);
-  --glass-shadow: 0 8px 40px rgb(70 55 40 / 0.08), 0 2px 8px rgb(70 55 40 / 0.04);
-  --glass-shadow-hover: 0 12px 48px rgb(70 55 40 / 0.14), 0 4px 12px rgb(70 55 40 / 0.06);
-  --glow: rgb(233 226 212 / 0.4);
+  --glass-shadow: 0 8px 40px rgb(var(--shade-rgb) / 0.08), 0 2px 8px rgb(var(--shade-rgb) / 0.04);
+  --glass-shadow-hover: 0 12px 48px rgb(var(--shade-rgb) / 0.14), 0 4px 12px rgb(var(--shade-rgb) / 0.06);
+  --glow-rgb: var(--sky-rgb);
+  --glow-a: 0.62;
 
   /* one family throughout, Source Serif 4, like the homepage */
   --serif: "Source Serif 4", "Source Serif Pro", Georgia, "Times New Roman", "Songti SC", serif;
@@ -41,15 +49,17 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #16130e;
-  --bg-rgb: 22 19 14;
-  --paper: #1f1c17;
-  --ink: #e9e6e0;
-  --ink-soft: #9a958c;
-  --ink-faint: #57524b;
+  --bg: #0f141a;
+  --bg-rgb: 15 20 26;
+  --paper: #171d25;
+  --ink: #e6e9ee;
+  --ink-soft: #949cab;
+  --ink-faint: #4f5866;
+  --shade-rgb: 0 0 0;
   --hairline: rgba(255, 255, 255, 0.09);
-  --accent: #d29a72;
-  --accent-soft: #c89472;
+  --sky-rgb: 169 205 238;
+  --accent-rgb: 169 205 238; /* at night the baby blue itself reads as text */
+  --accent-soft-rgb: 128 177 222;
   --link: #6db3e6;
   --shadow: rgba(0, 0, 0, 0.55);
   --stars-alpha: 1;
@@ -60,7 +70,8 @@
   --glass-border-hi: rgb(255 255 255 / 0.1);
   --glass-shadow: 0 8px 40px rgb(0 0 0 / 0.22);
   --glass-shadow-hover: 0 12px 48px rgb(0 0 0 / 0.32);
-  --glow: rgb(48 38 22 / 0.35);
+  --glow-rgb: 70 125 185;
+  --glow-a: 0.26;
   color-scheme: dark;
 }
 
@@ -1105,17 +1116,25 @@ html.noreveal .reveal, html.noreveal .atlas-side.in, html.noreveal .atlas-frame.
    same navbar, the same heavier headings and the same pills.
    ============================================================ */
 
-/* ground: one wide warm glow behind the top of the page (instead of the
-   three colour washes) and a faint paper grain; the glass blurs both */
+/* ground: baby-blue daylight washing down from the top of the page and easing
+   into the paper — the same light as the homepage (one hue, cosine-eased stops,
+   so no edge or band; it scrolls away with the intro instead of following the
+   reader) — and a faint paper grain; the glass blurs both */
 body::before {
-  inset: auto; top: -60px; left: 50%;
-  width: min(900px, 100vw); height: 500px;
-  transform: translateX(-50%);
-  border-radius: 50%;
-  background: var(--glow);
-  background-image: none;
-  filter: blur(160px);
-  animation: none;
+  position: absolute; inset: 0 0 auto 0; height: 1000px;
+  transform: none; border-radius: 0; filter: none; animation: none;
+  background: radial-gradient(ellipse 85% 100% at 50% 0%,
+    rgb(var(--glow-rgb) / var(--glow-a)) 0%,
+    rgb(var(--glow-rgb) / calc(var(--glow-a) * 0.976)) 10%,
+    rgb(var(--glow-rgb) / calc(var(--glow-a) * 0.905)) 20%,
+    rgb(var(--glow-rgb) / calc(var(--glow-a) * 0.794)) 30%,
+    rgb(var(--glow-rgb) / calc(var(--glow-a) * 0.655)) 40%,
+    rgb(var(--glow-rgb) / calc(var(--glow-a) * 0.500)) 50%,
+    rgb(var(--glow-rgb) / calc(var(--glow-a) * 0.345)) 60%,
+    rgb(var(--glow-rgb) / calc(var(--glow-a) * 0.206)) 70%,
+    rgb(var(--glow-rgb) / calc(var(--glow-a) * 0.095)) 80%,
+    rgb(var(--glow-rgb) / calc(var(--glow-a) * 0.024)) 90%,
+    rgb(var(--glow-rgb) / 0) 100%);
 }
 body::after {
   content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -1124,7 +1143,7 @@ body::after {
 }
 :root[data-theme="dark"] body::after { opacity: 0.05; }
 body { font-size: 16px; }
-::selection { background: rgb(197 139 92 / 0.28); color: inherit; }
+::selection { background: rgb(var(--sky-rgb) / 0.6); color: inherit; }
 
 /* small caps labels, set in the serif */
 .eyebrow, .label,
@@ -1135,15 +1154,27 @@ body { font-size: 16px; }
 .pl-names { font-size: 1rem; letter-spacing: 0; }
 .pl-label { font-size: 0.66rem; }
 
-/* navbar: the homepage's frosted bar — 64px, name in semibold, quiet links */
+/* navbar: the homepage's frosted bar — 64px, name in semibold, quiet links.
+   The frosting, tint and hairline sit on a layer of their own that fades in
+   once the page scrolls (main.js sets .scrolled), so at the top the sky runs
+   on under the bar without a seam. */
 .topbar {
   min-height: 64px; padding-top: 0; padding-bottom: 0;
-  background: rgb(var(--bg-rgb) / 0.82);
-  border-bottom: 1px solid rgb(255 255 255 / 0.35);
-  box-shadow: 0 1px 0 rgb(70 55 40 / 0.05);
+  background: transparent;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  border-bottom: 0;
 }
-:root[data-theme="dark"] .topbar { background: rgb(var(--bg-rgb) / 0.55); border-bottom-color: rgb(255 255 255 / 0.06); box-shadow: none; }
-.topbar.scrolled { border-bottom-color: rgb(255 255 255 / 0.35); }
+.topbar::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: rgb(var(--bg-rgb) / 0.72);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3); backdrop-filter: blur(16px) saturate(1.3);
+  border-bottom: 1px solid rgb(255 255 255 / 0.55);
+  box-shadow: 0 1px 0 rgb(var(--shade-rgb) / 0.05);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.topbar.scrolled::before { opacity: 1; }
+:root[data-theme="dark"] .topbar::before { background: rgb(var(--bg-rgb) / 0.6); border-bottom-color: rgb(255 255 255 / 0.06); box-shadow: none; }
 .brand-mark { width: 1.6rem; height: 1.6rem; }
 .brand-name { font-size: 1.125rem; font-weight: 600; letter-spacing: -0.01em; }
 .topbar-nav { gap: 0.25rem; }
@@ -1156,7 +1187,7 @@ body { font-size: 16px; }
 .topbar-link:hover, .index-toggle:hover { color: var(--ink); }
 .theme-toggle { width: 2.25rem; height: 2.25rem; border-radius: 10px; color: var(--ink-soft); transition: background-color 0.2s ease, color 0.2s ease; }
 .theme-toggle:hover { color: var(--ink); background: var(--glass); }
-.progress { height: 2px; background: linear-gradient(90deg, rgb(197 139 92 / 0.25), rgb(197 139 92 / 0.85)); }
+.progress { height: 2px; background: linear-gradient(90deg, rgb(var(--sky-rgb) / 0.4), rgb(var(--accent-soft-rgb))); }
 
 /* headings: bold and tight, like the homepage's */
 .intro-title { font-weight: 700; letter-spacing: -0.02em; font-size: clamp(2.4rem, 5vw, 3.8rem); }
@@ -1197,7 +1228,7 @@ body { font-size: 16px; }
   border: 1px solid rgb(255 255 255 / 0.5);
   background: rgb(var(--bg-rgb) / 0.85);
   -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
-  box-shadow: 0 2px 8px rgb(70 55 40 / 0.05);
+  box-shadow: 0 2px 8px rgb(var(--shade-rgb) / 0.05);
 }
 :root[data-theme="dark"] .ct { background: rgb(255 255 255 / 0.05); border-color: rgb(255 255 255 / 0.08); }
 .ct:not(.empty):hover { border-color: rgb(255 255 255 / 0.7); background: var(--glass-hover); transform: translateY(-1px); }
@@ -1207,9 +1238,9 @@ body { font-size: 16px; }
 .ct.empty { background: transparent; box-shadow: none; border-color: var(--hairline); }
 .as-city:hover { background: var(--ink); color: var(--bg); }
 
-/* photographs: softer corners, a warm lift on hover */
-.photo-frame { box-shadow: 0 2px 10px rgb(70 55 40 / 0.07); }
-.photo-card:hover .photo-frame { box-shadow: 0 18px 36px -16px rgb(70 55 40 / 0.35), 0 2px 8px rgb(70 55 40 / 0.06); }
+/* photographs: softer corners, a soft lift on hover */
+.photo-frame { box-shadow: 0 2px 10px rgb(var(--shade-rgb) / 0.07); }
+.photo-card:hover .photo-frame { box-shadow: 0 18px 36px -16px rgb(var(--shade-rgb) / 0.35), 0 2px 8px rgb(var(--shade-rgb) / 0.06); }
 :root[data-theme="dark"] .photo-frame { box-shadow: 0 2px 10px rgb(0 0 0 / 0.3); }
 .lb-strip button { border-radius: 6px; }
 
@@ -1219,19 +1250,19 @@ body { font-size: 16px; }
   border-radius: 999px; border: 1px solid var(--glass-border);
   background: var(--glass);
   -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
-  box-shadow: 0 2px 8px rgb(70 55 40 / 0.06);
+  box-shadow: 0 2px 8px rgb(var(--shade-rgb) / 0.06);
   font-size: 0.875rem; font-weight: 500; letter-spacing: 0;
   color: var(--ink-soft);
   transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, gap 0.3s var(--ease);
 }
 .view-all:hover, .back-link:hover {
   color: var(--ink); border-color: var(--glass-border-hi);
-  transform: translateY(-2px); box-shadow: 0 4px 16px rgb(70 55 40 / 0.1); gap: 0.7rem;
+  transform: translateY(-2px); box-shadow: 0 4px 16px rgb(var(--shade-rgb) / 0.1); gap: 0.7rem;
 }
 .back-link { margin-top: 0; }
 
-/* journey play button and the soundtrack in the caramel */
-.jr-play { box-shadow: 0 4px 14px -6px rgb(165 100 58 / 0.6); }
+/* journey play button and the soundtrack in the accent blue */
+.jr-play { box-shadow: 0 4px 14px -6px rgb(var(--accent-rgb) / 0.6); }
 
 /* footer: quieter, on a faint rule like the homepage's */
 .site-footer { border-top-color: var(--hairline); }

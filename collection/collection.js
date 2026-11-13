@@ -197,6 +197,7 @@
   sync();
   const topbar = document.getElementById("topbar");
   addEventListener("scroll", () => topbar.classList.toggle("scrolled", scrollY > 8), { passive: true });
+  topbar.classList.toggle("scrolled", scrollY > 8);
 
   // deep link: /collection/#<photo-id>
   if (location.hash && byId.has(location.hash.slice(1))) openSheet(location.hash.slice(1));
