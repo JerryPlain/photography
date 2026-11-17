@@ -14,6 +14,7 @@
   --paper: #fafbfc;
   --ink: #1a2332;
   --ink-soft: #6b7a8d;
+  --ink-mid: #4a5568; /* between ink and ink-soft: quiet but readable (7:1) */
   --ink-faint: #b3b9c2;
   --shade-rgb: 44 70 108; /* shadows: slate with a little blue in it */
   --hairline: rgb(var(--shade-rgb) / 0.1);
@@ -54,6 +55,7 @@
   --paper: #171d25;
   --ink: #e6e9ee;
   --ink-soft: #949cab;
+  --ink-mid: #b8bfcb;
   --ink-faint: #4f5866;
   --shade-rgb: 0 0 0;
   --hairline: rgba(255, 255, 255, 0.09);
@@ -1317,5 +1319,6 @@ body { font-size: 16px; }
 /* footer: quieter, on a faint rule like the homepage's */
 .site-footer { border-top-color: var(--hairline); }
 .footer-name { font-weight: 700; letter-spacing: -0.01em; }
-.footer-links a { color: var(--ink-soft); text-transform: none; letter-spacing: 0; font-size: 0.9375rem; font-weight: 400; }
+.footer-links a { color: var(--ink-mid); text-transform: none; letter-spacing: 0; font-size: 0.9375rem; font-weight: 400; }
 .footer-links a:hover { color: var(--ink); }
+.footer-copy { color: var(--ink-mid); }
