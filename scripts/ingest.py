@@ -36,8 +36,11 @@ VIDEO_PRESET = "Preset1280x720"   # avconvert (built into macOS): H.264 720p, ~1
 
 # ---------------------------------------------------------------- helpers
 
+TRANSLIT = str.maketrans({"æ": "ae", "Æ": "Ae", "ø": "o", "Ø": "O", "å": "a", "Å": "A", "ß": "ss", "œ": "oe", "Œ": "Oe",
+                          "ð": "d", "Ð": "D", "þ": "th", "Þ": "Th", "ł": "l", "Ł": "L", "đ": "d", "Đ": "D"})
+
 def slugify(s: str) -> str:
-    s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
+    s = unicodedata.normalize("NFKD", s.translate(TRANSLIT)).encode("ascii", "ignore").decode()
     s = re.sub(r"[^A-Za-z0-9]+", "-", s).strip("-").lower()
     return s or "untitled"
 
@@ -229,6 +232,18 @@ def video_encode(src: Path, dst: Path):
                    check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def video_seconds(p: Path) -> float:
+    """Duration from the file's own movie header (mvhd), so it never depends on Spotlight."""
+    try:
+        with open(p, "rb") as f:
+            data = f.read()
+        i = data.find(b"mvhd")
+        if i > 0:
+            ver = data[i + 4]
+            if ver == 1: ts, dur = struct.unpack(">IQ", data[i + 24:i + 36])
+            else: ts, dur = struct.unpack(">II", data[i + 16:i + 24])
+            if ts: return round(dur / ts, 1)
+    except Exception:
+        pass
     out = subprocess.run(["mdls", "-raw", "-name", "kMDItemDurationSeconds", str(p)], capture_output=True, text=True).stdout
     try: return round(float(out), 1)
     except ValueError: return 0.0
@@ -393,6 +408,13 @@ def main():
                 entry["video"] = f"{s['slug']}/videos/{video.name}"
                 entry["duration"] = video_seconds(src)
             entries.append(entry)
+        # a photograph with no date at all (exported without EXIF) takes the earliest date of its place
+        by_place = {}
+        for e in entries:
+            if e.get("date"): by_place.setdefault((e["title"], e["location"]), []).append(e["date"])
+        for e in entries:
+            if not e.get("date") and by_place.get((e["title"], e["location"])):
+                e["date"] = min(by_place[(e["title"], e["location"])])
         manifest.append({"slug": s["slug"], "title": s["title"], "photos": entries})
         print(f"{s['slug']}: {len(entries)} photos")
 

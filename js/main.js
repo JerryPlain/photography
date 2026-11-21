@@ -332,40 +332,29 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
     return `M${x0},${y0} Q${cx.toFixed(1)},${cy.toFixed(1)} ${x1},${y1}`;
   };
 
-  const merc = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI / 180) / 2));
   mapEl.innerHTML = MAP.plates.map((pl, pk) => {
-    const [lon0, lat0, lon1, lat1] = pl.bbox;
-    const K = pl.w / ((lon1 - lon0) * Math.PI / 180), TOP = merc(lat1);
-    const px = (lon) => ((lon - lon0) * Math.PI / 180) * K, py = (lat) => (TOP - merc(lat)) * K;
-    let grat = "";
-    for (let lon = Math.ceil(lon0 / 5) * 5; lon <= lon1; lon += 5) grat += `M${px(lon).toFixed(1)},0V${pl.h}`;
-    for (let lat = Math.ceil(lat0 / 5) * 5; lat <= lat1; lat += 5) grat += `M0,${py(lat).toFixed(1)}H${pl.w}`;
+    // graticule, degree band and scale come precomputed from scripts/build_map.py, in whatever projection the plate uses
+    const grat = pl.grat || "";
     const here = visits.filter((v) => v.plate === pk);
     const arcs = visits.filter((v) => v.k > 0 && v.plate === pk && visits[v.k - 1].plate === pk);
     const { w: W, h: H } = pl;
 
     // neatline: a paper margin, a band of alternating whole degrees between two rules, and every 10° named
     const B0 = 6, B1 = 11, clampX = (x) => Math.min(Math.max(x, B0), W - B0), clampY = (y) => Math.min(Math.max(y, B0), H - B0);
+    const F = pl.frame || { top: [], bottom: [], left: [], right: [], lonTicks: [], latTicks: [] };
     let band = "", deg = "";
-    for (let lon = Math.floor(lon0); lon < lon1; lon++) if (lon % 2 === 0) {
-      const a = clampX(px(lon)), b = clampX(px(lon + 1));
-      if (b > a) band += `M${a.toFixed(1)},${B0}H${b.toFixed(1)}V${B1}H${a.toFixed(1)}ZM${a.toFixed(1)},${H - B1}H${b.toFixed(1)}V${H - B0}H${a.toFixed(1)}Z`;
-    }
-    for (let lat = Math.floor(lat0); lat < lat1; lat++) if (lat % 2 === 0) {
-      const a = clampY(py(lat + 1)), b = clampY(py(lat));
-      if (b > a) band += `M${B0},${a.toFixed(1)}H${B1}V${b.toFixed(1)}H${B0}ZM${W - B1},${a.toFixed(1)}H${W - B0}V${b.toFixed(1)}H${W - B1}Z`;
-    }
+    F.top.forEach(([a, b]) => { a = clampX(a); b = clampX(b); if (b > a) band += `M${a},${B0}H${b}V${B1}H${a}Z`; });
+    F.bottom.forEach(([a, b]) => { a = clampX(a); b = clampX(b); if (b > a) band += `M${a},${H - B1}H${b}V${H - B0}H${a}Z`; });
+    F.left.forEach(([a, b]) => { a = clampY(a); b = clampY(b); if (b > a) band += `M${B0},${a}H${B1}V${b}H${B0}Z`; });
+    F.right.forEach(([a, b]) => { a = clampY(a); b = clampY(b); if (b > a) band += `M${W - B1},${a}H${W - B0}V${b}H${W - B1}Z`; });
     const fmt = (v, pos, neg) => (v === 0 ? "0°" : `${Math.abs(v)}°${v > 0 ? pos : neg}`);
-    for (let lon = Math.ceil(lon0 / 10) * 10; lon <= lon1; lon += 10)
-      if (px(lon) > 40 && px(lon) < W - 40) deg += `<text x="${px(lon).toFixed(1)}" y="${B1 + 14}" text-anchor="middle">${fmt(lon, "E", "W")}</text>`;
-    for (let lat = Math.ceil(lat0 / 10) * 10; lat <= lat1; lat += 10)
-      if (py(lat) > 40 && py(lat) < H - 60) deg += pl.latSide === "right"
-        ? `<text x="${W - B1 - 6}" y="${(py(lat) + 4).toFixed(1)}" text-anchor="end">${fmt(lat, "N", "S")}</text>`
-        : `<text x="${B1 + 6}" y="${(py(lat) + 4).toFixed(1)}">${fmt(lat, "N", "S")}</text>`;
+    F.lonTicks.forEach(([x, lon]) => { if (x > 40 && x < W - 40) deg += `<text x="${x}" y="${B1 + 14}" text-anchor="middle">${fmt(lon, "E", "W")}</text>`; });
+    F.latTicks.forEach(([y, lat]) => { if (y > 40 && y < H - 60) deg += pl.latSide === "right"
+      ? `<text x="${W - B1 - 6}" y="${(y + 4).toFixed(1)}" text-anchor="end">${fmt(lat, "N", "S")}</text>`
+      : `<text x="${B1 + 6}" y="${(y + 4).toFixed(1)}">${fmt(lat, "N", "S")}</text>`; });
 
-    // scale bar for the latitude it sits at (Mercator stretches toward the poles)
-    const sx = W - B1 - 22, sy = H - B1 - 26, latS = lat0 + (lat1 - lat0) * 0.04;
-    const perKm = K / (6371 * Math.cos(latS * Math.PI / 180));
+    // scale bar, true for where it sits
+    const sx = W - B1 - 22, sy = H - B1 - 26, perKm = pl.perKm || 0.3;
     const km = [250, 500, 1000, 2000].find((k) => k * perKm >= 110) || 2000, len = km * perKm;
     const scale = `<g class="scale" transform="translate(${(sx - len).toFixed(1)},${sy})">
       <rect class="card" x="-16" y="-22" width="${(len + 40).toFixed(1)}" height="34" rx="3"/>
