@@ -66,7 +66,7 @@ const SERIES = [
       {"file": "city/oslo-86c089f5.jpg", "src": "DSCF3881", "title": "Oslo", "location": "Norway", "w": 2000, "h": 1333, "date": "2026-11-20", "camera": "Fujifilm X-T50", "exif": "31.9 mm · ƒ/4 · 1/150 s · ISO 250"},
       {"file": "city/oslo-29eb88bf.jpg", "src": "DSCF3897", "title": "Oslo", "location": "Norway", "w": 2000, "h": 1333, "date": "2026-11-20", "camera": "Fujifilm X-T50", "exif": "21.2 mm · ƒ/3.6 · 1/180 s · ISO 250"},
       {"file": "city/oslo-7ebd3223.jpg", "src": "DSCF3906", "title": "Oslo", "location": "Norway", "w": 2000, "h": 1333, "date": "2026-11-20", "camera": "Fujifilm X-T50", "exif": "18.1 mm · ƒ/5 · 1/160 s · ISO 250"},
-      {"file": "city/oslo-f73a6cb6.jpg", "src": "DSCF3929", "title": "Oslo", "location": "Norway", "w": 2000, "h": 1333, "date": "2026-11-20", "camera": "Fujifilm X-T50", "exif": "30.9 mm · ƒ/5.6 · 1/680 s · ISO 160"},
+      {"file": "city/oslo-c58f00fd.jpg", "src": "DSCF3937", "title": "Oslo", "location": "Norway", "w": 2000, "h": 1333, "date": "2026-11-20", "camera": "Fujifilm X-T50", "exif": "27.2 mm · ƒ/4 · 1/2000 s · ISO 250"},
       {"file": "city/oslo-0e192109.jpg", "src": "DSCF3943", "title": "Oslo", "location": "Norway", "w": 2000, "h": 1333, "date": "2026-11-20", "camera": "Fujifilm X-T50", "exif": "22.6 mm · ƒ/5.6 · 1/280 s · ISO 160"},
       {"file": "city/oslo-cedfec90.jpg", "src": "DSCF3956", "title": "Oslo", "location": "Norway", "w": 2000, "h": 1333, "date": "2026-11-20", "camera": "Fujifilm X-T50", "exif": "19.9 mm · ƒ/4.5 · 1/3000 s · ISO 250"},
       {"file": "city/oslo-942ccbb5.jpg", "src": "DSCF4012", "title": "Oslo", "location": "Norway", "w": 2000, "h": 1333, "date": "2026-11-20", "camera": "Fujifilm X-T50", "exif": "18.7 mm · ƒ/2.8 · 1/100 s · ISO 400"},
