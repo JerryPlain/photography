@@ -311,15 +311,36 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
   stats.innerHTML = `${plural(N, "city")}<br>${plural(countries.size, "country")}${span ? `<br>${span}` : ""}`;
 
   // permanent labels: most photographed first, skipping any that would collide with one already placed
+  // permanent labels: most photographed first. A label is a box beside its dot (right, or left if the right
+  // is taken); it must not cover another label or any other city's dot. Unplaced names show on hover.
   const named = new Set();
+  const dotR = (v) => 5.5 + Math.min(v.photos.length, 12) * 0.45;
+  // side labels may slide half a line up or down to clear a neighbour (Munich between Freising and Kufstein)
+  const SHIFT = { "right-up": -12, "right-down": 12, "left-up": -12, "left-down": 12 };
+  const labelBox = (v, side) => {
+    const [x, y] = v.xy, r = dotR(v), w = v.name.length * 11.5, dy = SHIFT[side] || 0;
+    if (side.startsWith("right")) return [x + r + 6, y - 11 + dy, x + r + 12 + w, y + 11 + dy];
+    if (side.startsWith("left")) return [x - r - 12 - w, y - 11 + dy, x - r - 6, y + 11 + dy];
+    if (side === "above") return [x - w / 2 - 3, y - r - 28, x + w / 2 + 3, y - r - 4];
+    if (side === "below") return [x - w / 2 - 3, y + r + 4, x + w / 2 + 3, y + r + 28];
+    if (side === "ne") return [x + r * 0.7 + 2, y - r - 26, x + r * 0.7 + 8 + w, y - r - 2];
+    if (side === "se") return [x + r * 0.7 + 2, y + r + 2, x + r * 0.7 + 8 + w, y + r + 26];
+    if (side === "nw") return [x - r * 0.7 - 8 - w, y - r - 26, x - r * 0.7 - 2, y - r - 2];
+    return [x - r * 0.7 - 8 - w, y + r + 2, x - r * 0.7 - 2, y + r + 26];
+  };
+  const hits = (b, c) => b[0] < c[2] && c[0] < b[2] && b[1] < c[3] && c[1] < b[3];
   MAP.plates.forEach((pl, k) => {
-    const placed = [];
-    visits.filter((v) => v.plate === k)
-      .sort((a, b) => b.photos.length - a.photos.length || a.name.localeCompare(b.name))
-      .forEach((v) => {
-        const [x, y] = v.xy;
-        if (placed.every(([px, py]) => Math.abs(y - py) > 24 || Math.abs(x - px) > 150)) { named.add(v.name); placed.push([x, y]); }
-      });
+    const mine = visits.filter((v) => v.plate === k), boxes = [];
+    // a label may brush the rim of a neighbouring dot, never its centre
+    const dots = mine.map((v) => { const r = Math.min(dotR(v), 5); return [v, [v.xy[0] - r, v.xy[1] - r, v.xy[0] + r, v.xy[1] + r]]; });
+    mine.slice().sort((a, b) => b.photos.length - a.photos.length || a.name.localeCompare(b.name)).forEach((v) => {
+      for (const side of ["right", "left", "right-up", "right-down", "left-up", "left-down", "above", "below", "ne", "se", "nw", "sw"]) {
+        const b = labelBox(v, side);
+        if (b[0] < 14 || b[2] > pl.w - 14 || b[1] < 14 || b[3] > pl.h - 14) continue;
+        if (boxes.some((c) => hits(b, c)) || dots.some(([u, c]) => u !== v && hits(b, c))) continue;
+        named.add(v.name); v.side = side; boxes.push(b); return;
+      }
+    });
   });
 
   // a gentle upward arc from one city to the next
@@ -395,12 +416,17 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
         ${here.map((v) => {
           const [x, y] = v.xy, n = v.photos.length;
           const r = 5.5 + Math.min(n, 12) * 0.45;
-          const right = x + r + 12 + v.name.length * 11.5 < pl.w;
+          const right = v.side ? v.side === "right" : x + r + 12 + v.name.length * 11.5 < pl.w;
+          const sd = v.side || (right ? "right" : "left");
+          const P = { right: [r + 9, 7, "start"], left: [-(r + 9), 7, "end"], above: [0, -(r + 10), "middle"], below: [0, r + 23, "middle"],
+                      "right-up": [r + 9, -5, "start"], "right-down": [r + 9, 19, "start"], "left-up": [-(r + 9), -5, "end"], "left-down": [-(r + 9), 19, "end"],
+                      ne: [r * 0.7 + 5, -(r + 8), "start"], se: [r * 0.7 + 5, r + 20, "start"], nw: [-(r * 0.7 + 5), -(r + 8), "end"], sw: [-(r * 0.7 + 5), r + 20, "end"] }[sd];
+          const [lx, ly, la] = P;
           return `<g transform="translate(${x},${y})"><g class="pin${named.has(v.name) ? " named" : ""}" data-place="${esc(v.name)}" data-k="${v.k}" tabindex="0" role="button"
                    aria-label="${esc(v.name)}, ${plural(n, "photograph")}" style="--j:${v.k % 5}">
             <circle class="halo" r="6"/>
             <circle class="dot" r="${r.toFixed(1)}"/>
-            <text class="lbl" x="${right ? r + 9 : -(r + 9)}" y="7" text-anchor="${right ? "start" : "end"}">${esc(v.name)}</text>
+            <text class="lbl" x="${lx}" y="${ly}" text-anchor="${la}">${esc(v.name)}</text>
           </g></g>`; }).join("")}
         <circle class="comet" r="7" opacity="0"/>
       </svg>
