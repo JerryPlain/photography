@@ -365,6 +365,18 @@ def main():
     keep = set()
     for s in series:
         entries = []
+        # the same photograph twice in one series (a copy renamed, the original left behind): keep one,
+        # preferring the copy whose filename names it
+        by_hash, order = {}, []
+        for item in s["photos"]:
+            h = file_hash(item[2])
+            if h not in by_hash:
+                by_hash[h] = item; order.append(h)
+            elif stem_label(item[2])[0] and not stem_label(by_hash[h][2])[0]:
+                print(f"  duplicate skipped: {by_hash[h][2].relative_to(SRC)} (same as {item[2].name})"); by_hash[h] = item
+            else:
+                print(f"  duplicate skipped: {item[2].relative_to(SRC)} (same as {by_hash[h][2].name})")
+        s["photos"] = [by_hash[h] for h in order]
         for title, location, src, group in s["photos"]:
             stem = f"{slugify(title) if title else s['slug']}-{file_hash(src)}"
             base = f"{stem}.jpg"

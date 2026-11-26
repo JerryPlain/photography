@@ -90,6 +90,8 @@ const SERIES = [
       {"file": "city/svolvaer-9bbc3ecd.jpg", "src": "DSCF4572", "title": "Svolvær", "location": "Norway", "w": 2000, "h": 1333, "date": "2026-11-23", "camera": "Fujifilm X-T50", "exif": "20.5 mm · ƒ/2.8 · 1/8 s · ISO 12800"},
       {"file": "city/svolvaer-cbdc6740.jpg", "src": "DSCF4621", "title": "Svolvær", "location": "Norway", "w": 2000, "h": 1333, "date": "2026-11-23", "camera": "Fujifilm X-T50", "exif": "48.2 mm · ƒ/2.8 · 1/4 s · ISO 6400"},
       {"file": "city/svolvaer-fad7fa8d.jpg", "src": "IMG_0398", "title": "Svolvær", "location": "Norway", "w": 2000, "h": 1566, "date": "2026-11-23", "camera": "iPhone 14 Pro Max", "exif": "32 mm · ƒ/1.78 · 1/2 s · ISO 2500"},
+      {"file": "city/tromso-c98fe172.jpg", "src": "DSCF4686", "title": "Tromsø", "location": "Norway", "w": 1569, "h": 2000, "date": "2026-11-25", "camera": "Fujifilm X-T50", "exif": "16 mm · ƒ/2.8 · 1/30 s · ISO 6400"},
+      {"file": "city/tromso-0f17bd91.jpg", "src": "144", "title": "Tromsø", "location": "Norway", "w": 1333, "h": 2000, "date": "2026-11-26", "exif": "50 mm · ƒ/4.9 · 1/60 s · ISO 5000"},
       {"file": "city/lisbon-26a14e24.jpg", "src": "DSCF1836", "title": "Lisbon", "location": "Portugal", "w": 2000, "h": 1333, "date": "2026-02-28", "camera": "Fujifilm X-T50", "exif": "16 mm · ƒ/4 · 1/900 s · ISO 250"},
       {"file": "city/lisbon-e3c070ec.jpg", "src": "DSCF1908", "title": "Lisbon", "location": "Portugal", "w": 1333, "h": 2000, "date": "2026-02-28", "camera": "Fujifilm X-T50", "exif": "55 mm · ƒ/4 · 1/350 s · ISO 250"},
       {"file": "city/lisbon-48df73df.jpg", "src": "DSCF1943", "title": "Lisbon", "location": "Portugal", "w": 2000, "h": 1333, "date": "2026-02-28", "camera": "Fujifilm X-T50", "exif": "45.2 mm · ƒ/4 · 1/220 s · ISO 250"},
@@ -132,6 +134,7 @@ const SERIES = [
       {"file": "me/berlin-a60e7036.jpg", "src": "Berlin, Germany", "title": "Berlin", "location": "Germany", "w": 2000, "h": 1333, "date": "2026-01-01", "group": "Europe", "camera": "Fujifilm X-T50", "exif": "16 mm · ƒ/2.8 · 1/25 s · ISO 6400"},
       {"file": "me/dubrovnik-95cbb3be.jpg", "src": "Dubrovnik, Croatia", "title": "Dubrovnik", "location": "Croatia", "w": 2000, "h": 1333, "date": "2026-06-29", "group": "Europe", "camera": "Fujifilm X-T50", "exif": "16 mm · ƒ/4 · 1/1800 s · ISO 125"},
       {"file": "me/murren-3d4fbda2.jpg", "src": "Mürren, Switzerland", "title": "Mürren", "location": "Switzerland", "w": 1506, "h": 2000, "date": "2026-10-26", "group": "Europe", "camera": "Fujifilm X-T50", "exif": "25.6 mm · ƒ/4 · 1/150 s · ISO 250"},
+      {"file": "me/tromso-9316fa11.jpg", "src": "Tromsø, Norway", "title": "Tromsø", "location": "Norway", "w": 2000, "h": 1395, "date": "2026-11-26", "group": "Europe", "camera": "Fujifilm X-M5", "exif": "21.5 mm · ƒ/4.2 · 1/100 s · ISO 640"},
     ],
   },
   {
