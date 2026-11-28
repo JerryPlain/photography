@@ -193,8 +193,8 @@ const SERIES = [
       {"file": "concert/lorde-c4353375.jpg", "src": "IMG_0549", "title": "Lorde", "location": "Munich 2025", "w": 1748, "h": 2000, "date": "2025-12-01", "camera": "iPhone 14 Pro Max", "exif": "160 mm · ƒ/2.8 · 1/80 s · ISO 160"},
       {"file": "concert/taylor-swift-4937dc80.jpg", "src": "IMG_1449", "title": "Taylor Swift", "location": "Singapore 2024", "w": 1290, "h": 1300, "date": "2024-03-04"},
       {"file": "concert/taylor-swift-2fa60f02.jpg", "src": "IMG_1451", "title": "Taylor Swift", "location": "Singapore 2024", "w": 1290, "h": 1703, "date": "2024-03-04"},
-      {"file": "concert/billie-eilish-dab68baf.jpg", "src": "IMG_7841", "title": "Billie Eilish", "location": "Tokyo 2025", "w": 1622, "h": 2000, "date": "2025-08-17", "camera": "iPhone 14 Pro Max", "exif": "48 mm · ƒ/1.78 · 1/55 s · ISO 250"},
       {"file": "concert/billie-eilish-d06d8c48.jpg", "src": "IMG_7888", "title": "Billie Eilish", "location": "Tokyo 2025", "w": 1700, "h": 2000, "date": "2025-08-17", "camera": "iPhone 14 Pro Max", "exif": "77 mm · ƒ/1.78 · 1/60 s · ISO 250"},
+      {"file": "concert/fujii-kaze-dab68baf.jpg", "src": "IMG_7841", "title": "Fujii Kaze", "location": "Tokyo 2025", "w": 1622, "h": 2000, "date": "2025-08-17", "camera": "iPhone 14 Pro Max", "exif": "48 mm · ƒ/1.78 · 1/55 s · ISO 250"},
     ],
   },
   {
