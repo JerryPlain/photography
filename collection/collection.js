@@ -5,7 +5,6 @@
 (function () {
   const C = COLLECTION;
   const Q = new URLSearchParams(location.search);
-  if (Q.get("theme") === "dark") document.documentElement.dataset.theme = "dark";
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const slug = (s) => String(s).normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const full = (p) => `../photos/${p.file}`;
@@ -194,14 +193,14 @@
     });
   }
 
-  // ---- theme toggle (same key as the main site) ----
+  // ---- theme toggle: js/theme.js follows the clock, a click overrides it for this visit ----
   const root = document.documentElement, tt = document.getElementById("themeToggle");
   const sync = () => document.body.classList.toggle("dark-active", root.dataset.theme === "dark");
   tt.addEventListener("click", () => {
-    const next = root.dataset.theme === "dark" ? "light" : "dark";
-    root.dataset.theme = next; try { localStorage.setItem("theme", next); } catch (e) {}
+    setTheme(root.dataset.theme === "dark" ? "light" : "dark");
     sync();
   });
+  new MutationObserver(sync).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
   sync();
   const topbar = document.getElementById("topbar");
   addEventListener("scroll", () => topbar.classList.toggle("scrolled", scrollY > 8), { passive: true });

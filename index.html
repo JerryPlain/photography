@@ -7,20 +7,12 @@
   <meta name="description" content="A photography gallery by Shijie Zhou: cities, mountains, lakes and concerts across Europe and Asia.">
   <meta name="theme-color" content="#f4f1ea">
   <link rel="icon" href="assets/sz-mark.svg" type="image/svg+xml">
-  <script>
-    // 默认浅色；用户手动选过深色时切换（CSS 加载前执行，避免闪烁）
-    (function () {
-      try {
-        if (localStorage.getItem("theme") === "dark") {
-          document.documentElement.dataset.theme = "dark";
-        }
-      } catch (e) {}
-    })();
-  </script>
+  <!-- 白天浅色、晚上深色，按访客本地时间自动切换（CSS 加载前执行，避免闪烁） -->
+  <script src="js/theme.js?v=7c8f8b23"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=8fbfcabf">
+  <link rel="stylesheet" href="css/style.css?v=85e50b14">
 </head>
 <body>
   <a class="skip-link" href="#contents">Skip to contents</a>
@@ -218,7 +210,6 @@
   <script src="js/data.js?v=ee86b44a"></script>
   <script src="js/map.js?v=307dfad5"></script>
   <script src="js/stars.js?v=d5e12b97"></script>
-  <script src="js/stardust.js?v=7eecee33"></script>
-  <script src="js/main.js?v=4668cf38"></script>
+  <script src="js/main.js?v=96e81925"></script>
 </body>
 </html>

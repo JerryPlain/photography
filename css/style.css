@@ -1145,55 +1145,6 @@ body::after {
 }
 :root[data-theme="dark"] body::after { opacity: 0.05; }
 
-/* Stardust: fifteen stars caught in the sky wash, as on the homepage — small
-   dots and four glints placed by js/stardust.js in the open sky and the
-   margins. They sit with the wash behind the content, scroll away with the
-   intro and fade out downward, each twinkling slowly on its own period and
-   phase: a white point in a baby-blue halo. Daytime only — at night the
-   canvas sky (js/stars.js) takes over. */
-.pg-stars {
-  --star-core-rgb: 255 255 255;
-  --star-halo-rgb: var(--accent-soft-rgb);
-  --glint-shape: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 0C12.9 7.6 16.4 11.1 24 12C16.4 12.9 12.9 16.4 12 24C11.1 16.4 7.6 12.9 0 12C7.6 11.1 11.1 7.6 12 0Z'/%3E%3C/svg%3E");
-  position: absolute; top: 0; left: 0; width: 100%; height: 760px;
-  overflow: hidden; pointer-events: none; z-index: 0;
-  -webkit-mask-image: linear-gradient(#000 35%, transparent);
-  mask-image: linear-gradient(#000 35%, transparent);
-}
-:root[data-theme="dark"] .pg-stars { display: none; }
-.pg-star {
-  position: absolute; left: var(--x); top: var(--y);
-  width: var(--s); height: var(--s);
-  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgb(var(--star-core-rgb)) 0 25%, rgb(var(--star-halo-rgb)) 60%);
-  box-shadow: 0 0 calc(var(--s) * 2) calc(var(--s) * 0.4) rgb(var(--star-halo-rgb) / 0.6);
-  opacity: 0.6;
-  animation: pg-twinkle var(--t) ease-in-out var(--phase) infinite;
-}
-.pg-star--glint { border-radius: 0; background: none; box-shadow: none; animation-name: pg-glint; }
-.pg-star--glint::before, .pg-star--glint::after { content: ""; position: absolute; }
-.pg-star--glint::before {
-  inset: -70%; border-radius: 50%;
-  background: radial-gradient(circle, rgb(var(--star-halo-rgb) / 0.4), rgb(var(--star-halo-rgb) / 0) 62%);
-}
-/* the glint: a four-point sparkle with curved sides, white at the heart */
-.pg-star--glint::after {
-  inset: 0;
-  background: radial-gradient(circle, rgb(var(--star-core-rgb)) 0 9%, rgb(var(--star-halo-rgb)) 38%);
-  -webkit-mask: var(--glint-shape) center / 100% 100% no-repeat;
-  mask: var(--glint-shape) center / 100% 100% no-repeat;
-}
-@keyframes pg-twinkle {
-  0%, 100% { opacity: 0.4; transform: scale(0.75); }
-  50% { opacity: 1; transform: scale(1); }
-}
-@keyframes pg-glint {
-  0%, 100% { opacity: 0.3; transform: scale(0.6) rotate(-15deg); }
-  50% { opacity: 1; transform: scale(1) rotate(0deg); }
-}
-@media (max-width: 767.98px) { .pg-star--wide { display: none; } }
-@media (prefers-reduced-motion: reduce) { .pg-star { animation: none; } }
 body { font-size: 16px; }
 ::selection { background: rgb(var(--sky-rgb) / 0.6); color: inherit; }
 

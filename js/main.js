@@ -17,9 +17,8 @@ const PLURALS = { series: "series", photograph: "photographs", place: "places",
 const plural = (n, w) => `${n} ${n === 1 ? w : PLURALS[w] || w + "s"}`;
 const subjectOf = (s) => (typeof SUBJECT !== "undefined" && SUBJECT[s.slug]) || "place";
 
-// debug flags for screenshots: ?noreveal ?nohero ?from=N ?theme=dark
+// debug flags for screenshots: ?noreveal ?nohero ?from=N (and ?theme=dark|light, read by js/theme.js)
 const Q = new URLSearchParams(location.search);
-if (Q.get("theme") === "dark") document.documentElement.dataset.theme = "dark";
 const NO_REVEAL = Q.has("noreveal");
 if (NO_REVEAL) document.documentElement.classList.add("noreveal");   // also freezes keyframe entrances
 
@@ -865,15 +864,17 @@ const spy = new IntersectionObserver((entries) => {
 document.querySelectorAll(".series").forEach((el) => spy.observe(el));
 
 // ---------- theme toggle (circular reveal) ----------
+// js/theme.js picks the theme by the clock; a click overrides it for this visit.
 const themeToggle = document.getElementById("themeToggle");
 const rootEl = document.documentElement;
 const isDark = () => rootEl.dataset.theme === "dark";
 const syncToggleIcon = () => document.body.classList.toggle("dark-active", isDark());
 function applyTheme(next) {
-  rootEl.dataset.theme = next;
-  try { localStorage.setItem("theme", next); } catch (e) {}
+  setTheme(next);
   syncToggleIcon();
 }
+// the clock turns the page over at 18:00 and 06:00: keep the icon in step
+new MutationObserver(syncToggleIcon).observe(rootEl, { attributes: true, attributeFilter: ["data-theme"] });
 themeToggle.addEventListener("click", () => {
   const next = isDark() ? "light" : "dark";
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
