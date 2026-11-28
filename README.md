@@ -10,7 +10,7 @@
 
 ```
 01-City/Berlin, Germany/DSCF1518.jpg      → 标题 Berlin，小字 Germany
-08-Concert/Billie Eilish, Tokyo 2025/*    → 标题 Billie Eilish，小字 Tokyo 2025
+07-Concert/Billie Eilish, Tokyo 2025/*    → 标题 Billie Eilish，小字 Tokyo 2025
 02-Me/Europe/Croatia.jpg                  → 标题 Croatia，小字 Europe（文件名当标题）
 02-Me/Asia/Japan/IMG_7830.jpeg            → 标题 Japan，小字 Asia（嵌套文件夹）
 04-Car/Porsche 911 GTS/DSCF2940.jpg       → 标题 Porsche 911 GTS
