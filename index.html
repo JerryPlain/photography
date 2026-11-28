@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css?v=842ccfd4">
+  <link rel="stylesheet" href="css/style.css?v=8fbfcabf">
 </head>
 <body>
   <a class="skip-link" href="#contents">Skip to contents</a>
@@ -111,21 +111,22 @@
         <p class="atlas-stats reveal" id="atlasStats" style="--d:160ms"></p>
       </div>
       <!-- 护照：去过多少个国家，离环游世界还有多远 -->
-      <div class="passport reveal" id="passport" style="--d:200ms" aria-label="Countries visited">
-        <div class="pp-top">
-          <div class="pp-count">
-            <span class="pp-n" id="ppN">0</span><span class="pp-of">/ <span id="ppTotal">195</span></span>
-          </div>
-          <div class="pp-words">
-            <p class="pp-label">countries visited</p>
-            <p class="pp-dream" id="ppDream"></p>
-          </div>
+      <div class="passport reveal" id="passport" style="--d:200ms" aria-label="Countries and regions visited">
+        <div class="pp-figs">
+          <div class="pp-fig lead"><span class="pp-k">Countries &amp; regions</span><span class="pp-v"><b id="ppN">0</b><i>/ <span id="ppTotal">249</span></i></span></div>
+          <div class="pp-fig"><span class="pp-k">Continents</span><span class="pp-v"><b id="ppCN">0</b><i>/ 7</i></span></div>
+          <div class="pp-fig"><span class="pp-k">Places visited</span><span class="pp-v"><b id="ppPlaces">0</b></span></div>
+          <div class="pp-fig"><span class="pp-k">Explored</span><span class="pp-v"><b id="ppPct">0</b><i>%</i></span></div>
         </div>
         <div class="pp-bar" aria-hidden="true"><i id="ppFill"></i></div>
+        <p class="pp-note" id="ppNote"></p>
         <div class="pp-ledger" id="ppCont"></div>
       </div>
       <!-- 按大洲看：All 显示两幅图版；选中某个大洲时那幅图版放大，右侧列出该洲的国家与城市 -->
-      <div class="continents reveal" id="continents" role="tablist" aria-label="Continents" style="--d:220ms"></div>
+      <div class="ct-bar reveal" style="--d:220ms">
+        <div class="continents" id="continents" role="tablist" aria-label="Continents"></div>
+        <p class="ct-someday" id="ctSomeday"></p>
+      </div>
       <div class="atlas-frame reveal" style="--d:240ms">
         <div class="atlas-body">
           <div class="atlas-map" id="atlasMap"></div>
@@ -212,11 +213,12 @@
     <div class="lb-strip" id="lbStrip" aria-label="Photographs in this series"></div>
   </div>
 
-  <script src="js/site.js?v=f81ffa84"></script>
+  <script src="js/site.js?v=1c20db49"></script>
+  <script src="js/iso.js?v=600dda38"></script>
   <script src="js/data.js?v=ee86b44a"></script>
   <script src="js/map.js?v=307dfad5"></script>
   <script src="js/stars.js?v=d5e12b97"></script>
   <script src="js/stardust.js?v=7eecee33"></script>
-  <script src="js/main.js?v=6cc1cd45"></script>
+  <script src="js/main.js?v=4668cf38"></script>
 </body>
 </html>

@@ -98,9 +98,11 @@ python3 scripts/build_map.py ne
 
 ## 护照（环游世界进度）
 
-地图上方是一块「护照」：大号红字显示已经去过的国家数 / 195，下面一条进度条，然后是六大洲的账页：每洲一个进度圆环、已去 / 总数、从哪年开始，以及该洲去过的国家代码（DEU FRA …）；还没去过的洲写 someday。三列紧凑卡片，不再用邮戳。去过的洲排前面。滚到这里时数字从 0 数上来、进度条填满、邮戳一枚枚盖上去。
+地图上方的护照按 **ISO 3166-1** 统计：249 个国家和地区（香港、台湾、格陵兰、法罗群岛这类地区各算一个），七大洲（含南极洲）。顶部四个数字：Countries & regions（17 / 249）、Continents（2 / 7）、Places visited（地图上的城市数）、Explored（百分比，两位小数）；下面是进度条、一行统计口径说明，以及七个大洲的卡片（进度圆环、已去 / 总数、去过的国家代码）。滚到这里时所有数字从 0 数上来。
 
-国家从 City / Me 的小字标注读取；演唱会城市在 `js/site.js` 的 `PASSPORT.VENUE_COUNTRY` 里对应国家（Singapore 就是这样算进来的）。新国家如果不在 `js/main.js` 护照部分的国家表里，需要补一行代码和所属大洲。
+国家和地区从 City / Me 的小字标注读取，按日常名字、别名或代码都能认（`Vatican City`、`Holy See`、`Hong Kong`、`UK`、`Turkey` 等）；演唱会城市在 `js/site.js` 的 `PASSPORT.VENUE_COUNTRY` 里对应国家。认不出的名字会在浏览器控制台提示。全表在 `js/iso.js`，由 `scripts/build_iso.py` 从 [ISO 3166-1 + UN M49](https://github.com/lukes/ISO-3166-Countries-with-Regional-Codes) 生成：美洲按 South America 子区域拆成南北美洲，南极洲含 ATA、BVT、SGS、HMD、ATF，台湾归亚洲；各洲合计 Africa 59 · Asia 51 · Europe 51 · North America 41 · Oceania 28 · South America 14 · Antarctica 5 = 249。
+
+地图上的大洲标签只给去过的大洲做按钮，没去过的写在旁边一行 *Someday*。
 
 ## 访客地图
 

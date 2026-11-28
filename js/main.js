@@ -553,14 +553,19 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
 
   // ---- by continent: tabs, a single enlarged plate, and the continent's own index beside it ----
   const PLATE_CONTINENT = { "Europe": "Europe", "Southeast Asia & Japan": "Asia" };
-  const ALL_CONTINENTS = ["Europe", "Asia", "Africa", "North America", "South America", "Oceania"];
+  const ALL_CONTINENTS = ["Europe", "Asia", "Africa", "North America", "South America", "Oceania", "Antarctica"];
   const plateEls = [...mapEl.querySelectorAll(".plate")];
   const contOf = (v) => PLATE_CONTINENT[MAP.plates[v.plate].name] || "";
   const tabs = document.getElementById("continents"), side = document.getElementById("atlasSide");
   const tally = (list) => ({ cities: list.length, countries: new Set(list.map((v) => v.country).filter(Boolean)).size,
     photos: list.reduce((a, v) => a + v.photos.length, 0), since: list.map((v) => v.first).filter(Boolean).sort()[0] || "" });
   const allTally = tally(visits);
-  tabs.innerHTML = [["All", visits], ...ALL_CONTINENTS.map((c) => [c, visits.filter((v) => contOf(v) === c)])].map(([name, list]) => {
+  // tabs only for the world and continents with photographs; the rest wait on one quiet line
+  const visited = ALL_CONTINENTS.filter((c) => visits.some((v) => contOf(v) === c));
+  const someday = ALL_CONTINENTS.filter((c) => !visited.includes(c));
+  const sd = document.getElementById("ctSomeday");
+  if (sd) sd.innerHTML = someday.length ? `<span class="ct-sd-k">Someday</span>${someday.map((c) => `<span class="ct-sd-c">${esc(c)}</span>`).join('<span class="ct-sd-dot">·</span>')}` : "";
+  tabs.innerHTML = [["All", visits], ...visited.map((c) => [c, visits.filter((v) => contOf(v) === c)])].map(([name, list]) => {
     const st = name === "All" ? allTally : tally(list), empty = !list.length;
     return `<button type="button" role="tab" class="ct${empty ? " empty" : ""}" data-c="${name}" aria-selected="${name === "All"}"${empty ? ' aria-disabled="true" title="No stamps yet — someday"' : ""}>
       <span class="ct-name">${name === "All" ? "The world" : name}</span>
@@ -632,67 +637,77 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
 // ---------- passport: countries visited, on the way to all of them ----------
 (function passport() {
   const root = document.getElementById("passport");
-  if (!root || typeof PASSPORT === "undefined") return;
-  // ISO code + continent for every country that can appear (add more as the journey grows)
-  const C = {
-    Germany: ["DEU", "Europe"], Italy: ["ITA", "Europe"], Greece: ["GRC", "Europe"], Malta: ["MLT", "Europe"],
-    Portugal: ["PRT", "Europe"], Spain: ["ESP", "Europe"], France: ["FRA", "Europe"], Croatia: ["HRV", "Europe"],
-    Slovenia: ["SVN", "Europe"], Austria: ["AUT", "Europe"], "Vatican City": ["VAT", "Europe"],
-    Switzerland: ["CHE", "Europe"], Netherlands: ["NLD", "Europe"], Belgium: ["BEL", "Europe"], Czechia: ["CZE", "Europe"],
-    Hungary: ["HUN", "Europe"], Poland: ["POL", "Europe"], Denmark: ["DNK", "Europe"], Sweden: ["SWE", "Europe"],
-    Norway: ["NOR", "Europe"], Finland: ["FIN", "Europe"], Iceland: ["ISL", "Europe"], Ireland: ["IRL", "Europe"],
-    "United Kingdom": ["GBR", "Europe"], Luxembourg: ["LUX", "Europe"], Monaco: ["MCO", "Europe"], Liechtenstein: ["LIE", "Europe"],
-    "San Marino": ["SMR", "Europe"], Montenegro: ["MNE", "Europe"], Albania: ["ALB", "Europe"], Turkey: ["TUR", "Asia"],
-    China: ["CHN", "Asia"], Japan: ["JPN", "Asia"], Thailand: ["THA", "Asia"], Singapore: ["SGP", "Asia"],
-    "South Korea": ["KOR", "Asia"], Vietnam: ["VNM", "Asia"], Malaysia: ["MYS", "Asia"], Indonesia: ["IDN", "Asia"],
-    "United States": ["USA", "North America"], Canada: ["CAN", "North America"], Mexico: ["MEX", "North America"],
-    Australia: ["AUS", "Oceania"], "New Zealand": ["NZL", "Oceania"], Egypt: ["EGY", "Africa"], Morocco: ["MAR", "Africa"],
-    Brazil: ["BRA", "South America"], Argentina: ["ARG", "South America"], Peru: ["PER", "South America"],
-  };
-  const CONTINENTS = [["Europe", 44], ["Asia", 48], ["Africa", 54], ["North America", 23], ["South America", 12], ["Oceania", 14]];
-  const seen = new Map();   // country -> first date
-  const note = (country, date) => {
-    if (!country || !C[country]) return;
-    const prev = seen.get(country);
-    if (prev === undefined || (date && (!prev || date < prev))) seen.set(country, date || prev || "");
+  if (!root || typeof PASSPORT === "undefined" || typeof ISO === "undefined") return;
+  // every ISO 3166-1 country and region, findable by everyday name, alias or code
+  const norm = (t) => String(t || "").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const byName = new Map();
+  ISO.forEach((e) => { const [code, name, , aliases] = e; [code, name, ...aliases].forEach((k) => byName.set(norm(k), e)); });
+  const ORDER = ["Europe", "Asia", "Africa", "North America", "South America", "Oceania", "Antarctica"];
+  const TOTAL = {}; ISO.forEach(([, , c]) => { TOTAL[c] = (TOTAL[c] || 0) + 1; });
+
+  const seen = new Map();   // ISO entry -> first date
+  const unknown = new Set();
+  const note = (label, date) => {
+    if (!label) return;
+    const e = byName.get(norm(label));
+    if (!e) { unknown.add(label); return; }
+    const prev = seen.get(e);
+    if (prev === undefined || (date && (!prev || date < prev))) seen.set(e, date || prev || "");
   };
   SERIES.forEach((s) => s.photos.forEach((p) => {
     if (subjectOf(s) === "act") note(PASSPORT.VENUE_COUNTRY[(p.location || "").replace(/\s+\d{4}$/, "")], p.date);
     else if (subjectOf(s) === "place") note(p.location, p.date);
   }));
+  if (unknown.size) console.warn("passport: not an ISO 3166-1 country or region:", [...unknown].join(", "));
+
+  // places visited: every city on the atlas (City titles and concert cities)
+  const onMap = new Set(typeof ATLAS_SERIES !== "undefined" ? ATLAS_SERIES : ["city"]);
+  const placeNames = new Set();
+  SERIES.forEach((s) => { if (onMap.has(s.slug)) s.photos.forEach((p) => {
+    const n = subjectOf(s) === "act" ? (p.location || "").replace(/\s+\d{4}$/, "") : p.title;
+    if (n) placeNames.add(n.normalize("NFC"));
+  }); });
+
   const list = [...seen.entries()].sort((a, b) => (a[1] || "9").localeCompare(b[1] || "9"));
-  const n = list.length, goal = PASSPORT.goal || 195;
+  const n = list.length, goal = PASSPORT.goal || ISO.length;
+  const byCont = {};
+  list.forEach(([e, date]) => { (byCont[e[2]] = byCont[e[2]] || []).push([e, date]); });
+  const contN = Object.keys(byCont).length, places = placeNames.size;
   const pct = n / goal * 100;
   document.getElementById("ppTotal").textContent = goal;
-  document.getElementById("ppDream").innerHTML = `${pct < 10 ? pct.toFixed(1) : Math.round(pct)}% of the world so far<span class="sep">·</span>${esc(PASSPORT.dream || "")}`;
-  // continents: a compact strip — ring, name, visited / total, and the countries in small caps
-  const byCont = {};
-  list.forEach(([c, date]) => { const k = C[c][1]; (byCont[k] = byCont[k] || []).push([c, date]); });
+  document.getElementById("ppNote").textContent = PASSPORT.note || "";
+
+  // seven continents: visited first, each with a ring, visited / total, and the codes it holds
   const R = 20, CIRC = 2 * Math.PI * R;
-  document.getElementById("ppCont").innerHTML = CONTINENTS
-    .map(([name, total], k) => ({ name, total, k, got: (byCont[name] || []).sort((a, b) => (a[1] || "9").localeCompare(b[1] || "9")) }))
+  document.getElementById("ppCont").innerHTML = ORDER
+    .map((name, k) => ({ name, total: TOTAL[name] || 0, k, got: byCont[name] || [] }))
     .sort((a, b) => b.got.length - a.got.length || a.k - b.k)
     .map(({ name, total, got }, row) => {
-      const v = got.length, p = v / total * 100;
+      const v = got.length, p = total ? v / total * 100 : 0;
       const ptxt = v === 0 ? "—" : p < 10 ? `${p.toFixed(1)}%` : `${Math.round(p)}%`;
-      const codes = got.map(([c, d]) => `<span title="${esc(c)}${d ? `, ${d.slice(0, 4)}` : ""}">${C[c][0]}</span>`).join("");
+      const codes = got.map(([e, d]) => `<span title="${esc(e[1])}${d ? `, ${d.slice(0, 4)}` : ""}">${e[0]}</span>`).join("");
       return `<div class="pp-c${v ? "" : " none"}" style="--row:${row}">
         <svg class="pp-ring" viewBox="0 0 48 48" aria-hidden="true">
           <circle class="pp-ring-bg" cx="24" cy="24" r="${R}"/>
-          <circle class="pp-ring-fg" cx="24" cy="24" r="${R}" style="--len:${CIRC.toFixed(2)};--to:${(CIRC * (1 - v / total)).toFixed(2)}"/>
+          <circle class="pp-ring-fg" cx="24" cy="24" r="${R}" style="--len:${CIRC.toFixed(2)};--to:${(CIRC * (1 - (total ? v / total : 0))).toFixed(2)}"/>
           <text class="pp-ring-t" x="24" y="24">${ptxt}</text>
         </svg>
         <div class="pp-ch">
           <span class="pp-cn">${name}</span>
           <span class="pp-cv"><b>${v}</b> / ${total}</span>
         </div>
-        <div class="pp-codes">${v ? codes : '<em>someday</em>'}</div>
+        <div class="pp-codes">${v ? codes : "<em>someday</em>"}</div>
       </div>`;
     }).join("");
-  // count up, fill the bars and drop the stamps when the passport scrolls into view
-  const ppN = document.getElementById("ppN"), fill = document.getElementById("ppFill");
-  const finish = () => { ppN.textContent = n; fill.style.width = `${Math.max(pct, 0.6)}%`; root.classList.add("open"); };
+
+  // count every figure up from zero and fill the bars when the passport scrolls into view
+  const figs = [[document.getElementById("ppN"), n, 0], [document.getElementById("ppCN"), contN, 0],
+                [document.getElementById("ppPlaces"), places, 0], [document.getElementById("ppPct"), pct, 2]];
+  const fill = document.getElementById("ppFill");
+  const show = (k) => figs.forEach(([el, v, dp]) => { el.textContent = (v * k).toFixed(dp); });
+  const finish = () => { show(1); fill.style.width = `${Math.max(pct, 0.6)}%`; root.classList.add("open"); };
   if (NO_REVEAL || matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
+  show(0);
   const io = new IntersectionObserver((es) => {
     if (!es.some((e) => e.isIntersecting)) return;
     io.disconnect();
@@ -700,9 +715,9 @@ document.getElementById("footerCopy").textContent = SITE.copyright;
     fill.style.width = `${Math.max(pct, 0.6)}%`;
     const t0 = performance.now() + 250, dur = 1300;
     const step = (now) => {
-      const k = Math.min(1, Math.max(0, (now - t0) / dur)), e = 1 - Math.pow(1 - k, 3);
-      ppN.textContent = String(Math.round(n * e));
-      if (k < 1) requestAnimationFrame(step);
+      const k = Math.min(1, Math.max(0, (now - t0) / dur));
+      show(1 - Math.pow(1 - k, 3));
+      if (k < 1) requestAnimationFrame(step); else show(1);
     };
     requestAnimationFrame(step);
   }, { threshold: 0.3 });
